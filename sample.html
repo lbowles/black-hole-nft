@@ -46,12 +46,9 @@
               default:
                 value = 0
             }
-            row.push(value)
+            circleArray.push(value)
           }
-          circleArray.push(row)
         }
-
-        console.log(circleArray)
 
         return circleArray
       }
@@ -79,7 +76,7 @@
             let y = i * 8
             let randomIndex = Math.floor(Math.random() * 200)
             let fillColor = ""
-            switch (pixelArray[i][j]) {
+            switch (pixelArray[i * gridSize + (j % gridSize)]) {
               //Rings
               case 1:
                 fillColor = "black"
