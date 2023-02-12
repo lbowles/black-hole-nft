@@ -53,37 +53,39 @@
           "#1B1517",
           "#282221",
         ];
-        let svg = `<svg width="${gridSize}" height="${gridSize}" style="background-color:transparent">`;
+        let svg = `<svg width="${gridSize * 8}" height="${
+          gridSize * 8
+        }" style="background-color:transparent">`;
         for (let i = 0; i < gridSize; i++) {
           for (let j = 0; j < gridSize; j++) {
             if (pixelArray[i][j] === 1) {
-              let x = j;
-              let y = i;
-              svg += `<rect x="${x}" y="${y}" width="1" height="1" fill="black"/>`;
+              let x = j * 8;
+              let y = i * 8;
+              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="black"/>`;
             } else if (pixelArray[i][j] === 2) {
-              let x = j;
-              let y = i;
-              svg += `<rect x="${x}" y="${y}" width="1" height="1" fill="#361902"/>`;
+              let x = j * 8;
+              let y = i * 8;
+              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#361902"/>`;
             } else if (pixelArray[i][j] === 3) {
-              let x = j;
-              let y = i;
-              svg += `<rect x="${x}" y="${y}" width="1" height="1" fill="#FFD088"/>`;
+              let x = j * 8;
+              let y = i * 8;
+              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#FFD088"/>`;
             } else if (pixelArray[i][j] === 4) {
-              let x = j;
-              let y = i;
-              svg += `<rect x="${x}" y="${y}" width="1" height="1" fill="#BD460A"/>`;
+              let x = j * 8;
+              let y = i * 8;
+              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#BD460A"/>`;
             } else if (pixelArray[i][j] === 5) {
-              let x = j;
-              let y = i;
-              svg += `<rect x="${x}" y="${y}" width="1" height="1" fill="#390706"/>`;
+              let x = j * 8;
+              let y = i * 8;
+              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#390706"/>`;
             } else {
-              let x = j;
-              let y = i;
+              let x = j * 8;
+              let y = i * 8;
               let randomIndex = Math.floor(
                 Math.random() * backgroundColors.length
               );
               let randomColor = backgroundColors[randomIndex];
-              svg += `<rect x="${x}" y="${y}" width="1" height="1" fill="${randomColor}"/>`;
+              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="${randomColor}"/>`;
             }
           }
         }
@@ -91,15 +93,7 @@
         return svg;
       }
 
-      // Clear the canvas container
       document.getElementById("canvasContainer").innerHTML = "";
-
-      // Create 10 canvas elements
-      // for (let i = 0; i < 1; i++) {
-      //   const canvas = document.createElement("div")
-      //   canvas.innerHTML = getSVG(500)
-      //   document.getElementById("canvasContainer").appendChild(canvas)
-      // }
       const canvas = document.createElement("div");
 
       canvas.innerHTML = createSVG(createCircleArray(10));
