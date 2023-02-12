@@ -13,3 +13,5 @@ types
 
 deployments/localhost
 .DS_Store
+
+.gas-used

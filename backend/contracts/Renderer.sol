@@ -12,7 +12,20 @@ contract Renderer {
   uint256 constant PRECISION = 10**PRECISION_DEGREE;
 
   struct BlackHole {
+    uint256 tokenId;
     uint256 level;
+  }
+
+  function getPixels(uint256 _size) public pure returns (uint256[] memory) {
+    uint256[] memory pixels = new uint256[](_size * _size);
+    uint256 index = 0;
+    for (uint256 i = 0; i < _size; i++) {
+      for (uint256 j = 0; j < _size; j++) {
+        pixels[index] = i * _size + j;
+        index++;
+      }
+    }
+    return pixels;
   }
 
   function getBlackHoleSVG(BlackHole memory _blackHole) public pure returns (string memory) {
@@ -42,7 +55,7 @@ contract Renderer {
   }
 
   function renderSample() public pure returns (string memory) {
-    BlackHole memory blackHole = BlackHole(1);
+    BlackHole memory blackHole = BlackHole(1, 1);
     return render(blackHole);
   }
 }

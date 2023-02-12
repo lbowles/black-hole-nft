@@ -28,19 +28,15 @@ async function deploy(vm, pk, bytecode, compileResult) {
     nonce: account.nonce,
   }
 
-  console.log("deploying")
-
   const tx = Transaction.fromTxData(txData).sign(pk)
 
   const deploymentResult = await vm.runTx({ tx })
-
-  console.log(deploymentResult.gasUsed.toString())
 
   if (deploymentResult.execResult.exceptionError) {
     throw deploymentResult.execResult.exceptionError
   }
 
-  return deploymentResult.createdAddress
+  return { address: deploymentResult.createdAddress, gasUsed: deploymentResult.gasUsed }
 }
 
 module.exports = { deploy }
