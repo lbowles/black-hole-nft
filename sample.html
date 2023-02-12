@@ -9,8 +9,11 @@
   <body>
     <div id="canvasContainer"></div>
     <script>
+      const canvasSize = 40;
+      const holeSize = 10;
+
       function createCircleArray(size) {
-        const gridSize = 40;
+        const gridSize = canvasSize;
         let circleArray = [];
         for (let i = 0; i < gridSize; i++) {
           let row = [];
@@ -40,7 +43,7 @@
       }
 
       function createSVG(pixelArray) {
-        const gridSize = 40;
+        const gridSize = canvasSize;
         const backgroundColors = [
           "#140E0E",
           "#160F0D",
@@ -128,7 +131,7 @@
       document.getElementById("canvasContainer").innerHTML = "";
       const canvas = document.createElement("div");
 
-      canvas.innerHTML = createSVG(createCircleArray(10));
+      canvas.innerHTML = createSVG(createCircleArray(holeSize));
       document.getElementById("canvasContainer").appendChild(canvas);
     </script>
   </body>
