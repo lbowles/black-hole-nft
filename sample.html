@@ -28,6 +28,8 @@
               row.push(4);
             } else if (distance <= size / 2 + 4 && distance >= size / 2 - 4) {
               row.push(5);
+            } else if (distance <= size / 2 + 6 && distance >= size / 2 - 6) {
+              row.push(7);
             } else {
               row.push(0);
             }
@@ -78,13 +80,43 @@
               let x = j * 8;
               let y = i * 8;
               svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#390706"/>`;
+            } else if (pixelArray[i][j] === 5) {
+              let x = j * 8;
+              let y = i * 8;
+              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#390706"/>`;
+            } else if (pixelArray[i][j] === 7) {
+              let x = j * 8;
+              let y = i * 8;
+              let randomIndex = Math.floor(Math.random() * 200);
+              let randomColor;
+              if (randomIndex === 0) {
+                randomColor = "#852C27";
+              } else if (randomIndex === 1) {
+                randomColor = "#741D27";
+              } else if (randomIndex === 2) {
+                randomColor = "#8F5359";
+              } else if (randomIndex === 3) {
+                randomColor = "#D1652C";
+              } else {
+                randomColor =
+                  backgroundColors[
+                    Math.floor(Math.random() * backgroundColors.length)
+                  ];
+              }
+              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="${randomColor}"/>`;
             } else {
               let x = j * 8;
               let y = i * 8;
-              let randomIndex = Math.floor(
-                Math.random() * backgroundColors.length
-              );
-              let randomColor = backgroundColors[randomIndex];
+              let randomIndex = Math.floor(Math.random() * 200);
+              let randomColor;
+              if (randomIndex === 0) {
+                randomColor = "#504940";
+              } else {
+                randomColor =
+                  backgroundColors[
+                    Math.floor(Math.random() * backgroundColors.length)
+                  ];
+              }
               svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="${randomColor}"/>`;
             }
           }
