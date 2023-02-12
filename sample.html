@@ -1,138 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kaleidoscope SVG</title>
-  </head>
-  <body>
-    <div id="canvasContainer"></div>
-    <script>
-      const canvasSize = 40;
-      const holeSize = 10;
 
-      function createCircleArray(size) {
-        const gridSize = canvasSize;
-        let circleArray = [];
-        for (let i = 0; i < gridSize; i++) {
-          let row = [];
-          for (let j = 0; j < gridSize; j++) {
-            let x = j - gridSize / 2;
-            let y = i - gridSize / 2;
-            let distance = Math.sqrt(x * x + y * y);
-            if (distance <= size / 2) {
-              row.push(1);
-            } else if (distance <= size / 2 + 1 && distance >= size / 2 - 1) {
-              row.push(2);
-            } else if (distance <= size / 2 + 2 && distance >= size / 2 - 2) {
-              row.push(3);
-            } else if (distance <= size / 2 + 3 && distance >= size / 2 - 3) {
-              row.push(4);
-            } else if (distance <= size / 2 + 4 && distance >= size / 2 - 4) {
-              row.push(5);
-            } else if (distance <= size / 2 + 6 && distance >= size / 2 - 6) {
-              row.push(7);
-            } else {
-              row.push(0);
-            }
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaleidoscope SVG</title>
+</head>
+
+<body>
+  <div id="canvasContainer"></div>
+  <script>
+    const canvasSize = 40;
+    const holeSize = 10;
+
+    function createCircleArray(size) {
+      const gridSize = canvasSize;
+      let circleArray = [];
+      for (let i = 0; i < gridSize; i++) {
+        let row = [];
+        for (let j = 0; j < gridSize; j++) {
+          let x = j - gridSize / 2;
+          let y = i - gridSize / 2;
+          let distance = Math.sqrt(x * x + y * y);
+          let value = 0;
+          //Each value represents a differtent color on the grid that is used in createSVG, these create the rings
+          switch (true) {
+            case distance <= size / 2:
+              value = 1;
+              break;
+            case distance <= size / 2 + 1 && distance >= size / 2 - 1:
+              value = 2;
+              break;
+            case distance <= size / 2 + 2 && distance >= size / 2 - 2:
+              value = 3;
+              break;
+            case distance <= size / 2 + 3 && distance >= size / 2 - 3:
+              value = 4;
+              break;
+            case distance <= size / 2 + 4 && distance >= size / 2 - 4:
+              value = 5;
+              break;
+            case distance <= size / 2 + 6 && distance >= size / 2 - 6:
+              value = 7;
+              break;
+            default:
+              value = 0;
           }
-          circleArray.push(row);
+          row.push(value);
         }
-        return circleArray;
+        circleArray.push(row);
       }
+      return circleArray;
+    }
 
-      function createSVG(pixelArray) {
-        const gridSize = canvasSize;
-        const backgroundColors = [
-          "#140E0E",
-          "#160F0D",
-          "#17120E",
-          "#181214",
-          "#18130F",
-          "#181310",
-          "#181410",
-          "#1A1210",
-          "#1A1511",
-          "#1B1310",
-          "#1B1517",
-          "#282221",
-        ];
-        let svg = `<svg width="${gridSize * 8}" height="${
-          gridSize * 8
+
+    function createSVG(pixelArray) {
+      const gridSize = canvasSize;
+      const backgroundColors = [
+        "#140E0E",
+        "#160F0D",
+        "#17120E",
+        "#181214",
+        "#18130F",
+        "#181310",
+        "#181410",
+        "#1A1210",
+        "#1A1511",
+        "#1B1310",
+        "#1B1517",
+        "#282221",
+      ];
+      let svg = `<svg width="${gridSize * 8}" height="${gridSize * 8
         }" style="background-color:transparent">`;
-        for (let i = 0; i < gridSize; i++) {
-          for (let j = 0; j < gridSize; j++) {
-            if (pixelArray[i][j] === 1) {
-              let x = j * 8;
-              let y = i * 8;
-              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="black"/>`;
-            } else if (pixelArray[i][j] === 2) {
-              let x = j * 8;
-              let y = i * 8;
-              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#361902"/>`;
-            } else if (pixelArray[i][j] === 3) {
-              let x = j * 8;
-              let y = i * 8;
-              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#FFD088"/>`;
-            } else if (pixelArray[i][j] === 4) {
-              let x = j * 8;
-              let y = i * 8;
-              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#BD460A"/>`;
-            } else if (pixelArray[i][j] === 5) {
-              let x = j * 8;
-              let y = i * 8;
-              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#390706"/>`;
-            } else if (pixelArray[i][j] === 5) {
-              let x = j * 8;
-              let y = i * 8;
-              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="#390706"/>`;
-            } else if (pixelArray[i][j] === 7) {
-              let x = j * 8;
-              let y = i * 8;
-              let randomIndex = Math.floor(Math.random() * 200);
-              let randomColor;
-              if (randomIndex === 0) {
-                randomColor = "#852C27";
-              } else if (randomIndex === 1) {
-                randomColor = "#741D27";
-              } else if (randomIndex === 2) {
-                randomColor = "#8F5359";
-              } else if (randomIndex === 3) {
-                randomColor = "#D1652C";
-              } else {
-                randomColor =
-                  backgroundColors[
+      for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+          let x = j * 8;
+          let y = i * 8;
+          let randomIndex = Math.floor(Math.random() * 200);
+          let fillColor = "";
+          switch (pixelArray[i][j]) {
+            //Rings
+            case 1:
+              fillColor = "black";
+              break;
+            case 2:
+              fillColor = "#361902";
+              break;
+            case 3:
+              fillColor = "#FFD088";
+              break;
+            case 4:
+              fillColor = "#BD460A";
+              break;
+            case 5:
+              fillColor = "#390706";
+              break;
+            case 7:
+              //Random redish pixels around the perimiter 
+              switch (randomIndex) {
+                case 0:
+                  fillColor = "#852C27";
+                  break;
+                case 1:
+                  fillColor = "#741D27";
+                  break;
+                case 2:
+                  fillColor = "#8F5359";
+                  break;
+                case 3:
+                  fillColor = "#D1652C";
+                  break;
+                default:
+                  fillColor = backgroundColors[
                     Math.floor(Math.random() * backgroundColors.length)
                   ];
+                  break;
               }
-              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="${randomColor}"/>`;
-            } else {
-              let x = j * 8;
-              let y = i * 8;
-              let randomIndex = Math.floor(Math.random() * 200);
-              let randomColor;
-              if (randomIndex === 0) {
-                randomColor = "#504940";
-              } else {
-                randomColor =
-                  backgroundColors[
+              break;
+            default:
+              //Background noise, I added this case 0 as a low probibility representing stars.
+              switch (randomIndex) {
+                case 0:
+                  fillColor = "#504940";
+                  break;
+                default:
+                  fillColor =
+                    backgroundColors[
                     Math.floor(Math.random() * backgroundColors.length)
-                  ];
+                    ];
+                  break;
               }
-              svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="${randomColor}"/>`;
-            }
+              break;
           }
+          svg += `<rect x="${x}" y="${y}" width="8" height="8" fill="${fillColor}"/>`;
         }
-        svg += `</svg>`;
-        return svg;
       }
+      svg += `</svg>`;
+      return svg;
+    }
 
-      document.getElementById("canvasContainer").innerHTML = "";
-      const canvas = document.createElement("div");
+    document.getElementById("canvasContainer").innerHTML = "";
+    const canvas = document.createElement("div");
+    canvas.innerHTML = createSVG(createCircleArray(holeSize));
+    document.getElementById("canvasContainer").appendChild(canvas);
 
-      canvas.innerHTML = createSVG(createCircleArray(holeSize));
-      document.getElementById("canvasContainer").appendChild(canvas);
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>
