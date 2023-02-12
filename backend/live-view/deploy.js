@@ -5,13 +5,15 @@ const linker = require("solc/linker")
 async function deploy(vm, pk, bytecode, compileResult) {
   // Dependencies
   const libraries = {}
+  let totalGas = 0
   await Promise.all(
     Object.entries(bytecode.linkReferences).map(async ([name]) => {
       const contractData = compileResult.contracts[name]
       const [contractName, contract] = Object.entries(contractData)[0]
       console.log(name)
       const bytecode = contract.evm.bytecode
-      const address = await deploy(vm, pk, bytecode, compileResult)
+      const { address, gasUsed } = await deploy(vm, pk, bytecode, compileResult)
+      totalGas += gasUsed.toNumber()
       libraries[`${name}:${contractName}`] = address.toString()
     }),
   )
@@ -36,7 +38,9 @@ async function deploy(vm, pk, bytecode, compileResult) {
     throw deploymentResult.execResult.exceptionError
   }
 
-  return { address: deploymentResult.createdAddress, gasUsed: deploymentResult.gasUsed }
+  totalGas += deploymentResult.gasUsed.toNumber()
+
+  return { address: deploymentResult.createdAddress, gasUsed: totalGas }
 }
 
 module.exports = { deploy }

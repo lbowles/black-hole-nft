@@ -20,21 +20,25 @@ async function main() {
       // Ignore
     }
 
+    console.log("Compiling", path.basename(SOURCE))
+
     const { result: compileResult, targetContract } = compile(SOURCE)
     const { abi, bytecode } = targetContract
     const { address, gasUsed } = await deploy(vm, pk, bytecode, compileResult)
-    const [result] = await call(vm, address, abi, "renderSample")
-
-    // Write gas used to a file
-    fs.writeFileSync(path.join(__dirname, ".gas-used"), gasUsed.toString())
+    const { results, gasUsed: callGas } = await call(vm, address, abi, "renderSample")
+    const result = results[0]
 
     // Calculate percentage change in gas used
-    const gasUsedChange = ((gasUsed.toNumber() - lastGasUsed) / lastGasUsed) * 100
+    const gasUsedChange = ((gasUsed - lastGasUsed) / lastGasUsed) * 100
     console.log(
-      `${gasUsed.toNumber().toLocaleString()} gas used (${gasUsedChange >= 0 ? "+" : ""}${(
+      `${gasUsed.toLocaleString()} gas used for deployment (${gasUsedChange >= 0 ? "+" : ""}${(
         Math.round(gasUsedChange * 100) / 100
       ).toFixed(2)}%)`,
     )
+    console.log(`${callGas.toNumber().toLocaleString()} gas used for call`)
+
+    // Write gas used to a file
+    fs.writeFileSync(path.join(__dirname, ".gas-used"), gasUsed.toString())
 
     return result
   }

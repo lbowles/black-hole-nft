@@ -23,7 +23,7 @@ async function call(vm, address, abi, name, args = [], types = ["string"]) {
 
   const results = defaultAbiCoder.decode(types, renderResult.execResult.returnValue)
 
-  return results
+  return { results, gasUsed: renderResult.gasUsed }
 }
 
 module.exports = call
