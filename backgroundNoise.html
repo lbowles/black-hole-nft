@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlackHole SVG</title>
+  </head>
+
+  <body>
+    <div id="canvasContainer"></div>
+    <script>
+      const PIXELS_PER_SIDE = 200
+      const PIXEL_SIZE = 10
+      const CANVAS_SIZE = PIXELS_PER_SIDE * PIXEL_SIZE
+
+      const backgroundColors = [
+        "#140E0E",
+        "#160F0D",
+        "#17120E",
+        "#181214",
+        "#18130F",
+        "#181310",
+        "#181410",
+        "#1A1210",
+        "#1A1511",
+        "#1B1310",
+        "#1B1517",
+        "#282221",
+      ]
+
+      function createCanvas() {
+        let canvasArray = []
+        for (let i = 0; i < PIXELS_PER_SIDE; i++) {
+          for (let j = 0; j < PIXELS_PER_SIDE; j++) {
+            let randomIndex = Math.floor(Math.random() * backgroundColors.length)
+            let fillColor = backgroundColors[randomIndex]
+            canvasArray.push(fillColor)
+          }
+        }
+        return canvasArray
+      }
+
+      function createSVG(canvas) {
+        let svg = `<svg width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="background-color:transparent">`
+        let g = `<g id="base">`
+        for (let i = 0; i < PIXELS_PER_SIDE; i++) {
+          for (let j = 0; j < PIXELS_PER_SIDE; j++) {
+            let x = j * PIXEL_SIZE
+            let y = i * PIXEL_SIZE
+            let fillColor = canvas[i * PIXELS_PER_SIDE + (j % PIXELS_PER_SIDE)]
+            g += `<rect x="${x}" y="${y}" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}"/>`
+          }
+        }
+        g += `</g>`
+        svg += g
+        svg += `</svg>`
+        return svg
+      }
+
+      document.getElementById("canvasContainer").innerHTML = ""
+      const canvas = document.createElement("div")
+
+      // const holeSize = Math.random() * 10 + 4
+      canvas.innerHTML = createSVG(createCanvas())
+      document.getElementById("canvasContainer").appendChild(canvas)
+    </script>
+  </body>
+</html>
