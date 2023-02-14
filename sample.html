@@ -13,6 +13,7 @@
       const PIXELS_PER_SIDE = 24
       const PIXEL_SIZE = 20
       const CANVAS_SIZE = PIXELS_PER_SIDE * PIXEL_SIZE
+      const BASE_HUE = Math.floor(Math.random() * 255)
 
       function getPixelSVG(tokenId, pixelClass, x, y) {
         const backgroundColors = [
@@ -29,15 +30,28 @@
           "#1B1517",
           "#282221",
         ]
+
+        const baseSaturation = 90
+        const lightnesses = [10, 40, 80]
+        const hueIncrements = 20
+
+        const blackHoleColors = [
+          "black",
+          `hsl(${BASE_HUE + hueIncrements}, ${baseSaturation}%, ${lightnesses[2]}%)`,
+          `hsl(${BASE_HUE}, ${baseSaturation}%, ${lightnesses[1]}%)`,
+          `hsl(${BASE_HUE - hueIncrements}, ${baseSaturation}%, ${lightnesses[0]}%)`,
+        ]
+
         const perimiterColors = ["#852C27", "#741D27", "#8F5359", "#D1652C"]
-        const blackHoleColors = ["black", "#361902", "#FFD088", "#BD460A", "#390706"]
         let fillColor = ""
         const randomIndex = Math.floor(Math.random() * 200)
 
         if (pixelClass === 0) {
           // Background + small chance of dim star
           fillColor = randomIndex <= 10 ? "#504940" : backgroundColors[randomIndex % backgroundColors.length]
-        } else if (pixelClass >= 1 && pixelClass <= 6) {
+        } else if (pixelClass === 1) {
+          fillColor = "black"
+        } else if (pixelClass > 1 && pixelClass <= 6) {
           // Black hole
           fillColor = blackHoleColors[pixelClass - 1]
         } else if (pixelClass === 7) {
