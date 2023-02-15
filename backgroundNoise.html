@@ -43,17 +43,20 @@
 
       function createSVG(canvas) {
         let svg = `<svg width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="background-color:transparent">`
-        let g = `<g id="base">`
-        for (let i = 0; i < PIXELS_PER_SIDE; i++) {
-          for (let j = 0; j < PIXELS_PER_SIDE; j++) {
-            let x = j * PIXEL_SIZE
-            let y = i * PIXEL_SIZE
-            let fillColor = canvas[i * PIXELS_PER_SIDE + (j % PIXELS_PER_SIDE)]
-            g += `<rect x="${x}" y="${y}" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}"/>`
-          }
+        // Black background
+        svg += `<rect x="0" y="0" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" fill="#000000"/>`
+
+        // Noise
+        for (let i = 0; i < CANVAS_SIZE / 10; i++) {
+          const x = Math.floor(Math.random() * PIXELS_PER_SIDE)
+          const y = Math.floor(Math.random() * PIXELS_PER_SIDE)
+          const fillColor = backgroundColors[Math.floor(Math.random() * backgroundColors.length)]
+          svg = svg.concat(
+            `<rect x="${x * PIXEL_SIZE}" y="${
+              y * PIXEL_SIZE
+            }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}"/>`,
+          )
         }
-        g += `</g>`
-        svg += g
         svg += `</svg>`
         return svg
       }
