@@ -10,10 +10,10 @@
   <body>
     <div id="canvasContainer"></div>
     <script>
-      const PIXELS_PER_SIDE = 24
+      const PIXELS_PER_SIDE = 28
       const PIXEL_SIZE = 20
       const CANVAS_SIZE = PIXELS_PER_SIDE * PIXEL_SIZE
-      const BASE_HUE = Math.floor(Math.random() * 255)
+      let BASE_HUE = 15
 
       function getPixelSVG(tokenId, pixelClass, x, y) {
         const backgroundColors = [
@@ -32,7 +32,7 @@
         ]
 
         const baseSaturation = 90
-        const lightnesses = [10, 40, 80]
+        const lightnesses = [20, 55, 80]
         const hueIncrements = 20
 
         const blackHoleColors = [
@@ -65,11 +65,10 @@
 
         return `<rect x="${x * PIXEL_SIZE}" y="${
           y * PIXEL_SIZE
-        }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}"/>
-        <text x="${x * PIXEL_SIZE + PIXEL_SIZE / 2}" y="${
-          y * PIXEL_SIZE + PIXEL_SIZE / 2
-        }" text-anchor="middle" dominant-baseline="middle" fill="transparent" font-size="10" font-family="sans-serif">${pixelClass}</text>
-        `
+        }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}"/>`
+        // <text x="${x * PIXEL_SIZE + PIXEL_SIZE / 2}" y="${y * PIXEL_SIZE + PIXEL_SIZE / 2}"
+        // text-anchor="middle" dominant-baseline="middle" fill="white" font-size="10" font-family="sans-serif">${pixelClass}</text>
+        // `
       }
 
       // Javascript
@@ -93,7 +92,7 @@
             } else if (distance <= size + 3) {
               pixelsSVG = pixelsSVG.concat(getPixelSVG(tokenId, 4, j, i))
             } else if (distance <= size + 4) {
-              pixelsSVG = pixelsSVG.concat(getPixelSVG(tokenId, 5, j, i))
+              // pixelsSVG = pixelsSVG.concat(getPixelSVG(tokenId, 5, j, i))
             } else if (distance <= size + 5) {
               // pixelsSVG = pixelsSVG.concat(getPixelSVG(tokenId, 7, j, i))
             }
@@ -107,36 +106,47 @@
         let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CANVAS_SIZE} ${CANVAS_SIZE}" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}">`
 
         // Black background
-        svg += `<rect x="0" y="0" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" fill="#000000"/>`
+        // svg += `<rect x="0" y="0" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" fill="#000000"/>`
 
         // Noise
-        for (let i = 0; i < 40; i++) {
-          const x = Math.floor(Math.random() * PIXELS_PER_SIDE)
-          const y = Math.floor(Math.random() * PIXELS_PER_SIDE)
-          svg = svg.concat(getPixelSVG(1, 0, x, y))
-        }
+        // for (let i = 0; i < 40; i++) {
+        //   const x = Math.floor(Math.random() * PIXELS_PER_SIDE)
+        //   const y = Math.floor(Math.random() * PIXELS_PER_SIDE)
+        //   svg = svg.concat(getPixelSVG(1, 0, x, y))
+        // }
+
+        const id = `base${BASE_HUE}`
 
         // Quarter black hole
-        let g = `<g id="base">`
+        let g = `<g id="${id}">`
         g += quarterCanvas
         g += `</g>`
         svg += g
 
         // Repetitions
-        svg += `<use href="#base" transform="scale(-1,1),translate(-${CANVAS_SIZE},0)" />`
-        svg += `<use href="#base" transform="scale(1,-1),translate(0,-${CANVAS_SIZE})" />`
-        svg += `<use href="#base" transform="scale(-1,-1),translate(-${CANVAS_SIZE},-${CANVAS_SIZE})" />`
+        svg += `<use href="#${id}" transform="scale(-1,1),translate(-${CANVAS_SIZE},0)" />`
+        svg += `<use href="#${id}" transform="scale(1,-1),translate(0,-${CANVAS_SIZE})" />`
+        svg += `<use href="#${id}" transform="scale(-1,-1),translate(-${CANVAS_SIZE},-${CANVAS_SIZE})" />`
 
         svg += `</svg>`
         return svg
       }
 
-      document.getElementById("canvasContainer").innerHTML = ""
-      const canvas = document.createElement("div")
+      const hues = [15, 20, 25, 30, 35, 250]
 
-      const holeSize = Math.floor(Math.random() * (PIXELS_PER_SIDE / 2 - 8) + 2)
-      canvas.innerHTML = createSVG(createQuarterCanvas(holeSize))
-      document.getElementById("canvasContainer").appendChild(canvas)
+      for (let i = 0; i < 6; i++) {
+        const level = i
+
+        BASE_HUE = hues[level]
+
+        console.log(BASE_HUE)
+
+        const holeSize = PIXELS_PER_SIDE / 2 - (10 - level)
+
+        const canvas = document.createElement("div")
+        canvas.innerHTML = createSVG(createQuarterCanvas(holeSize))
+        document.getElementById("canvasContainer").appendChild(canvas)
+      }
     </script>
   </body>
 </html>
