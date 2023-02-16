@@ -11,26 +11,11 @@
     <div id="canvasContainer"></div>
     <script>
       const PIXELS_PER_SIDE = 28
-      const PIXEL_SIZE = 20
+      const PIXEL_SIZE = 10
       const CANVAS_SIZE = PIXELS_PER_SIDE * PIXEL_SIZE
       let BASE_HUE = 15
 
       function getPixelSVG(tokenId, pixelClass, x, y) {
-        const backgroundColors = [
-          "#140E0E",
-          "#160F0D",
-          "#17120E",
-          "#181214",
-          "#18130F",
-          "#181310",
-          "#181410",
-          "#1A1210",
-          "#1A1511",
-          "#1B1310",
-          "#1B1517",
-          "#282221",
-        ]
-
         const baseSaturation = 90
         const lightnesses = [20, 55, 80]
         const hueIncrements = 20
@@ -73,24 +58,25 @@
 
       // Javascript
       function createQuarterCanvas(size) {
-        let pixelsSVG = ""
+        let edgeSVG = ""
+        let insideSVG = ""
         const renderEndIndex = PIXELS_PER_SIDE / 2
         const renderStartIndex = renderEndIndex - size - 5
         const tokenId = 1
-        for (let i = renderStartIndex; i < renderEndIndex; i++) {
-          for (let j = renderStartIndex; j < renderEndIndex; j++) {
+        for (let i = renderStartIndex; i <= renderEndIndex; i++) {
+          for (let j = renderStartIndex; j <= renderEndIndex; j++) {
             const x = j - PIXELS_PER_SIDE / 2
             const y = i - PIXELS_PER_SIDE / 2
             const distance = Math.floor(Math.sqrt(x * x + y * y))
 
             if (distance <= size) {
-              pixelsSVG = pixelsSVG.concat(getPixelSVG(tokenId, 1, j, i))
+              insideSVG = insideSVG.concat(getPixelSVG(tokenId, 1, j, i))
             } else if (distance <= size + 1) {
-              pixelsSVG = pixelsSVG.concat(getPixelSVG(tokenId, 2, j, i))
+              edgeSVG = edgeSVG.concat(getPixelSVG(tokenId, 2, j, i))
             } else if (distance <= size + 2) {
-              pixelsSVG = pixelsSVG.concat(getPixelSVG(tokenId, 3, j, i))
+              edgeSVG = edgeSVG.concat(getPixelSVG(tokenId, 3, j, i))
             } else if (distance <= size + 3) {
-              pixelsSVG = pixelsSVG.concat(getPixelSVG(tokenId, 4, j, i))
+              edgeSVG = edgeSVG.concat(getPixelSVG(tokenId, 4, j, i))
             } else if (distance <= size + 4) {
               // pixelsSVG = pixelsSVG.concat(getPixelSVG(tokenId, 5, j, i))
             } else if (distance <= size + 5) {
@@ -99,34 +85,124 @@
           }
         }
 
-        return pixelsSVG
+        return [edgeSVG, insideSVG]
       }
 
-      function createSVG(quarterCanvas) {
+      function createSVG([edgeSVG, insideSVG], holeSize) {
         let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CANVAS_SIZE} ${CANVAS_SIZE}" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}">`
 
         // Black background
-        // svg += `<rect x="0" y="0" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" fill="#000000"/>`
+        svg += `<rect x="0" y="0" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" fill="#000000"/>`
 
-        // Noise
-        // for (let i = 0; i < 40; i++) {
-        //   const x = Math.floor(Math.random() * PIXELS_PER_SIDE)
-        //   const y = Math.floor(Math.random() * PIXELS_PER_SIDE)
-        //   svg = svg.concat(getPixelSVG(1, 0, x, y))
-        // }
+        for (let i = 0; i < 20; i++) {
+          let x = Math.floor(Math.random() * PIXELS_PER_SIDE) * PIXEL_SIZE
+          let y = Math.floor(Math.random() * PIXELS_PER_SIDE) * PIXEL_SIZE
+
+          const maxLightness = 12
+          const minLigtness = 5
+
+          const fillLightness = Math.floor(Math.random() * (maxLightness - minLigtness)) + minLigtness
+          const fillColor = `hsl(0, 0%, ${fillLightness}%)`
+
+          const pixel = `<rect x="${x}" y="${y}" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}">
+                    </rect>`
+          svg += pixel
+        }
 
         const id = `base${BASE_HUE}`
 
-        // Quarter black hole
+        // Edge part
         let g = `<g id="${id}">`
-        g += quarterCanvas
+        g += edgeSVG
         g += `</g>`
         svg += g
 
         // Repetitions
-        svg += `<use href="#${id}" transform="scale(-1,1),translate(-${CANVAS_SIZE},0)" />`
-        svg += `<use href="#${id}" transform="scale(1,-1),translate(0,-${CANVAS_SIZE})" />`
-        svg += `<use href="#${id}" transform="scale(-1,-1),translate(-${CANVAS_SIZE},-${CANVAS_SIZE})" />`
+        svg += `<use href="#${id}" transform="scale(-1,1),translate(-${CANVAS_SIZE + PIXEL_SIZE},0)" />`
+        svg += `<use href="#${id}" transform="scale(1,-1),translate(0,-${CANVAS_SIZE + PIXEL_SIZE})" />`
+        svg += `<use href="#${id}" transform="scale(-1,-1),translate(-${CANVAS_SIZE + PIXEL_SIZE},-${
+          CANVAS_SIZE + PIXEL_SIZE
+        })" />`
+
+        // Noise
+        // TODO:
+        // [ ] Start animated noise outside frame
+        // [x] Order brighter pixels on top of darker pixels
+        // [x] Speed up animation as it gets closer to center
+        // [x] Black part of black hole should be on top
+        const centerX = CANVAS_SIZE / 2 / PIXEL_SIZE
+        const centerY = centerX
+        const radius = holeSize + 6
+        for (let i = 0; i < 20; i++) {
+          let x = Math.floor(Math.random() * PIXELS_PER_SIDE)
+
+          const discriminant = radius ** 2 - (x - centerX) ** 2
+          let minY = 0
+          let maxY = PIXELS_PER_SIDE
+          if (discriminant > 0) {
+            // Bottom edge to bottom canvas
+            minY = Math.floor(Math.sqrt(discriminant) + centerY)
+            maxY = PIXELS_PER_SIDE
+
+            // Top canvas to top edge
+            if (Math.random() > 0.5) {
+              maxY = centerY * 2 - minY
+              minY = 0
+            }
+
+            // Randomly add perimiter glow
+            if (Math.random() > 0.5) {
+              const fillColor = `hsl(${BASE_HUE - 10}, 50%, 20%)`
+              const pixel = `<rect x="${x * PIXEL_SIZE}" y="${
+                (minY === 0 ? maxY + 1 : minY - 1) * PIXEL_SIZE
+              }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}">
+                    </rect>`
+              svg += pixel
+            }
+          }
+
+          // Select a random value between minY and maxY
+          x = x * PIXEL_SIZE
+          const y = Math.floor(Math.random() * (maxY - minY) + minY) * PIXEL_SIZE
+
+          const maxLightness = 30
+          const minLigtness = 15
+
+          const fillLightness = Math.floor(Math.random() * (maxLightness - minLigtness)) + minLigtness
+          const fillColor = `hsl(0, 0%, ${fillLightness}%)`
+
+          const animateDuration = Math.floor(((maxLightness - fillLightness) / maxLightness) ** 2 * 40) + 10
+          const animationOffset = Math.random() * 2
+
+          const transformAnimation = `<animate attributeName="x" from="${x}" to="${
+            centerX * PIXEL_SIZE
+          }" dur="${animateDuration}s" repeatCount="indefinite" begin="${animationOffset}s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1" values="${x};${
+            centerX * PIXEL_SIZE
+          }" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      <animate attributeName="y" from="${y}" to="${
+            centerY * PIXEL_SIZE
+          }" dur="${animateDuration}s" repeatCount="indefinite" begin="${animationOffset}s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1" values="${y};${
+            centerY * PIXEL_SIZE
+          }" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>`
+
+          const pixel = `<rect x="${x}" y="${y}" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}">
+                    ${transformAnimation}
+                    </rect>`
+          svg += pixel
+        }
+
+        // Inside part
+        let g2 = `<g id="i${id}">`
+        g2 += insideSVG
+        g2 += `</g>`
+        svg += g2
+
+        // Repetitions
+        svg += `<use href="#i${id}" transform="scale(-1,1),translate(-${CANVAS_SIZE + PIXEL_SIZE},0)" />`
+        svg += `<use href="#i${id}" transform="scale(1,-1),translate(0,-${CANVAS_SIZE + PIXEL_SIZE})" />`
+        svg += `<use href="#i${id}" transform="scale(-1,-1),translate(-${CANVAS_SIZE + PIXEL_SIZE},-${
+          CANVAS_SIZE + PIXEL_SIZE
+        })" />`
 
         svg += `</svg>`
         return svg
@@ -139,12 +215,10 @@
 
         BASE_HUE = hues[level]
 
-        console.log(BASE_HUE)
-
         const holeSize = PIXELS_PER_SIDE / 2 - (10 - level)
 
-        const canvas = document.createElement("div")
-        canvas.innerHTML = createSVG(createQuarterCanvas(holeSize))
+        const canvas = document.createElement("span")
+        canvas.innerHTML = createSVG(createQuarterCanvas(holeSize), holeSize)
         document.getElementById("canvasContainer").appendChild(canvas)
       }
     </script>
