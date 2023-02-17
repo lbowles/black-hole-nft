@@ -25,7 +25,9 @@ async function main() {
     const { result: compileResult, targetContract } = compile(SOURCE)
     const { abi, bytecode } = targetContract
     const { address, gasUsed } = await deploy(vm, pk, bytecode, compileResult)
-    const { results, gasUsed: callGas } = await call(vm, address, abi, "renderSample")
+    const { results, gasUsed: callGas } = await call(vm, address, abi, "renderSample", [
+      Math.floor(Math.random() * 1000),
+    ])
     const result = results[0]
 
     // Calculate percentage change in gas used

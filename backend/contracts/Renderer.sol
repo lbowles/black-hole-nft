@@ -6,79 +6,335 @@ import "./Utilities.sol";
 import "hardhat/console.sol";
 
 contract Renderer {
-  uint256 constant PIXEL_SIZE = 20;
-  uint256 constant PIXELS_PER_SIDE = 24;
+  // TODO: Store constants as strings too
+  uint256 constant PIXELS_PER_SIDE = 28;
+  uint256 constant PIXEL_SIZE = 10;
   uint256 constant CANVAS_SIZE = PIXELS_PER_SIDE * PIXEL_SIZE;
 
-  string[] backgroundColors;
-  string[] perimiterColors;
-  string[] blackHoleColors;
+  string constant SPECIAL_STRING =
+    '<g id="special"><path fill="#182463" d="M120 0h10v10h-10V0Z"/><path fill="#BAAEF9" d="M110 0h10v10h-10z"/><path fill="#182463" d="M130 10h10v10h-10V10Z"/><path fill="#182462" d="M90 10H0v10h90V10Z"/><path fill="#E3C8FF" d="M140 20H0v10h140z"/><path fill="#182462" d="M40 40H0v10h40V40Z"/><path fill="#BAAEF9" d="M70 30H0v10h70zm40-20h20v10h-20z"/><path fill="#E2C7FF" d="M90 20h20V10H90v10Z"/><path fill="#182462" d="M130 30H70v10h60V30Z"/></g>';
+
+  uint256[3][] COLOR_SCHEMES;
 
   constructor() {
-    backgroundColors = new string[](13);
-    backgroundColors[0] = "#140E0E";
-    backgroundColors[1] = "#160F0D";
-    backgroundColors[2] = "#17120E";
-    backgroundColors[3] = "#181214";
-    backgroundColors[4] = "#18130F";
-    backgroundColors[5] = "#181310";
-    backgroundColors[6] = "#181410";
-    backgroundColors[7] = "#1A1210";
-    backgroundColors[8] = "#1A1511";
-    backgroundColors[9] = "#1B1310";
-    backgroundColors[10] = "#1B1517";
-    backgroundColors[11] = "#282221";
-    backgroundColors[12] = "#504940";
-
-    perimiterColors = new string[](4);
-    perimiterColors[0] = "#852C27";
-    perimiterColors[1] = "#741D27";
-    perimiterColors[2] = "#8F5359";
-    perimiterColors[3] = "#D1652C";
-
-    blackHoleColors = new string[](5);
-    blackHoleColors[0] = "black";
-    blackHoleColors[1] = "#361902";
-    blackHoleColors[2] = "#FFD088";
-    blackHoleColors[3] = "#BD460A";
-    blackHoleColors[4] = "#390706";
+    // Initialize color schemes
+    // TODO: This accounts for 30% of deployment gas
+    COLOR_SCHEMES.push([35, 90, 80]);
+    COLOR_SCHEMES.push([15, 90, 55]);
+    COLOR_SCHEMES.push([0, 90, 20]);
+    COLOR_SCHEMES.push([45, 90, 80]);
+    COLOR_SCHEMES.push([25, 90, 55]);
+    COLOR_SCHEMES.push([5, 90, 20]);
+    COLOR_SCHEMES.push([55, 90, 80]);
+    COLOR_SCHEMES.push([35, 90, 55]);
+    COLOR_SCHEMES.push([15, 90, 20]);
+    COLOR_SCHEMES.push([270, 90, 80]);
+    COLOR_SCHEMES.push([250, 90, 55]);
+    COLOR_SCHEMES.push([230, 90, 20]);
+    COLOR_SCHEMES.push([269, 100, 89]);
+    COLOR_SCHEMES.push([250, 86, 83]);
+    COLOR_SCHEMES.push([230, 61, 24]);
   }
 
   struct BlackHole {
     uint256 tokenId;
     uint256 level;
+    uint256 size;
   }
 
   function getPixelSVG(
     uint256 tokenId,
     uint256 pixelClass,
-    uint256 x,
-    uint256 y
+    uint8 x,
+    uint8 y,
+    uint8 level
   ) public view returns (string memory) {
-    string memory fillColor = "";
-    uint256 randomIndex = utils.randomRange(tokenId, "randomIndex", 0, 200);
+    uint256[3] memory colorScheme = COLOR_SCHEMES[level * 3 + pixelClass - 1];
+    string memory fillColor = pixelClass == 0 ? "black" : utils.getHslString(colorScheme);
 
-    if (pixelClass == 0) {
-      // Background + small chance of dim star
-      fillColor = randomIndex <= 2 ? "#504940" : backgroundColors[(randomIndex - 2) % backgroundColors.length];
-    } else if (pixelClass >= 1 && pixelClass <= 6) {
-      // Black hole
-      fillColor = blackHoleColors[pixelClass - 1];
-    } else if (pixelClass == 7) {
-      // Perimiter
-      if (randomIndex < perimiterColors.length) {
-        fillColor = perimiterColors[randomIndex];
-      } else {
-        fillColor = backgroundColors[randomIndex % backgroundColors.length];
+    return
+      string(
+        abi.encodePacked(
+          '<rect x="',
+          utils.uint2str(x * PIXEL_SIZE),
+          '" y="',
+          utils.uint2str(y * PIXEL_SIZE),
+          '" width="',
+          utils.uint2str(PIXEL_SIZE),
+          '" height="',
+          utils.uint2str(PIXEL_SIZE),
+          '" fill="',
+          fillColor,
+          '"/>'
+        )
+      );
+  }
+
+  struct QuarterCanvasVariables {
+    uint256 renderEndIndex;
+    uint256 renderStartIndex;
+  }
+
+  function getQuarterCanvas(BlackHole memory _blackHole) public view returns (string memory) {
+    QuarterCanvasVariables memory vars;
+
+    string memory edgeSVG = "";
+    vars.renderEndIndex = PIXELS_PER_SIDE / 2;
+    vars.renderStartIndex = vars.renderEndIndex - _blackHole.size - 5;
+    for (uint256 i = vars.renderStartIndex; i <= vars.renderEndIndex; i++) {
+      for (uint256 j = vars.renderStartIndex; j <= vars.renderEndIndex; j++) {
+        int256 x = int256(j) - int256(PIXELS_PER_SIDE) / 2;
+        int256 y = int256(i) - int256(PIXELS_PER_SIDE) / 2;
+        uint256 distance = uint256(utils.sqrt(uint256(x * x) + uint256(y * y)));
+
+        int256 classIndex = int256(distance) - int256(_blackHole.size);
+
+        if (distance > _blackHole.size && distance <= _blackHole.size + 3) {
+          edgeSVG = string.concat(
+            edgeSVG,
+            getPixelSVG(_blackHole.tokenId, uint256(classIndex), uint8(j), uint8(i), uint8(_blackHole.level))
+          );
+        }
       }
     }
 
-    return
-      string.concat(
+    return edgeSVG;
+  }
+
+  // JavaScript:
+  // function getAnimatedStars(holeSize, level) {
+  //   // Noise
+  //   // TODO:
+  //   // [x] Start animated noise outside frame
+  //   // [x] Order brighter pixels on top of darker pixels
+  //   // [x] Speed up animation as it gets closer to center
+  //   // [x] Black part of black hole should be on top
+  //   const centerX = CANVAS_SIZE / 2 / PIXEL_SIZE
+  //   const centerY = centerX
+  //   const radius = holeSize + 6
+  //   let svg = ""
+  //   for (let i = 0; i < 10; i++) {
+  //     // x is a random number from -PIXELS_PER_SIDE to 2*PIXELS_PER_SIDE
+  //     let x = Math.floor(Math.random() * PIXELS_PER_SIDE * 3 - PIXELS_PER_SIDE)
+
+  //     const discriminant = radius ** 2 - (x - centerX) ** 2
+  //     let minY = -PIXELS_PER_SIDE
+  //     let maxY = 2 * PIXELS_PER_SIDE
+  //     if (discriminant > 0) {
+  //       // Bottom edge to bottom canvas
+  //       minY = Math.floor(Math.sqrt(discriminant) + centerY)
+  //       maxY = 2 * PIXELS_PER_SIDE
+
+  //       // Top canvas to top edge
+  //       if (Math.random() > 0.5) {
+  //         maxY = centerY * 2 - minY
+  //         minY = -PIXELS_PER_SIDE
+  //       }
+
+  //       // Randomly add perimiter glow
+  //       if (Math.random() > 0.2) {
+  //         const delay = Math.random() * 2
+  //         const fillColor = `hsl(${COLOR_SCHEMES[level * 3][0] - 10}, 50%, 20%)`
+  //         console.log(fillColor, COLOR_SCHEMES[level * 3][0])
+  //         const pixel = `<rect x="${x * PIXEL_SIZE}" y="${
+  //           (minY === 0 ? maxY + 1 : minY - 1) * PIXEL_SIZE
+  //         }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}">
+  //           <animate
+  //             attributeName="fill-opacity"
+  //             values="0;1;0"
+  //             dur="2s"
+  //             begin="${delay}"
+  //             repeatCount="indefinite" />
+  //           </rect>`
+  //         svg += pixel
+  //       }
+  //     }
+
+  //     // Select a random value between minY and maxY
+  //     x = x * PIXEL_SIZE
+  //     const y = Math.floor(Math.random() * (maxY - minY) + minY) * PIXEL_SIZE
+
+  //     const maxLightness = 200
+  //     const minLigtness = 15
+
+  //     const fillLightness = Math.floor(Math.random() * (maxLightness - minLigtness)) + minLigtness
+  //     const fillColor = `hsl(0, 0%, ${fillLightness}%)`
+
+  //     const animateDuration = 2 // Math.floor(((maxLightness - fillLightness) / maxLightness) ** 2 * 40 - 10) + 10
+  //     const animationOffset = Math.random() * 2
+
+  //     const animationCommon = `dur="${animateDuration}s" repeatCount="indefinite" begin="${animationOffset}s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"`
+
+  //     const transformAnimation = `
+  //     <animate attributeName="x" from="${x}" to="${centerX * PIXEL_SIZE}"  values="${x};${
+  //       centerX * PIXEL_SIZE
+  //     }" ${animationCommon}/>
+
+  //     <animate attributeName="y" from="${y}" to="${centerY * PIXEL_SIZE}" values="${y};${
+  //       centerY * PIXEL_SIZE
+  //     }" ${animationCommon}/>
+
+  //     <animate attributeName="fill-opacity" from="1" to="0" values="1;0" ${animationCommon}/>
+  //     `
+
+  //     const pixel = `<rect x="${x}" y="${y}" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}">
+  //               ${transformAnimation}
+  //               </rect>`
+  //     svg += pixel
+  //   }
+
+  //   return svg
+  // }
+
+  // struct AnimationVariables {
+  //   ;
+  // }
+
+  // Solidity: // TODO: REVERT here
+  function getAnimatedStars(BlackHole memory _blackHole) public pure returns (string memory) {
+    string memory svg = "";
+    for (uint256 i = 0; i < 10; i++) {
+      // x is a random number from -PIXELS_PER_SIDE to 2*PIXELS_PER_SIDE
+      uint256 x = utils.randomRange(
+        _blackHole.tokenId,
+        string.concat("animatedStarX", utils.uint2str(i)),
+        0,
+        PIXELS_PER_SIDE * 3
+      );
+
+      uint256 radius = _blackHole.size + 6;
+      uint256 discriminant = radius * radius - (x - PIXELS_PER_SIDE / 2) * (x - PIXELS_PER_SIDE / 2);
+      uint256 minY = 0;
+      uint256 maxY = PIXELS_PER_SIDE * 2;
+      if (discriminant > 0) {
+        // Bottom edge to bottom canvas
+        minY = utils.sqrt(discriminant) + PIXELS_PER_SIDE / 2;
+        maxY = PIXELS_PER_SIDE * 2;
+
+        // Top canvas to top edge
+        if (utils.randomRange(_blackHole.tokenId, string.concat("animatedStarY", utils.uint2str(i)), 0, 2) == 1) {
+          maxY = PIXELS_PER_SIDE - minY;
+          minY = 0;
+        }
+
+        // TODO: Randomly add perimiter glow
+      }
+
+      // Select a random value between minY and maxY
+      x = x * PIXEL_SIZE;
+      uint256 y = utils.randomRange(_blackHole.tokenId, string.concat("animatedStarY", utils.uint2str(i)), minY, maxY) *
+        PIXEL_SIZE;
+
+      uint256 fillLightness = utils.randomRange(
+        _blackHole.tokenId,
+        string.concat("fillLightness", utils.uint2str(i)),
+        15,
+        200
+      );
+      string memory fillColor = utils.getHslString([0, 0, fillLightness]);
+
+      uint256 animateDuration = 2;
+      uint256 animationOffset = utils.randomRange(
+        _blackHole.tokenId,
+        string.concat("animationOffset", utils.uint2str(i)),
+        0,
+        2
+      );
+
+      string memory animationCommon = string.concat(
+        "dur=",
+        utils.uint2str(animateDuration),
+        "s repeatCount=indefinite begin=",
+        utils.uint2str(animationOffset),
+        "s calcMode=spline keyTimes=0;1 keySplines=0.4 0 0.2 1"
+      );
+
+      string memory transformAnimation = string.concat(
+        "<animate attributeName=x from=",
+        utils.uint2str(x),
+        " to=",
+        utils.uint2str((PIXELS_PER_SIDE * PIXEL_SIZE) / 2),
+        " values=",
+        utils.uint2str(x),
+        ";",
+        utils.uint2str((PIXELS_PER_SIDE * PIXEL_SIZE) / 2),
+        " ",
+        animationCommon,
+        "/>"
+      );
+
+      transformAnimation = string.concat(
+        transformAnimation,
+        "<animate attributeName=y from=",
+        utils.uint2str(y),
+        " to=",
+        utils.uint2str((PIXELS_PER_SIDE * PIXEL_SIZE) / 2),
+        " values=",
+        utils.uint2str(y),
+        ";",
+        utils.uint2str((PIXELS_PER_SIDE * PIXEL_SIZE) / 2),
+        " ",
+        animationCommon,
+        "/>"
+      );
+
+      transformAnimation = string.concat(
+        transformAnimation,
+        "<animate attributeName=fill-opacity from=1 to=0 values=1;0 ",
+        animationCommon,
+        "/>"
+      );
+
+      string memory pixel = string.concat(
+        "<rect x=",
+        utils.uint2str(x),
+        " y=",
+        utils.uint2str(y),
+        " width=",
+        utils.uint2str(PIXEL_SIZE),
+        " height=",
+        utils.uint2str(PIXEL_SIZE),
+        " fill=",
+        fillColor,
+        ">",
+        transformAnimation,
+        "</rect>"
+      );
+
+      svg = string.concat(svg, pixel);
+    }
+    return svg;
+  }
+
+  function getStaticBackground(BlackHole memory _blackHole) public pure returns (string memory) {
+    string memory svg = "";
+    for (uint256 i = 0; i < 20; i++) {
+      uint256 x = utils.randomRange(
+        _blackHole.tokenId,
+        string.concat("staticX", utils.uint2str(i)),
+        0,
+        PIXELS_PER_SIDE
+      ) * PIXEL_SIZE;
+      uint256 y = utils.randomRange(
+        _blackHole.tokenId,
+        string.concat("staticY", utils.uint2str(i)),
+        0,
+        PIXELS_PER_SIDE
+      ) * PIXEL_SIZE;
+
+      uint256 fillLightness = utils.randomRange(
+        _blackHole.tokenId,
+        string.concat("fillLightness", utils.uint2str(i)),
+        5,
+        12
+      );
+      string memory fillColor = utils.getHslString([0, 0, fillLightness]);
+
+      string memory pixel = string.concat(
         '<rect x="',
-        utils.uint2str(x * PIXEL_SIZE),
+        utils.uint2str(x),
         '" y="',
-        utils.uint2str(y * PIXEL_SIZE),
+        utils.uint2str(y),
         '" width="',
         utils.uint2str(PIXEL_SIZE),
         '" height="',
@@ -87,40 +343,14 @@ contract Renderer {
         fillColor,
         '"/>'
       );
-  }
 
-  function getQuarterCanvas(BlackHole memory _blackHole, uint256 _size) public view returns (string memory) {
-    string memory pixelsSVG = "";
-    for (uint256 i = 0; i < PIXELS_PER_SIDE / 2; i++) {
-      for (uint256 j = 0; j < PIXELS_PER_SIDE / 2; j++) {
-        int256 x = int256(j) - int256(PIXELS_PER_SIDE) / 2;
-        int256 y = int256(i) - int256(PIXELS_PER_SIDE) / 2;
-        uint256 distance = utils.sqrt(uint256(x * x) + uint256(y * y));
-        if (distance <= _size / 2) {
-          pixelsSVG = string.concat(pixelsSVG, getPixelSVG(_blackHole.tokenId, 1, j, i));
-        } else if (distance <= _size / 2 + 1) {
-          pixelsSVG = string.concat(pixelsSVG, getPixelSVG(_blackHole.tokenId, 2, j, i));
-        } else if (distance <= _size / 2 + 2) {
-          pixelsSVG = string.concat(pixelsSVG, getPixelSVG(_blackHole.tokenId, 3, j, i));
-        } else if (distance <= _size / 2 + 3) {
-          pixelsSVG = string.concat(pixelsSVG, getPixelSVG(_blackHole.tokenId, 4, j, i));
-        } else if (distance <= _size / 2 + 4) {
-          pixelsSVG = string.concat(pixelsSVG, getPixelSVG(_blackHole.tokenId, 5, j, i));
-        } else if (distance <= _size / 2 + 6) {
-          pixelsSVG = string.concat(pixelsSVG, getPixelSVG(_blackHole.tokenId, 7, j, i));
-        } else {
-          // TODO: Never called
-          pixelsSVG = string.concat(pixelsSVG, getPixelSVG(_blackHole.tokenId, 0, j, i));
-        }
-      }
+      svg = string.concat(svg, pixel);
     }
-    return pixelsSVG;
+    return svg;
   }
 
   function getBlackHoleSVG(BlackHole memory _blackHole) public view returns (string memory) {
-    uint256 radius = utils.randomRange(_blackHole.tokenId, "radius", 5, 10);
-
-    string memory quarterCanvas = getQuarterCanvas(_blackHole, radius);
+    string memory edgeSvg = getQuarterCanvas(_blackHole);
 
     string memory svg = string.concat(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ',
@@ -134,29 +364,91 @@ contract Renderer {
       '">'
     );
 
-    string memory g = string.concat('<g id="base">', quarterCanvas, "</g>");
+    // -- defs
 
-    svg = string.concat(svg, g);
+    // Edge def
+    string memory g = string.concat('<g id="edge">', edgeSvg, "</g>");
+
+    svg = string.concat(svg, "<defs>", '<g id="full">', g);
     svg = string.concat(
       svg,
-      '<use href="#base" transform="scale(-1,1),translate(-',
+      '<use href="#edge" transform="scale(-1,1),translate(-',
       utils.uint2str(CANVAS_SIZE),
       ',0)" />'
     );
     svg = string.concat(
       svg,
-      '<use href="#base" transform="scale(1,-1),translate(0,-',
+      '<use href="#edge" transform="scale(1,-1),translate(0,-',
       utils.uint2str(CANVAS_SIZE),
       ')" />'
     );
     svg = string.concat(
       svg,
-      '<use href="#base" transform="scale(-1,-1),translate(-',
+      '<use href="#edge" transform="scale(-1,-1),translate(-',
       utils.uint2str(CANVAS_SIZE),
       ",-",
       utils.uint2str(CANVAS_SIZE),
-      ')" />'
+      ')" /></g>'
     );
+
+    // Special string def
+    if (_blackHole.level == 4) svg = string.concat(svg, SPECIAL_STRING);
+
+    // -- end defs
+    svg = string.concat(svg, "</defs>");
+
+    // Black background
+    svg = string.concat(
+      svg,
+      '<rect x="0" y="0" width="',
+      utils.uint2str(CANVAS_SIZE),
+      '" height="',
+      utils.uint2str(CANVAS_SIZE),
+      '" fill="black"/>'
+    );
+
+    // Static background
+    svg = string.concat(svg, '<g id="background">', getStaticBackground(_blackHole), "</g>");
+
+    // Black background part of black hole
+    uint256 backgroundOffset = CANVAS_SIZE / 2 - _blackHole.size * PIXEL_SIZE;
+    uint256 backgroundSize = 2 * _blackHole.size * PIXEL_SIZE;
+    svg = string.concat(
+      svg,
+      '<rect fill="black" x="',
+      utils.uint2str(backgroundOffset),
+      '" y="',
+      utils.uint2str(backgroundOffset),
+      '" width="',
+      utils.uint2str(backgroundSize),
+      '"  height="',
+      utils.uint2str(backgroundSize),
+      '" />'
+    );
+
+    // Edge part
+    svg = string.concat(svg, '<use href="#full" />');
+
+    // Animated stars
+    // svg += getAnimatedStars(holeSize, level)
+    svg = string.concat(svg, getAnimatedStars(_blackHole));
+
+    // Special string
+    if (_blackHole.level == 4) {
+      svg = string.concat(
+        svg,
+        '<use href="#special" transform="translate(',
+        utils.uint2str(CANVAS_SIZE / 2),
+        ",",
+        utils.uint2str(CANVAS_SIZE / 2),
+        ')" />',
+        '<use href="#special" transform="scale(-1,1),translate(-',
+        utils.uint2str(CANVAS_SIZE / 2 + PIXEL_SIZE),
+        ",",
+        utils.uint2str(CANVAS_SIZE / 2),
+        ')" />'
+      );
+    }
 
     svg = string.concat(svg, "</svg>");
 
@@ -168,8 +460,10 @@ contract Renderer {
     return svg;
   }
 
-  function renderSample() public view returns (string memory) {
-    BlackHole memory blackHole = BlackHole(1, 1);
+  function renderSample(uint256 tokenId) public view returns (string memory) {
+    uint256 level = 1;
+    uint256 size = PIXELS_PER_SIDE / 2 - (10 - level); // 5
+    BlackHole memory blackHole = BlackHole(tokenId, level, size);
     return render(blackHole);
   }
 }
