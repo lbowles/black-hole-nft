@@ -1,26 +1,22 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg"
+import "./App.css"
+import { Navbar } from "./components/Navbar/Navbar"
+import { useState } from "react"
+
+type pagesType = { name: string; link: string; active: boolean }[]
+const defaultPages = [
+  { name: "HOME", link: "/", active: true },
+  { name: "MINT", link: "/mint", active: false },
+  { name: "BURN", link: "/burn", active: false },
+]
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+  const [pages, setPages] = useState<pagesType>(defaultPages)
 
-export default App;
+  return (
+    <div className="flex justify-center w-screen">
+      <Navbar pages={pages} />
+    </div>
+  )
+}
+export default App

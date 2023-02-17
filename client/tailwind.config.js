@@ -1,15 +1,26 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  content: ["./src/**/*.{js,jsx,ts,tsx}","./node_modules/react-tailwindcss-select/dist/index.esm.js"],
   theme: {
-    extend: {},
-  },
-  plugins: [],
-  theme: {
+    fontSize: {
+      'sm'  : '0.75rem',  //12px
+      'base': '0.875rem', //14px
+      "lg"  : "1rem",     //16px
+      "xl"  : "1.25rem",  //20px
+      "2xl" : "1.5rem",   //24px
+      "3xl" : "1.9rem",   //32px
+      "4xl" : "2.25rem",  //36px
+      "5xl" : "2.5rem",   //40px
+    },
     extend: {
-      fontFamily: {
-        poppins: ["Space+Mono"],
+      colors: {
+        'gray-900': '#252525',
+        'gray-800': '#424242',
+        'gray-700': '#8C8C8C',
+        'gray-600': '#ADADAD',
+        'gray-500': '#C7C7C7',
       },
     },
   },
+  plugins: [],
 }
