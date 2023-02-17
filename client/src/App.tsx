@@ -35,27 +35,25 @@ const wagmiClient = createClient({
 
 function App() {
   return (
-    <div className="flex justify-center w-screen">
-      <WagmiConfig client={wagmiClient}>
-        <RainbowKitProvider
-          showRecentTransactions={true}
-          chains={chains}
-          theme={{
-            ...darkTheme({ accentColor: "#393A3E" }),
-            fonts: {
-              body: "VT323, monospace",
-            },
-          }}
-        >
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/mint" element={<div className="text-white">mint</div>} />
-            <Route path="/burn" element={<div>burn</div>} />
-          </Routes>
-        </RainbowKitProvider>
-      </WagmiConfig>
-    </div>
+    <WagmiConfig client={wagmiClient}>
+      <RainbowKitProvider
+        showRecentTransactions={true}
+        chains={chains}
+        theme={{
+          ...darkTheme({ accentColor: "#393A3E" }),
+          fonts: {
+            body: "VT323, monospace",
+          },
+        }}
+      >
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/mint" element={<div className="text-white">mint</div>} />
+          <Route path="/burn" element={<div>burn</div>} />
+        </Routes>
+      </RainbowKitProvider>
+    </WagmiConfig>
   )
 }
 export default App
