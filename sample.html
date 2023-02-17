@@ -29,36 +29,26 @@
           `
 
       const COLOR_SCHEMES = [
-        [
-          // hsl(35, 90%, 80%)', 'hsl(15, 90%, 55%)', 'hsl(-5, 90%, 20%)
-          [35, 90, 80],
-          [15, 90, 55],
-          [0, 90, 20],
-        ],
-        [
-          // hsl(45, 90%, 80%)', 'hsl(25, 90%, 55%)', 'hsl(5, 90%, 20%)
-          [45, 90, 80],
-          [25, 90, 55],
-          [5, 90, 20],
-        ],
-        [
-          // hsl(55, 90%, 80%)', 'hsl(35, 90%, 55%)', 'hsl(15, 90%, 20%)
-          [55, 90, 80],
-          [35, 90, 55],
-          [15, 90, 20],
-        ],
-        [
-          // hsl(270, 90%, 80%)', 'hsl(250, 90%, 55%)', 'hsl(230, 90%, 20%)
-          [270, 90, 80],
-          [250, 90, 55],
-          [230, 90, 20],
-        ],
-        [
-          // hsl(230, 61%, 24%) hsl(250, 86%, 83%) hsl(269, 100%, 89%)
-          [269, 100, 89],
-          [250, 86, 83],
-          [230, 61, 24],
-        ],
+        // hsl(35, 90%, 80%)', 'hsl(15, 90%, 55%)', 'hsl(-5, 90%, 20%)
+        [35, 90, 80],
+        [15, 90, 55],
+        [0, 90, 20],
+        // hsl(45, 90%, 80%)', 'hsl(25, 90%, 55%)', 'hsl(5, 90%, 20%)
+        [45, 90, 80],
+        [25, 90, 55],
+        [5, 90, 20],
+        // hsl(55, 90%, 80%)', 'hsl(35, 90%, 55%)', 'hsl(15, 90%, 20%)
+        [55, 90, 80],
+        [35, 90, 55],
+        [15, 90, 20],
+        // hsl(270, 90%, 80%)', 'hsl(250, 90%, 55%)', 'hsl(230, 90%, 20%)
+        [270, 90, 80],
+        [250, 90, 55],
+        [230, 90, 20],
+        // hsl(230, 61%, 24%) hsl(250, 86%, 83%) hsl(269, 100%, 89%)
+        [269, 100, 89],
+        [250, 86, 83],
+        [230, 61, 24],
       ]
 
       function getHslString(hue, saturation, lightness) {
@@ -66,9 +56,10 @@
       }
 
       function getPixelSVG(tokenId, pixelClass, x, y, level) {
-        const blackHoleColors = ["black", ...COLOR_SCHEMES[level].map((color) => getHslString(...color))]
-
-        console.log(blackHoleColors)
+        const blackHoleColors = [
+          "black",
+          ...COLOR_SCHEMES.slice(level * 3, level * 3 + 3).map((color) => getHslString(...color)),
+        ]
 
         let fillColor = blackHoleColors[pixelClass]
 
@@ -155,7 +146,7 @@
             // Randomly add perimiter glow
             if (Math.random() > 0.2) {
               const delay = Math.random() * 2
-              const fillColor = `hsl(${COLOR_SCHEMES[level][0] - 10}, 50%, 20%)`
+              const fillColor = `hsl(${COLOR_SCHEMES[level * 3][0] - 10}, 50%, 20%)`
               const pixel = `<rect x="${x * PIXEL_SIZE}" y="${
                 (minY === 0 ? maxY + 1 : minY - 1) * PIXEL_SIZE
               }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}">
@@ -206,7 +197,8 @@
         return svg
       }
 
-      function createSVG(holeSize, level) {
+      function createSVG(level) {
+        const holeSize = PIXELS_PER_SIDE / 2 - (10 - level)
         const edgeSVG = createQuarterCanvas(holeSize, level)
 
         const id = `base${level}`
@@ -220,7 +212,7 @@
           CANVAS_SIZE + PIXEL_SIZE
         })" />
             </g>
-            ${level == COLOR_SCHEMES.length - 1 ? specialString : ""}
+            ${level == COLOR_SCHEMES.length / 3 - 1 ? specialString : ""}
           </defs>
           `
 
@@ -241,7 +233,7 @@
         // Animated stars
         svg += getAnimatedStars(holeSize, level)
 
-        if (level === COLOR_SCHEMES.length - 1) {
+        if (level === COLOR_SCHEMES.length / 3 - 1) {
           // Add special halo
           svg += `<use href="#special" transform="translate(${CANVAS_SIZE / 2},${CANVAS_SIZE / 2})"></use>`
           svg += `<use href="#special" transform="scale(-1,1),translate(${-CANVAS_SIZE / 2 - PIXEL_SIZE},${
@@ -253,15 +245,12 @@
         return svg
       }
 
-      for (let i = 0; i < COLOR_SCHEMES.length; i++) {
+      for (let i = 0; i < COLOR_SCHEMES.length / 3; i++) {
         const level = i
 
-        const holeSize = PIXELS_PER_SIDE / 2 - (10 - level)
-
         const canvas = document.createElement("span")
-        canvas.innerHTML = createSVG(holeSize, level)
+        canvas.innerHTML = createSVG(level)
         document.getElementById("canvasContainer").appendChild(canvas)
-        console.log("end")
       }
     </script>
   </body>
