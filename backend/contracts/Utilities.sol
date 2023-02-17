@@ -45,6 +45,18 @@ library utils {
     return string(abi.encodePacked("hsl(", uint2str(_hsl.h), ",", uint2str(_hsl.s), "%,", uint2str(_hsl.l), "%)"));
   }
 
+  function getHslString(
+    uint256 _h,
+    uint256 _s,
+    uint256 _l
+  ) public pure returns (string memory) {
+    return string(abi.encodePacked("hsl(", uint2str(_h), ",", uint2str(_s), "%,", uint2str(_l), "%)"));
+  }
+
+  function getHslString(uint256[3] memory _hsl) public pure returns (string memory) {
+    return string(abi.encodePacked("hsl(", uint2str(_hsl[0]), ",", uint2str(_hsl[1]), "%,", uint2str(_hsl[2]), "%)"));
+  }
+
   function uint2floatstr(uint256 _i_scaled, uint256 _decimals) internal pure returns (string memory) {
     return string.concat(uint2str(_i_scaled / (10**_decimals)), ".", uint2str(_i_scaled % (10**_decimals)));
   }
