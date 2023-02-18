@@ -13,7 +13,7 @@ async function deploy(vm, pk, bytecode, compileResult) {
       console.log(name)
       const bytecode = contract.evm.bytecode
       const { address, gasUsed } = await deploy(vm, pk, bytecode, compileResult)
-      totalGas += gasUsed.toNumber()
+      totalGas += gasUsed
       libraries[`${name}:${contractName}`] = address.toString()
     }),
   )

@@ -25,8 +25,6 @@ async function main() {
     const { result: compileResult, targetContract } = compile(SOURCE)
     const { abi, bytecode } = targetContract
     const { address, gasUsed } = await deploy(vm, pk, bytecode, compileResult)
-    const { results, gasUsed: callGas } = await call(vm, address, abi, "renderSample")
-    const result = results[0]
 
     // Calculate percentage change in gas used
     const gasUsedChange = ((gasUsed - lastGasUsed) / lastGasUsed) * 100
@@ -35,7 +33,16 @@ async function main() {
         Math.round(gasUsedChange * 100) / 100
       ).toFixed(2)}%)`,
     )
-    console.log(`${callGas.toNumber().toLocaleString()} gas used for call`)
+
+    let result = ""
+    for (let level = 0; level < 5; level++) {
+      const { results, gasUsed: callGas } = await call(vm, address, abi, "renderSample", [
+        Math.floor(Math.random() * 1000),
+        level,
+      ])
+      result += `<iframe style="width: 500px; height: 500px;" srcdoc='${results[0]}'></iframe>`
+      console.log(`${callGas.toNumber().toLocaleString()} gas used for call (${level})`)
+    }
 
     // Write gas used to a file
     fs.writeFileSync(path.join(__dirname, ".gas-used"), gasUsed.toString())

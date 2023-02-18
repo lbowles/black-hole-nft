@@ -7,7 +7,6 @@ import "hardhat-deploy"
 import "hardhat-gas-reporter"
 import { HardhatUserConfig, task } from "hardhat/config"
 import { HardhatNetworkUserConfig, NetworksUserConfig } from "hardhat/types"
-import "./tasks/tokenURI"
 dotenv.config()
 
 // This is a sample Hardhat task. To learn how to create your own go to
