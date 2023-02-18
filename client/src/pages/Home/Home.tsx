@@ -1,6 +1,6 @@
 import { BlackHoleIntro } from "../../components/home/BlackHoleIntro/BlackHoleIntro"
 import { GeneralInfo } from "../../components/home/GeneralInfo/GeneralInfo"
-import landingBackHole from "../../img/landingBlackHole.svg"
+import landingBackHole from "../../img/landingBlackHoleAnimation.svg"
 import opensea from "../../img/icons/opensea.svg"
 import twitter from "../../img/icons/twitter.svg"
 import gihub from "../../img/icons/github.svg"
