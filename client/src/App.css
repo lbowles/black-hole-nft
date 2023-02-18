@@ -2,10 +2,10 @@
   background: black;
   border: 2px solid white;
   color: white;
-  font-size: 1.5rem;
-  height: 40px;
-  padding-left: 20px;
-  padding-right: 20px;
+  font-size: 1.25rem;
+  height: 44px;
+  padding-left: 25px;
+  padding-right: 25px;
   transition: 0.1s ease-in-out;
 }
 
