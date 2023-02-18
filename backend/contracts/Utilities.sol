@@ -41,6 +41,15 @@ library utils {
     return colors;
   }
 
+  function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
+    require(bs.length >= start + 32, "slicing out of range");
+    uint256 x;
+    assembly {
+      x := mload(add(bs, add(0x20, start)))
+    }
+    return x;
+  }
+
   function getHslString(HSL memory _hsl) public pure returns (string memory) {
     return string(abi.encodePacked("hsl(", uint2str(_hsl.h), ",", uint2str(_hsl.s), "%,", uint2str(_hsl.l), "%)"));
   }
@@ -55,6 +64,22 @@ library utils {
 
   function getHslString(uint256[3] memory _hsl) public pure returns (string memory) {
     return string(abi.encodePacked("hsl(", uint2str(_hsl[0]), ",", uint2str(_hsl[1]), "%,", uint2str(_hsl[2]), "%)"));
+  }
+
+  function getHslString(uint256 _packedHsl) public pure returns (string memory) {
+    // 3 colors per level, 3 color items per color, H/S/L are color items, 3 bytes each
+    return
+      string(
+        abi.encodePacked(
+          "hsl(",
+          uint2str((_packedHsl >> (12 * 2)) & 0xFFF),
+          ",",
+          uint2str((_packedHsl >> (12 * 1)) & 0xFFF),
+          "%,",
+          uint2str((_packedHsl >> (12 * 0)) & 0xFFF),
+          "%)"
+        )
+      );
   }
 
   function uint2floatstr(uint256 _i_scaled, uint256 _decimals) internal pure returns (string memory) {

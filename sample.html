@@ -51,15 +51,33 @@
         [230, 61, 24],
       ]
 
+      // Encode COLOR_SCHEMES into a hex byte string where each byte is 2 characters
+      const colorSchemeString = COLOR_SCHEMES.map((color) => {
+        return color.map((c) => c.toString(16).padStart(3, "0")).join("")
+      })
+        .join("")
+        .padEnd(135, "0")
+
       function getHslString(hue, saturation, lightness) {
         return `hsl(${hue}, ${saturation}%, ${lightness}%)`
       }
 
       function getPixelSVG(tokenId, pixelClass, x, y, level) {
-        const blackHoleColors = [
-          "black",
-          ...COLOR_SCHEMES.slice(level * 3, level * 3 + 3).map((color) => getHslString(...color)),
-        ]
+        // Decode colour scheme from 3 bytes encoded colorSchemeString
+        const encoded = colorSchemeString.slice(level * 9 * 3, level * 9 * 3 + 9 * 3)
+
+        const colorScheme = []
+
+        // Convert from hex to decimal
+        for (let i = 0; i < 3; i++) {
+          let colors = []
+          for (let j = 0; j < 3; j++) {
+            colors.push(parseInt(encoded.slice(i * 9 + j * 3, i * 9 + j * 3 + 3), 16))
+          }
+          colorScheme.push(colors)
+        }
+
+        const blackHoleColors = ["black", ...colorScheme.map((c) => getHslString(...c))]
 
         let fillColor = blackHoleColors[pixelClass]
 
@@ -115,8 +133,6 @@
       }
 
       function getAnimatedStars(holeSize, level) {
-        // Noise
-        // TODO:
         // [x] Start animated noise outside frame
         // [x] Order brighter pixels on top of darker pixels
         // [x] Speed up animation as it gets closer to center

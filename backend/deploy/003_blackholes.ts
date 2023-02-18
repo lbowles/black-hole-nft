@@ -51,7 +51,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   const utilities = await deployments.get("utils")
-  const trigonometry = await deployments.get("Trigonometry")
   const renderer = await deployments.get("Renderer")
 
   const latestBlock = await ethers.provider.getBlock("latest")
@@ -66,7 +65,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     libraries: {
       utils: utilities.address,
-      Trigonometry: trigonometry.address,
     },
     args: [name, symbol, ethers.utils.parseEther("0.01"), 1000, renderer.address],
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
