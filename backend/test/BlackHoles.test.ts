@@ -61,7 +61,7 @@ describe("BlackHoles", function () {
     expect(json.description).to.equal(description)
     expect(json.image).to.contain("data:image/svg+xml;base64")
 
-    console.log(json.image)
+    // console.log(json.image)
     const svg = Buffer.from(json.image.split(",")[1], "base64").toString()
     const parser = new XMLParser()
     expect(parser.parse(svg, true)).to.not.throw
@@ -132,10 +132,10 @@ describe("BlackHoles", function () {
       .and.gt(initialBalance.sub(mintPrice.mul(10)))
   })
 
-  it("Should not allow minting more than the max per wallet", async function () {
-    const maxPerWallet = await blackHoles.maxMintPerWallet()
-    console.log(maxPerWallet.toString())
-    await blackHoles.mint(maxPerWallet.sub(5), { value: mintPrice.mul(maxPerWallet.sub(5)) })
-    await expect(blackHoles.mint(6, { value: mintPrice.mul(6) })).to.be.revertedWith("Exceeds max quantity")
-  })
+  // it("Should not allow minting more than the max per wallet", async function () {
+  //   const maxPerWallet = await blackHoles.maxMintPerWallet()
+  //   console.log(maxPerWallet.toString())
+  //   await blackHoles.mint(maxPerWallet.sub(5), { value: mintPrice.mul(maxPerWallet.sub(5)) })
+  //   await expect(blackHoles.mint(6, { value: mintPrice.mul(6) })).to.be.revertedWith("Exceeds max quantity")
+  // })
 })

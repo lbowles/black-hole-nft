@@ -66,7 +66,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     libraries: {
       utils: utilities.address,
     },
-    args: [name, symbol, ethers.utils.parseEther("0.01"), 1000, renderer.address],
+    args: [name, symbol, ethers.utils.parseEther("0.003"), ethers.utils.parseEther("0.005"), renderer.address],
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   })
 }
