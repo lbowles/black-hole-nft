@@ -1,0 +1,259 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" width="280" height="280">
+  <defs>
+    <g id="fullbase4">
+      <g id="base4">
+        <rect x="100" y="30" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="110" y="30" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="120" y="30" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="130" y="30" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="140" y="30" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="80" y="40" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="90" y="40" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="100" y="40" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="110" y="40" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="120" y="40" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="130" y="40" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="140" y="40" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="70" y="50" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="80" y="50" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="90" y="50" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="100" y="50" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="110" y="50" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="120" y="50" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="130" y="50" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="140" y="50" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="60" y="60" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="70" y="60" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="80" y="60" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="90" y="60" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="50" y="70" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="60" y="70" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="70" y="70" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="80" y="70" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="40" y="80" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="50" y="80" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="60" y="80" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="70" y="80" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="40" y="90" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="50" y="90" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="60" y="90" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="30" y="100" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="40" y="100" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="50" y="100" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="30" y="110" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="40" y="110" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="50" y="110" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="30" y="120" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="40" y="120" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="50" y="120" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="30" y="130" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="40" y="130" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="50" y="130" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+        <rect x="30" y="140" width="10" height="10" fill="hsl(230, 61%, 24%)"></rect>
+        <rect x="40" y="140" width="10" height="10" fill="hsl(250, 86%, 83%)"></rect>
+        <rect x="50" y="140" width="10" height="10" fill="hsl(269, 100%, 89%)"></rect>
+      </g>
+      <use href="#base4" transform="scale(-1,1),translate(-290,0)"></use>
+      <use href="#base4" transform="scale(1,-1),translate(0,-290)"></use>
+      <use href="#base4" transform="scale(-1,-1),translate(-290,-290)"></use>
+    </g>
+
+    <g id="special">
+      <path fill="#182463" d="M120 0h10v10h-10V0Z"></path>
+      <path fill="#BAAEF9" d="M110 0h10v10h-10z"></path>
+      <path fill="#182463" d="M130 10h10v10h-10V10Z"></path>
+      <path fill="#182462" d="M90 10H0v10h90V10Z"></path>
+      <path fill="#E3C8FF" d="M140 20H0v10h140z"></path>
+      <path fill="#182462" d="M40 40H0v10h40V40Z"></path>
+      <path fill="#BAAEF9" d="M70 30H0v10h70zM110 10h20v10h-20z"></path>
+      <path fill="#E2C7FF" d="M90 20h20V10H90v10Z"></path>
+      <path fill="#182462" d="M130 30H70v10h60V30Z"></path>
+    </g>
+
+  </defs>
+  <rect x="0" y="0" width="280" height="280" fill="#000000"></rect>
+  <rect x="250" y="150" width="10" height="10" fill="hsl(0, 0%, 11%)">
+  </rect>
+  <rect x="240" y="270" width="10" height="10" fill="hsl(0, 0%, 11%)">
+  </rect>
+  <rect x="50" y="130" width="10" height="10" fill="hsl(0, 0%, 10%)">
+  </rect>
+  <rect x="40" y="80" width="10" height="10" fill="hsl(0, 0%, 7%)">
+  </rect>
+  <rect x="230" y="240" width="10" height="10" fill="hsl(0, 0%, 7%)">
+  </rect>
+  <rect x="110" y="140" width="10" height="10" fill="hsl(0, 0%, 6%)">
+  </rect>
+  <rect x="220" y="250" width="10" height="10" fill="hsl(0, 0%, 5%)">
+  </rect>
+  <rect x="0" y="100" width="10" height="10" fill="hsl(0, 0%, 10%)">
+  </rect>
+  <rect x="190" y="240" width="10" height="10" fill="hsl(0, 0%, 7%)">
+  </rect>
+  <rect x="220" y="190" width="10" height="10" fill="hsl(0, 0%, 8%)">
+  </rect>
+  <rect x="160" y="190" width="10" height="10" fill="hsl(0, 0%, 10%)">
+  </rect>
+  <rect x="20" y="100" width="10" height="10" fill="hsl(0, 0%, 7%)">
+  </rect>
+  <rect x="190" y="180" width="10" height="10" fill="hsl(0, 0%, 9%)">
+  </rect>
+  <rect x="20" y="230" width="10" height="10" fill="hsl(0, 0%, 10%)">
+  </rect>
+  <rect x="20" y="110" width="10" height="10" fill="hsl(0, 0%, 7%)">
+  </rect>
+  <rect x="210" y="220" width="10" height="10" fill="hsl(0, 0%, 6%)">
+  </rect>
+  <rect x="200" y="220" width="10" height="10" fill="hsl(0, 0%, 8%)">
+  </rect>
+  <rect x="30" y="150" width="10" height="10" fill="hsl(0, 0%, 5%)">
+  </rect>
+  <rect x="240" y="130" width="10" height="10" fill="hsl(0, 0%, 5%)">
+  </rect>
+  <rect x="180" y="30" width="10" height="10" fill="hsl(0, 0%, 6%)">
+  </rect>
+  <rect x="130" y="10" width="10" height="10" fill="hsl(0, 0%, 11%)">
+  </rect>
+  <rect x="210" y="60" width="10" height="10" fill="hsl(0, 0%, 5%)">
+  </rect>
+  <rect x="250" y="230" width="10" height="10" fill="hsl(0, 0%, 11%)">
+  </rect>
+  <rect x="120" y="20" width="10" height="10" fill="hsl(0, 0%, 8%)">
+  </rect>
+  <rect x="50" y="80" width="10" height="10" fill="hsl(0, 0%, 9%)">
+  </rect>
+  <rect x="100" y="180" width="10" height="10" fill="hsl(0, 0%, 7%)">
+  </rect>
+  <rect x="200" y="170" width="10" height="10" fill="hsl(0, 0%, 11%)">
+  </rect>
+  <rect x="0" y="110" width="10" height="10" fill="hsl(0, 0%, 7%)">
+  </rect>
+  <rect x="210" y="200" width="10" height="10" fill="hsl(0, 0%, 8%)">
+  </rect>
+  <rect x="60" y="180" width="10" height="10" fill="hsl(0, 0%, 6%)">
+  </rect>
+  <rect fill="black" x="60" y="60" width="170" height="170"></rect>
+  <use href="#fullbase4"></use>
+  <rect x="-280" y="200" width="10" height="10" fill="hsl(0, 0%, 151%)">
+
+    <animate attributeName="x" from="-280" to="140" values="-280;140" dur="2s" repeatCount="indefinite"
+      begin="0.4595520686488941s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="y" from="200" to="140" values="200;140" dur="2s" repeatCount="indefinite"
+      begin="0.4595520686488941s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="fill-opacity" from="1" to="0" values="1;0" dur="2s" repeatCount="indefinite"
+      begin="0.4595520686488941s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+  </rect>
+  <rect x="430" y="10" width="10" height="10" fill="hsl(0, 0%, 36%)">
+
+    <animate attributeName="x" from="430" to="140" values="430;140" dur="2s" repeatCount="indefinite"
+      begin="1.1170274700259335s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="y" from="10" to="140" values="10;140" dur="2s" repeatCount="indefinite"
+      begin="1.1170274700259335s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="fill-opacity" from="1" to="0" values="1;0" dur="2s" repeatCount="indefinite"
+      begin="1.1170274700259335s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+  </rect>
+  <rect x="470" y="30" width="10" height="10" fill="hsl(0, 0%, 156%)">
+
+    <animate attributeName="x" from="470" to="140" values="470;140" dur="2s" repeatCount="indefinite"
+      begin="1.453667663190025s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="y" from="30" to="140" values="30;140" dur="2s" repeatCount="indefinite"
+      begin="1.453667663190025s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="fill-opacity" from="1" to="0" values="1;0" dur="2s" repeatCount="indefinite"
+      begin="1.453667663190025s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+  </rect>
+  <rect x="550" y="310" width="10" height="10" fill="hsl(0, 0%, 191%)">
+
+    <animate attributeName="x" from="550" to="140" values="550;140" dur="2s" repeatCount="indefinite"
+      begin="0.34149322839279694s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="y" from="310" to="140" values="310;140" dur="2s" repeatCount="indefinite"
+      begin="0.34149322839279694s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="fill-opacity" from="1" to="0" values="1;0" dur="2s" repeatCount="indefinite"
+      begin="0.34149322839279694s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+  </rect>
+  <rect x="-110" y="290" width="10" height="10" fill="hsl(0, 0%, 128%)">
+
+    <animate attributeName="x" from="-110" to="140" values="-110;140" dur="2s" repeatCount="indefinite"
+      begin="0.7795692229039717s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="y" from="290" to="140" values="290;140" dur="2s" repeatCount="indefinite"
+      begin="0.7795692229039717s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="fill-opacity" from="1" to="0" values="1;0" dur="2s" repeatCount="indefinite"
+      begin="0.7795692229039717s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+  </rect>
+  <rect x="-30" y="-120" width="10" height="10" fill="hsl(0, 0%, 26%)">
+
+    <animate attributeName="x" from="-30" to="140" values="-30;140" dur="2s" repeatCount="indefinite"
+      begin="1.2900959327552997s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="y" from="-120" to="140" values="-120;140" dur="2s" repeatCount="indefinite"
+      begin="1.2900959327552997s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="fill-opacity" from="1" to="0" values="1;0" dur="2s" repeatCount="indefinite"
+      begin="1.2900959327552997s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+  </rect>
+  <rect x="250" y="-280" width="10" height="10" fill="hsl(0, 0%, 139%)">
+
+    <animate attributeName="x" from="250" to="140" values="250;140" dur="2s" repeatCount="indefinite"
+      begin="0.09498802320342392s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="y" from="-280" to="140" values="-280;140" dur="2s" repeatCount="indefinite"
+      begin="0.09498802320342392s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="fill-opacity" from="1" to="0" values="1;0" dur="2s" repeatCount="indefinite"
+      begin="0.09498802320342392s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+  </rect>
+  <rect x="-190" y="70" width="10" height="10" fill="hsl(0, 0%, 129%)">
+
+    <animate attributeName="x" from="-190" to="140" values="-190;140" dur="2s" repeatCount="indefinite"
+      begin="1.0556427136208133s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="y" from="70" to="140" values="70;140" dur="2s" repeatCount="indefinite"
+      begin="1.0556427136208133s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="fill-opacity" from="1" to="0" values="1;0" dur="2s" repeatCount="indefinite"
+      begin="1.0556427136208133s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+  </rect>
+  <rect x="230" y="390" width="10" height="10" fill="hsl(0, 0%, 135%)">
+
+    <animate attributeName="x" from="230" to="140" values="230;140" dur="2s" repeatCount="indefinite"
+      begin="0.7765983892616228s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="y" from="390" to="140" values="390;140" dur="2s" repeatCount="indefinite"
+      begin="0.7765983892616228s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="fill-opacity" from="1" to="0" values="1;0" dur="2s" repeatCount="indefinite"
+      begin="0.7765983892616228s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+  </rect>
+  <rect x="400" y="160" width="10" height="10" fill="hsl(0, 0%, 145%)">
+
+    <animate attributeName="x" from="400" to="140" values="400;140" dur="2s" repeatCount="indefinite"
+      begin="0.04843478314766614s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="y" from="160" to="140" values="160;140" dur="2s" repeatCount="indefinite"
+      begin="0.04843478314766614s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+    <animate attributeName="fill-opacity" from="1" to="0" values="1;0" dur="2s" repeatCount="indefinite"
+      begin="0.04843478314766614s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"></animate>
+
+  </rect>
+  <use href="#special" transform="translate(140,140)"></use>
+  <use href="#special" transform="scale(-1,1),translate(-150,140)"></use>
+</svg>
