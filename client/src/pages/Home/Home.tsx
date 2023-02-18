@@ -1,5 +1,6 @@
+import { BlackHoleIntro } from "../../components/home/BlackHoleIntro/BlackHoleIntro"
+import { GeneralInfo } from "../../components/home/GeneralInfo/GeneralInfo"
 import landingBackHole from "../../img/landingBlackHole.svg"
-
 export const Home = () => {
   return (
     <>
@@ -13,6 +14,8 @@ export const Home = () => {
       <div className="flex justify-center w-screen p-20">
         <button className="primaryBtn">MINT NOW</button>
       </div>
+      <BlackHoleIntro />
+      <GeneralInfo />
     </>
   )
 }
