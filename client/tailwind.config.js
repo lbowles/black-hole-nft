@@ -20,6 +20,9 @@ module.exports = {
         'gray-600': '#ADADAD',
         'gray-500': '#C7C7C7',
       },
+      width:{
+        96 : "22rem" // 352px
+      }
     },
   },
   plugins: [],
