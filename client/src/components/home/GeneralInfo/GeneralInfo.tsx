@@ -8,16 +8,16 @@ import { MergingAmountGraphic } from "../MergingAmountGraphic/MergingAmountGraph
 import { useState } from "react"
 
 const startingLevels = [
-  { startName: "Micro", endName: "Stellar", startImg: micro, endImg: stellar, amount: undefined },
-  { startName: "Stellar", endName: "Intermediate", startImg: stellar, endImg: intermediate, amount: undefined },
+  { startName: "MICRO", endName: "STELLAR", startImg: micro, endImg: stellar, amount: undefined },
+  { startName: "STELLAR", endName: "INTERMEDIATE", startImg: stellar, endImg: intermediate, amount: undefined },
   {
-    startName: "Intermediate",
-    endName: "Supermassive",
+    startName: "INTERMEDIATE",
+    endName: "SUPERMASSIVE",
     startImg: intermediate,
     endImg: supperMassive,
     amount: undefined,
   },
-  { startName: "Supermassive", endName: "Primordial", startImg: supperMassive, endImg: primordial, amount: undefined },
+  { startName: "SUPERMASSIVE", endName: "PRIMORDIAL", startImg: supperMassive, endImg: primordial, amount: undefined },
 ]
 
 type Ilevels = { startImg: string; endImg: string; startName: string; endName: string; amount?: number | undefined }[]
