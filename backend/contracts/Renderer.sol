@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
-import "./Trigonometry.sol";
 import "./Utilities.sol";
+import "./interfaces/BlackHole.sol";
 import "hardhat/console.sol";
 
 contract Renderer {
   // TODO: Store constants as strings too
-  uint256 constant PIXELS_PER_SIDE = 28;
+  uint256 public constant PIXELS_PER_SIDE = 28;
   uint256 constant PIXEL_SIZE = 10;
   uint256 constant CANVAS_SIZE = PIXELS_PER_SIDE * PIXEL_SIZE;
 
@@ -36,14 +36,7 @@ contract Renderer {
     COLOR_SCHEMES.push([230, 61, 24]);
   }
 
-  struct BlackHole {
-    uint256 tokenId;
-    uint256 level;
-    uint256 size;
-  }
-
   function getPixelSVG(
-    uint256 tokenId,
     uint256 pixelClass,
     uint8 x,
     uint8 y,
@@ -92,7 +85,7 @@ contract Renderer {
         if (distance > _blackHole.size && distance <= _blackHole.size + 3) {
           edgeSVG = string.concat(
             edgeSVG,
-            getPixelSVG(_blackHole.tokenId, uint256(classIndex), uint8(j), uint8(i), uint8(_blackHole.level))
+            getPixelSVG(uint256(classIndex), uint8(j), uint8(i), uint8(_blackHole.level))
           );
         }
       }
@@ -101,98 +94,10 @@ contract Renderer {
     return edgeSVG;
   }
 
-  // JavaScript:
-  // function getAnimatedStars(holeSize, level) {
-  //   // Noise
-  //   // TODO:
-  //   // [x] Start animated noise outside frame
-  //   // [x] Order brighter pixels on top of darker pixels
-  //   // [x] Speed up animation as it gets closer to center
-  //   // [x] Black part of black hole should be on top
-  //   const centerX = CANVAS_SIZE / 2 / PIXEL_SIZE
-  //   const centerY = centerX
-  //   const radius = holeSize + 6
-  //   let svg = ""
-  //   for (let i = 0; i < 10; i++) {
-  //     // x is a random number from -PIXELS_PER_SIDE to 2*PIXELS_PER_SIDE
-  //     let x = Math.floor(Math.random() * PIXELS_PER_SIDE * 3 - PIXELS_PER_SIDE)
-
-  //     const discriminant = radius ** 2 - (x - centerX) ** 2
-  //     let minY = -PIXELS_PER_SIDE
-  //     let maxY = 2 * PIXELS_PER_SIDE
-  //     if (discriminant > 0) {
-  //       // Bottom edge to bottom canvas
-  //       minY = Math.floor(Math.sqrt(discriminant) + centerY)
-  //       maxY = 2 * PIXELS_PER_SIDE
-
-  //       // Top canvas to top edge
-  //       if (Math.random() > 0.5) {
-  //         maxY = centerY * 2 - minY
-  //         minY = -PIXELS_PER_SIDE
-  //       }
-
-  //       // Randomly add perimiter glow
-  //       if (Math.random() > 0.2) {
-  //         const delay = Math.random() * 2
-  //         const fillColor = `hsl(${COLOR_SCHEMES[level * 3][0] - 10}, 50%, 20%)`
-  //         console.log(fillColor, COLOR_SCHEMES[level * 3][0])
-  //         const pixel = `<rect x="${x * PIXEL_SIZE}" y="${
-  //           (minY === 0 ? maxY + 1 : minY - 1) * PIXEL_SIZE
-  //         }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}">
-  //           <animate
-  //             attributeName="fill-opacity"
-  //             values="0;1;0"
-  //             dur="2s"
-  //             begin="${delay}"
-  //             repeatCount="indefinite" />
-  //           </rect>`
-  //         svg += pixel
-  //       }
-  //     }
-
-  //     // Select a random value between minY and maxY
-  //     x = x * PIXEL_SIZE
-  //     const y = Math.floor(Math.random() * (maxY - minY) + minY) * PIXEL_SIZE
-
-  //     const maxLightness = 200
-  //     const minLigtness = 15
-
-  //     const fillLightness = Math.floor(Math.random() * (maxLightness - minLigtness)) + minLigtness
-  //     const fillColor = `hsl(0, 0%, ${fillLightness}%)`
-
-  //     const animateDuration = 2 // Math.floor(((maxLightness - fillLightness) / maxLightness) ** 2 * 40 - 10) + 10
-  //     const animationOffset = Math.random() * 2
-
-  //     const animationCommon = `dur="${animateDuration}s" repeatCount="indefinite" begin="${animationOffset}s" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"`
-
-  //     const transformAnimation = `
-  //     <animate attributeName="x" from="${x}" to="${centerX * PIXEL_SIZE}"  values="${x};${
-  //       centerX * PIXEL_SIZE
-  //     }" ${animationCommon}/>
-
-  //     <animate attributeName="y" from="${y}" to="${centerY * PIXEL_SIZE}" values="${y};${
-  //       centerY * PIXEL_SIZE
-  //     }" ${animationCommon}/>
-
-  //     <animate attributeName="fill-opacity" from="1" to="0" values="1;0" ${animationCommon}/>
-  //     `
-
-  //     const pixel = `<rect x="${x}" y="${y}" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}">
-  //               ${transformAnimation}
-  //               </rect>`
-  //     svg += pixel
-  //   }
-
-  //   return svg
-  // }
-
-  // struct AnimationVariables {
-  //   ;
-  // }
-
   // Solidity: // TODO: REVERT here
   function getAnimatedStars(BlackHole memory _blackHole) public pure returns (string memory) {
     string memory svg = "";
+
     for (uint256 i = 0; i < 10; i++) {
       // x is a random number from -PIXELS_PER_SIDE to 2*PIXELS_PER_SIDE
       uint256 x = utils.randomRange(
@@ -203,12 +108,15 @@ contract Renderer {
       );
 
       uint256 radius = _blackHole.size + 6;
-      uint256 discriminant = radius * radius - (x - PIXELS_PER_SIDE / 2) * (x - PIXELS_PER_SIDE / 2);
+      int256 discriminant = int256(radius) *
+        int256(radius) -
+        (int256(x) - int256(PIXELS_PER_SIDE) / 2) *
+        (int256(x) - int256(PIXELS_PER_SIDE) / 2);
       uint256 minY = 0;
       uint256 maxY = PIXELS_PER_SIDE * 2;
       if (discriminant > 0) {
         // Bottom edge to bottom canvas
-        minY = utils.sqrt(discriminant) + PIXELS_PER_SIDE / 2;
+        minY = utils.sqrt(uint256(discriminant)) + PIXELS_PER_SIDE / 2;
         maxY = PIXELS_PER_SIDE * 2;
 
         // Top canvas to top edge
@@ -242,61 +150,61 @@ contract Renderer {
       );
 
       string memory animationCommon = string.concat(
-        "dur=",
+        'dur="',
         utils.uint2str(animateDuration),
-        "s repeatCount=indefinite begin=",
+        's" repeatCount="indefinite" begin="',
         utils.uint2str(animationOffset),
-        "s calcMode=spline keyTimes=0;1 keySplines=0.4 0 0.2 1"
+        's" calcMode="spline" keyTimes="0;1" keySplines="0.4,0,0.2,1"'
       );
 
       string memory transformAnimation = string.concat(
-        "<animate attributeName=x from=",
+        '<animate attributeName="x" from="',
         utils.uint2str(x),
-        " to=",
+        '" to="',
         utils.uint2str((PIXELS_PER_SIDE * PIXEL_SIZE) / 2),
-        " values=",
+        '" values="',
         utils.uint2str(x),
         ";",
         utils.uint2str((PIXELS_PER_SIDE * PIXEL_SIZE) / 2),
-        " ",
+        '" ',
         animationCommon,
         "/>"
       );
 
       transformAnimation = string.concat(
         transformAnimation,
-        "<animate attributeName=y from=",
+        '<animate attributeName="y" from="',
         utils.uint2str(y),
-        " to=",
+        '" to="',
         utils.uint2str((PIXELS_PER_SIDE * PIXEL_SIZE) / 2),
-        " values=",
+        '" values="',
         utils.uint2str(y),
         ";",
         utils.uint2str((PIXELS_PER_SIDE * PIXEL_SIZE) / 2),
-        " ",
+        '" ',
         animationCommon,
         "/>"
       );
 
       transformAnimation = string.concat(
         transformAnimation,
-        "<animate attributeName=fill-opacity from=1 to=0 values=1;0 ",
+        '<animate attributeName="fill-opacity" from="1" to="0" values="1;0" ',
         animationCommon,
         "/>"
       );
 
       string memory pixel = string.concat(
-        "<rect x=",
+        '<rect x="',
         utils.uint2str(x),
-        " y=",
+        '" y="',
         utils.uint2str(y),
-        " width=",
+        '" width="',
         utils.uint2str(PIXEL_SIZE),
-        " height=",
+        '" height="',
         utils.uint2str(PIXEL_SIZE),
-        " fill=",
+        '" fill="',
         fillColor,
-        ">",
+        '">',
         transformAnimation,
         "</rect>"
       );
@@ -308,7 +216,7 @@ contract Renderer {
 
   function getStaticBackground(BlackHole memory _blackHole) public pure returns (string memory) {
     string memory svg = "";
-    for (uint256 i = 0; i < 20; i++) {
+    for (uint256 i = 0; i < 30; i++) {
       uint256 x = utils.randomRange(
         _blackHole.tokenId,
         string.concat("staticX", utils.uint2str(i)),
@@ -438,7 +346,7 @@ contract Renderer {
       svg = string.concat(
         svg,
         '<use href="#special" transform="translate(',
-        utils.uint2str(CANVAS_SIZE / 2),
+        utils.uint2str(CANVAS_SIZE / 2 - PIXEL_SIZE),
         ",",
         utils.uint2str(CANVAS_SIZE / 2),
         ')" />',
@@ -460,10 +368,9 @@ contract Renderer {
     return svg;
   }
 
-  function renderSample(uint256 tokenId) public view returns (string memory) {
-    uint256 level = 1;
+  function renderSample(uint256 tokenId, uint256 level) public view returns (string memory) {
     uint256 size = PIXELS_PER_SIDE / 2 - (10 - level); // 5
-    BlackHole memory blackHole = BlackHole(tokenId, level, size);
+    BlackHole memory blackHole = BlackHole(tokenId, level, size, 1, "Micro");
     return render(blackHole);
   }
 }

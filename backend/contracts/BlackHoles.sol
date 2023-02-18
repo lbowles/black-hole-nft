@@ -6,12 +6,15 @@ import "erc721a/contracts/ERC721A.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "./Utilities.sol";
 import "./Renderer.sol";
+import "./interfaces/BlackHole.sol";
 import "svgnft/contracts/Base64.sol";
 
 contract BlackHoles is ERC721A, Ownable {
   uint256 public price;
   uint256 public maxSupply;
   uint256 public constant maxMintPerWallet = 20;
+
+  mapping(uint256 => uint256) public massesConsumed;
 
   Renderer public renderer;
 
@@ -53,31 +56,41 @@ contract BlackHoles is ERC721A, Ownable {
 
     string memory name = string(abi.encodePacked("BlackHole #", utils.uint2str(_tokenId)));
     string memory description = "Fully on-chain, procedurally generated, animated black holes.";
-    Renderer.BlackHole memory blackHole = renderer.kaleidoscopeForTokenId(_tokenId);
-    blackHole.hasHalo = _tokenId <= 50;
 
-    Renderer.ColorPalette memory palette = renderer.colorPaletteForKaleidescope(blackHole);
-    string memory svg = renderer.getKaleidoscopeSVG(blackHole, palette);
+    uint256 mass = massesConsumed[_tokenId] + 1;
+    uint256 level = 0;
+    // TODO: Refactor this into upgradeable contract, dependent on total supply
+    if (mass < 4) {
+      level = 0;
+    } else if (mass < 8) {
+      level = 1;
+    } else if (mass < 16) {
+      level = 2;
+    } else if (mass < 32) {
+      level = 3;
+    } else {
+      level = 4;
+    }
 
-    // string memory attributes = string.concat(
-    //   '"attributes": [',
-    //   '{"trait_type": "Mirrors", "value": ',
-    //   utils.uint2str(blackHole.repetitions),
-    //   "},",
-    //   '{"trait_type": "Outside Artifacts", "value": ',
-    //   utils.uint2str(blackHole.numOutsideArtifacts),
-    //   "},",
-    //   '{"trait_type": "Inside Artifacts", "value": ',
-    //   utils.uint2str(blackHole.numInsideArtifacts),
-    //   "},",
-    //   '{"trait_type": "Gradient", "value": "',
-    //   blackHole.hasGradient ? "Yes" : "No",
-    //   '"},',
-    //   '{"trait_type": "Primary Color", "value": "',
-    //   utils.getHueName(palette.primaryHue),
-    //   '"}'
-    // );
-    // attributes = string.concat(attributes, "]");
+    BlackHole memory blackHole = blackHoleForTokenId(_tokenId);
+
+    string memory svg = renderer.getBlackHoleSVG(blackHole);
+
+    string memory attributes = string.concat(
+      "[",
+      '{"trait_type": "Level", "value": ',
+      utils.uint2str(blackHole.level),
+      "},",
+      '{"trait_type": "Size", "value": ',
+      utils.uint2str(blackHole.size),
+      "},",
+      '{"trait_type": "Name", "value": "',
+      blackHole.name,
+      '"},',
+      '{"trait_type": "Mass", "value": ',
+      utils.uint2str(blackHole.mass),
+      "}]"
+    );
 
     string memory json = string(
       abi.encodePacked(
@@ -86,13 +99,58 @@ contract BlackHoles is ERC721A, Ownable {
         '","description":"',
         description,
         '",',
-        '"attributes": []' // attributes
+        '"attributes": ',
+        attributes, // attributes
         ', "image": "data:image/svg+xml;base64,',
         Base64.encode(bytes(svg)),
         '"}'
       )
     );
     return string(abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json))));
+  }
+
+  function blackHoleForTokenId(uint256 _tokenId) public view returns (BlackHole memory) {
+    uint256 mass = massesConsumed[_tokenId] + 1;
+    uint256 level = 0;
+    // TODO: Refactor this into upgradeable contract, dependent on total supply
+    if (mass < 4) {
+      level = 0;
+    } else if (mass < 8) {
+      level = 1;
+    } else if (mass < 16) {
+      level = 2;
+    } else if (mass < 32) {
+      level = 3;
+    } else {
+      level = 4;
+    }
+
+    string memory name = nameForBlackHoleLevel(level);
+
+    return
+      BlackHole({
+        tokenId: _tokenId,
+        level: level,
+        size: renderer.PIXELS_PER_SIDE() / 2 - (10 - level),
+        mass: mass,
+        name: name
+      });
+  }
+
+  function nameForBlackHoleLevel(uint256 _level) public pure returns (string memory) {
+    if (_level == 0) {
+      return "Micro";
+    } else if (_level == 1) {
+      return "Stellar";
+    } else if (_level == 2) {
+      return "Intermediate";
+    } else if (_level == 3) {
+      return "Supermassive";
+    } else if (_level == 4) {
+      return "Primordial";
+    } else {
+      return "Unknown";
+    }
   }
 
   /**

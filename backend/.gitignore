@@ -15,3 +15,5 @@ deployments/localhost
 .DS_Store
 
 .gas-used
+
+solstat_report.md
