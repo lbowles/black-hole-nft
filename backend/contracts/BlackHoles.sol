@@ -175,7 +175,7 @@ contract BlackHoles is ERC721A, Ownable {
    * @param _recipients List of recipients to receive the airdrop.
    * @param _quantity Quantity of tokens to airdrop to each recipient.
    */
-  function airdrop(address[] memory _recipients, uint256 _quantity) external payable onlyOwner {
+  function airdrop(address[] calldata _recipients, uint256 _quantity) external payable onlyOwner {
     require(totalSupply() + _quantity * _recipients.length <= maxSupply, "Exceeds max supply");
     for (uint256 i = 0; i < _recipients.length; i++) {
       _mint(_recipients[i], _quantity);

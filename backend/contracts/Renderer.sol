@@ -14,36 +14,39 @@ contract Renderer {
   string constant SPECIAL_STRING =
     '<g id="special"><path fill="#182463" d="M120 0h10v10h-10V0Z"/><path fill="#BAAEF9" d="M110 0h10v10h-10z"/><path fill="#182463" d="M130 10h10v10h-10V10Z"/><path fill="#182462" d="M90 10H0v10h90V10Z"/><path fill="#E3C8FF" d="M140 20H0v10h140z"/><path fill="#182462" d="M40 40H0v10h40V40Z"/><path fill="#BAAEF9" d="M70 30H0v10h70zm40-20h20v10h-20z"/><path fill="#E2C7FF" d="M90 20h20V10H90v10Z"/><path fill="#182462" d="M130 30H70v10h60V30Z"/></g>';
 
-  uint256[3][] COLOR_SCHEMES;
+  bytes constant COLOR_SCHEMES =
+    hex"02305a05000f05a03700005a01402d05a05001905a03700505a01403705a05002305a03700f05a01410e05a0500fa05a0370e605a01410d0640590fa0560530e603d0180";
 
-  constructor() {
-    // Initialize color schemes
-    // TODO: This accounts for 30% of deployment gas
-    COLOR_SCHEMES.push([35, 90, 80]);
-    COLOR_SCHEMES.push([15, 90, 55]);
-    COLOR_SCHEMES.push([0, 90, 20]);
-    COLOR_SCHEMES.push([45, 90, 80]);
-    COLOR_SCHEMES.push([25, 90, 55]);
-    COLOR_SCHEMES.push([5, 90, 20]);
-    COLOR_SCHEMES.push([55, 90, 80]);
-    COLOR_SCHEMES.push([35, 90, 55]);
-    COLOR_SCHEMES.push([15, 90, 20]);
-    COLOR_SCHEMES.push([270, 90, 80]);
-    COLOR_SCHEMES.push([250, 90, 55]);
-    COLOR_SCHEMES.push([230, 90, 20]);
-    COLOR_SCHEMES.push([269, 100, 89]);
-    COLOR_SCHEMES.push([250, 86, 83]);
-    COLOR_SCHEMES.push([230, 61, 24]);
-  }
+  constructor() {}
 
   function getPixelSVG(
     uint256 pixelClass,
     uint8 x,
     uint8 y,
     uint8 level
-  ) public view returns (string memory) {
-    uint256[3] memory colorScheme = COLOR_SCHEMES[level * 3 + pixelClass - 1];
-    string memory fillColor = pixelClass == 0 ? "black" : utils.getHslString(colorScheme);
+  ) public pure returns (string memory) {
+    uint256 encoded;
+
+    if (level <= 1) {
+      encoded = utils.sliceUint(COLOR_SCHEMES, 0);
+    } else if (level <= 3) {
+      encoded = utils.sliceUint(COLOR_SCHEMES, 27);
+    } else if (level <= 4) {
+      encoded = utils.sliceUint(COLOR_SCHEMES, 36);
+    }
+
+    if (level == 4) {
+      encoded = encoded >> 4;
+    } else if (level % 2 == 0) {
+      encoded = encoded >> 148;
+    } else {
+      encoded = encoded >> 40;
+    }
+
+    // uint256 hslPacked = (encoded >> ((3 - 1) * 9 * 8));
+    uint256 hslPacked = (encoded >> (72 - 12 * 3 * (pixelClass - 1))); // first color, next 3 nibbles is next color
+
+    string memory fillColor = pixelClass == 0 ? "black" : utils.getHslString(hslPacked);
 
     return
       string(
@@ -58,6 +61,12 @@ contract Renderer {
           utils.uint2str(PIXEL_SIZE),
           '" fill="',
           fillColor,
+          // '" misc="',
+          // utils.uint2str(hslPacked),
+          // '" encoded="',
+          // utils.uint2str(encoded),
+          // '" pixelClass="',
+          // utils.uint2str(pixelClass),
           '"/>'
         )
       );
@@ -68,7 +77,7 @@ contract Renderer {
     uint256 renderStartIndex;
   }
 
-  function getQuarterCanvas(BlackHole memory _blackHole) public view returns (string memory) {
+  function getQuarterCanvas(BlackHole calldata _blackHole) public pure returns (string memory) {
     QuarterCanvasVariables memory vars;
 
     string memory edgeSVG = "";
@@ -94,8 +103,7 @@ contract Renderer {
     return edgeSVG;
   }
 
-  // Solidity: // TODO: REVERT here
-  function getAnimatedStars(BlackHole memory _blackHole) public pure returns (string memory) {
+  function getAnimatedStars(BlackHole calldata _blackHole) public pure returns (string memory) {
     string memory svg = "";
 
     for (uint256 i = 0; i < 10; i++) {
@@ -146,14 +154,14 @@ contract Renderer {
         _blackHole.tokenId,
         string.concat("animationOffset", utils.uint2str(i)),
         0,
-        2
+        2000
       );
 
       string memory animationCommon = string.concat(
         'dur="',
         utils.uint2str(animateDuration),
         's" repeatCount="indefinite" begin="',
-        utils.uint2str(animationOffset),
+        utils.uint2floatstr(animationOffset, 3),
         's" calcMode="spline" keyTimes="0;1" keySplines="0.4,0,0.2,1"'
       );
 
@@ -214,7 +222,7 @@ contract Renderer {
     return svg;
   }
 
-  function getStaticBackground(BlackHole memory _blackHole) public pure returns (string memory) {
+  function getStaticBackground(BlackHole calldata _blackHole) public pure returns (string memory) {
     string memory svg = "";
     for (uint256 i = 0; i < 30; i++) {
       uint256 x = utils.randomRange(
@@ -257,7 +265,7 @@ contract Renderer {
     return svg;
   }
 
-  function getBlackHoleSVG(BlackHole memory _blackHole) public view returns (string memory) {
+  function getBlackHoleSVG(BlackHole calldata _blackHole) public pure returns (string memory) {
     string memory edgeSvg = getQuarterCanvas(_blackHole);
 
     string memory svg = string.concat(
@@ -363,14 +371,14 @@ contract Renderer {
     return svg;
   }
 
-  function render(BlackHole memory blackHole) public view returns (string memory) {
-    string memory svg = getBlackHoleSVG(blackHole);
-    return svg;
-  }
+  // function render(BlackHole calldata blackHole) public pure returns (string memory) {
+  //   string memory svg = getBlackHoleSVG(blackHole);
+  //   return svg;
+  // }
 
-  function renderSample(uint256 tokenId, uint256 level) public view returns (string memory) {
-    uint256 size = PIXELS_PER_SIDE / 2 - (10 - level); // 5
-    BlackHole memory blackHole = BlackHole(tokenId, level, size, 1, "Micro");
-    return render(blackHole);
-  }
+  // function renderSample(uint256 tokenId, uint256 level) public pure returns (string memory) {
+  //   uint256 size = PIXELS_PER_SIDE / 2 - (10 - level); // 5
+  //   BlackHole calldata blackHole = BlackHole(tokenId, level, size, 1, "Micro");
+  //   return render(blackHole);
+  // }
 }

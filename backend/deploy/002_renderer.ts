@@ -8,13 +8,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await getNamedAccounts()
 
   const utilities = await deployments.get("utils")
-  const trigonometry = await deployments.get("Trigonometry")
 
   await deploy("Renderer", {
     from: deployer,
     libraries: {
       utils: utilities.address,
-      Trigonometry: trigonometry.address,
     },
     log: true,
   })
