@@ -159,22 +159,22 @@
               minY = -PIXELS_PER_SIDE
             }
 
-            // Randomly add perimiter glow
-            if (Math.random() > 0.2) {
-              const delay = Math.random() * 2
-              const fillColor = `hsl(${COLOR_SCHEMES[level * 3][0] - 10}, 50%, 20%)`
-              const pixel = `<rect x="${x * PIXEL_SIZE}" y="${
-                (minY === 0 ? maxY + 1 : minY - 1) * PIXEL_SIZE
-              }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}">
-                <animate
-                  attributeName="fill-opacity"
-                  values="0;1;0"
-                  dur="2s"
-                  begin="${delay}"
-                  repeatCount="indefinite" />
-                </rect>`
-              svg += pixel
-            }
+            // // Randomly add perimiter glow
+            // if (Math.random() > 0.2) {
+            //   const delay = Math.random() * 2
+            //   const fillColor = `hsl(${COLOR_SCHEMES[level * 3][0] - 10}, 50%, 20%)`
+            //   const pixel = `<rect x="${x * PIXEL_SIZE}" y="${
+            //     (minY === 0 ? maxY + 1 : minY - 1) * PIXEL_SIZE
+            //   }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}">
+            //     <animate
+            //       attributeName="fill-opacity"
+            //       values="0;1;0"
+            //       dur="2s"
+            //       begin="${delay}"
+            //       repeatCount="indefinite" />
+            //     </rect>`
+            //   svg += pixel
+            // }
           }
 
           // Select a random value between minY and maxY
