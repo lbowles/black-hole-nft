@@ -225,11 +225,12 @@ describe("BlackHoles", function () {
     await ethers.provider.send("evm_mine", [])
 
     /* Merge */
-    expect(await blackHoles.totalMinted()).to.equal(11_000)
+    const totalMinted = (await blackHoles.totalMinted()).toNumber()
+    expect(totalMinted).to.equal(11_000)
 
     const baseUpgradeMass = (await blackHoles.getBaseUpgradeMass()).toNumber()
-
-    expect(baseUpgradeMass).to.equal(3)
+    const maxLevelTokenCap = (await blackHoles.MAX_SUPPLY_OF_INTERSTELLAR()).toNumber()
+    expect(baseUpgradeMass).to.equal(Math.floor(totalMinted / maxLevelTokenCap / 2 ** 5))
 
     await expect(blackHoles.merge([1, 2, 3, 4])).to.be.revertedWith("Merging not enabled")
 
@@ -248,15 +249,19 @@ describe("BlackHoles", function () {
 
     let tokenMetadata = await blackHoles.blackHoleForTokenId(1)
     expect(tokenMetadata.mass).to.equal(4)
-    expect(tokenMetadata.level).to.equal(1)
 
     let lastTokenId = 4
 
-    for (let level = 2; level <= 4; level++) {
+    let totalGas = BigNumber.from(0)
+
+    for (let level = 1; level <= 4; level++) {
       // Burn to next level
       // Array of numbers from 5 to 12
       const mergeIds = Array.from(Array(baseUpgradeMass * 2 ** (level - 1)).keys()).map((i) => i + lastTokenId + 1)
-      expect(await blackHoles.merge([1, ...mergeIds]))
+      const tx = await blackHoles.merge([1, ...mergeIds])
+      const receipt = await tx.wait()
+
+      totalGas = totalGas.add(receipt.gasUsed)
 
       tokenMetadata = await blackHoles.blackHoleForTokenId(1)
       console.log(tokenMetadata)
@@ -264,5 +269,7 @@ describe("BlackHoles", function () {
 
       lastTokenId = mergeIds[mergeIds.length - 1]
     }
+
+    console.log("Total gas used:", totalGas.toString())
   })
 })

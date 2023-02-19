@@ -15,7 +15,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
 
   uint256 public immutable TIMED_SALE_THRESHOLD = 1000;
   uint256 public immutable MAX_LEVEL = 4;
-  uint256 public immutable MAX_SUPPLY_OF_INTERSTELLAR = 100;
+  uint256 public immutable MAX_SUPPLY_OF_INTERSTELLAR = 42;
 
   uint256 public price;
   uint256 public timedSalePrice;
