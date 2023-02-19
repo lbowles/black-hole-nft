@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { ethers } from "ethers"
-import micro from "../../img/blackHoles/micro.svg"
+import micro from "../../img/blackHoles/microAnimated.svg"
 import blockSpinner from "../../img/blockSpinner.svg"
 import { Countdown } from "../../components/Countdown/Countdown"
 
@@ -72,6 +72,7 @@ export const Mint = ({
                 <button
                   className="text-gray-500 text-5xl hover:text-white"
                   onClick={() => handleMintAmountChange(Math.max(1, mintAmount - 1))}
+                  disabled={mintBtnDisabled}
                 >
                   -
                 </button>
@@ -88,6 +89,7 @@ export const Mint = ({
                   {/* TODO: rounding  */}
                 </button>
                 <button
+                  disabled={mintBtnDisabled}
                   className="text-gray-500 text-5xl hover:text-white"
                   onClick={() => handleMintAmountChange(mintAmount + 1)}
                 >
