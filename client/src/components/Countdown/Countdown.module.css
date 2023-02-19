@@ -1,0 +1,5 @@
+.notificationCard {
+  border: 1px var(--accent2) solid;
+  border-top: none;
+  color: var(--accent2);
+}

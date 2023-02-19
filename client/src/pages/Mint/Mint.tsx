@@ -1,19 +1,22 @@
 import { useState } from "react"
+import { ethers } from "ethers"
 import micro from "../../img/blackHoles/micro.svg"
 
 //Pull prices
-const mintPrice = 0.003
+const preOpenMintPrice = ethers.utils.parseEther("0.003")
+const openMintPrice = ethers.utils.parseEther("0.005")
 const mintEnded = false
 const openMintStarted = false
+const startingPrice = openMintStarted ? openMintPrice : preOpenMintPrice
 
 export const Mint = () => {
   const [mintAmount, setMintAmount] = useState(1)
+  const [totalPrice, setTotalPrice] = useState(startingPrice.mul(mintAmount))
   const [mintEnabled, setMintEnabled] = useState(true)
 
-  const updateMintAmount = (amount: number) => {
-    if (mintAmount + amount >= 1) {
-      setMintAmount(mintAmount + amount)
-    }
+  const handleMintAmountChange = (amount: number) => {
+    setMintAmount(amount)
+    setTotalPrice(startingPrice.mul(amount))
   }
 
   return (
@@ -52,14 +55,20 @@ export const Mint = () => {
                 </>
               )}
               <div className="flex justify-center mt-6">
-                <button className="text-gray-500 text-5xl hover:text-white" onClick={() => updateMintAmount(-1)}>
+                <button
+                  className="text-gray-500 text-5xl hover:text-white"
+                  onClick={() => handleMintAmountChange(Math.max(1, mintAmount - 1))}
+                >
                   -
                 </button>
                 <button className="primaryBtn mx-2">
                   {/* TODO: rounding  */}
-                  MINT {mintAmount} FOR {(mintAmount * mintPrice).toFixed(3)} ETH
+                  MINT {mintAmount} FOR {ethers.utils.formatEther(totalPrice)} ETH
                 </button>
-                <button className="text-gray-500 text-5xl hover:text-white" onClick={() => updateMintAmount(1)}>
+                <button
+                  className="text-gray-500 text-5xl hover:text-white"
+                  onClick={() => handleMintAmountChange(mintAmount + 1)}
+                >
                   +
                 </button>
               </div>
