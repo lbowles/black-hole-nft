@@ -11,6 +11,7 @@ import * as allChains from "@wagmi/chains"
 import deployments from "./deployments.json"
 import { Footer } from "./components/Footer/Footer"
 import { Mint } from "./pages/Mint/Mint"
+import { Burn } from "./pages/Burn /Burn"
 
 // Loop over all chains and check if they match deployments.chainId
 const deployedChain = Object.values(allChains).filter((chain) => {
@@ -75,7 +76,7 @@ function App() {
                 />
               }
             />
-            <Route path="/burn" element={<div>burn</div>} />
+            <Route path="/burn" element={<Burn />} />
           </Routes>
         </div>
         <Footer />

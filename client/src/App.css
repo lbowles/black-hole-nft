@@ -27,3 +27,15 @@ button:disabled {
 button:disabled:hover {
   color: #6f6f6f;
 }
+
+.secondaryBtn {
+  background: white;
+  border: none;
+  color: black;
+  padding-left: 25px;
+  padding-right: 25px;
+  transition: 0.15s ease-in-out;
+}
+.secondaryBtn:hover {
+  color: rgb(47, 47, 47);
+}
