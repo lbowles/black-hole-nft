@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { expect } from "chai"
-import { BigNumber } from "ethers"
+import { BaseContract, BigNumber } from "ethers"
 import { XMLParser } from "fast-xml-parser"
 import { deployments, ethers } from "hardhat"
 import { BlackHoles, BlackHoles__factory } from "../types"
@@ -9,6 +9,7 @@ describe("BlackHoles", function () {
   let signers: SignerWithAddress[]
   let blackHoles: BlackHoles
   let mintPrice: BigNumber
+  let threshold: BigNumber
 
   beforeEach(async function () {
     await ethers.provider.send("evm_setAutomine", [true])
@@ -16,11 +17,12 @@ describe("BlackHoles", function () {
     signers = await ethers.getSigners()
     const BlackHoles = await deployments.get("BlackHoles")
     blackHoles = BlackHoles__factory.connect(BlackHoles.address, signers[0]) as BlackHoles
-    mintPrice = await blackHoles.price()
+    mintPrice = await blackHoles.getPrice()
+    threshold = await blackHoles.TIMED_SALE_THRESHOLD()
   })
 
   it("Should have the correct price set in the constructor", async function () {
-    expect(await blackHoles.price()).to.equal(ethers.utils.parseEther("0.01"))
+    expect(await blackHoles.price()).to.equal(ethers.utils.parseEther("0.003"))
   })
 
   it("Should mint a new NFT and assign it to the caller", async function () {
@@ -38,10 +40,6 @@ describe("BlackHoles", function () {
     expect(await blackHoles.totalSupply()).to.equal(initialSupply.add(20))
 
     initialSupply = await blackHoles.totalSupply()
-  })
-
-  it("Should not allow minting more NFTs than the max supply", async function () {
-    await expect(blackHoles.mint(100001, { value: mintPrice.mul("100001") })).to.be.revertedWith("Exceeds max supply")
   })
 
   it("Should return the correct token URI for a given token ID", async function () {
@@ -132,10 +130,139 @@ describe("BlackHoles", function () {
       .and.gt(initialBalance.sub(mintPrice.mul(10)))
   })
 
-  // it("Should not allow minting more than the max per wallet", async function () {
-  //   const maxPerWallet = await blackHoles.maxMintPerWallet()
-  //   console.log(maxPerWallet.toString())
-  //   await blackHoles.mint(maxPerWallet.sub(5), { value: mintPrice.mul(maxPerWallet.sub(5)) })
-  //   await expect(blackHoles.mint(6, { value: mintPrice.mul(6) })).to.be.revertedWith("Exceeds max quantity")
-  // })
+  it("Should start timed sale once the threshold is reached", async function () {
+    // Mint state is OPEN (0) at the start
+    expect(await blackHoles.getMintState()).to.equal(0)
+
+    // Price should be normal price
+    expect(await blackHoles.getPrice()).to.equal(mintPrice)
+
+    expect(await blackHoles.mint(threshold, { value: mintPrice.mul(1000) })).to.emit(blackHoles, "TimedSaleStarted")
+
+    // Mint state is TIMED_SALE (1) after threshold is reached
+    expect(await blackHoles.getMintState()).to.equal(1)
+
+    // Price should change to timed sale price
+    expect(await blackHoles.getPrice()).to.equal(await blackHoles.timedSalePrice())
+  })
+
+  it("Should mint in timed sale", async function () {
+    // Trigger timed sale
+    mintPrice = await blackHoles.getPrice()
+    expect(await blackHoles.connect(signers[1]).mint(threshold, { value: mintPrice.mul(threshold) })).to.emit(
+      blackHoles,
+      "TimedSaleStarted",
+    )
+
+    // Mint in timed sale
+    const initialSupply = await blackHoles.totalSupply()
+
+    // Get new price
+    mintPrice = await blackHoles.getPrice()
+
+    // Mint
+    expect(await blackHoles.mint(1, { value: mintPrice }))
+      .to.emit(blackHoles, "Transfer")
+      .withArgs(ethers.constants.AddressZero, signers[0].address, 1)
+
+    // Check if supply has increased
+    expect(await blackHoles.totalSupply()).to.equal(initialSupply.add(1))
+
+    // Check if recipient's balance has increased
+    expect(await blackHoles.balanceOf(signers[0].address)).to.equal(1)
+
+    // Progress time by 24 hours
+    await ethers.provider.send("evm_increaseTime", [24 * 60 * 60])
+    await ethers.provider.send("evm_mine", [])
+
+    await expect(blackHoles.mint(1, { value: mintPrice })).to.be.revertedWith("Mint is closed")
+  })
+
+  it("Should mint the correct amount when crossing the threshold", async function () {
+    // Mint up to just before timed sale
+    let mintQuantity = threshold.sub(5)
+    mintPrice = await blackHoles.getPrice()
+    expect(await blackHoles.connect(signers[1]).mint(mintQuantity, { value: mintPrice.mul(mintQuantity) })).to.emit(
+      blackHoles,
+      "TimedSaleStarted",
+    )
+
+    // Mint mint just over threshold
+    mintQuantity = BigNumber.from(7)
+
+    const initialBalance = await signers[0].getBalance()
+
+    // Try to mint 7
+    const tx = await blackHoles.mint(mintQuantity, { value: mintPrice.mul(mintQuantity) })
+    const receipt = await tx.wait()
+
+    // Expect to receive 6 due to higher price
+    expect(receipt.events?.filter((event) => event.event === "Transfer").length).to.equal(6)
+
+    // Check refund amount
+    const finalBalance = await signers[0].getBalance()
+    const newMintPrice = await blackHoles.getPrice()
+    expect(finalBalance).to.be.eq(
+      initialBalance
+        .sub(mintPrice.mul(5).add(newMintPrice.mul(1))) // Mint amount
+        .sub(receipt.effectiveGasPrice.mul(receipt.gasUsed)), // Gas
+    )
+  })
+
+  it.only("Should merge tokens", async function () {
+    /* Complete sale (mint 11,000 tokens) */
+
+    // Mint in threshold sale
+    mintPrice = await blackHoles.getPrice()
+    await blackHoles.mint(threshold, { value: mintPrice.mul(threshold) })
+
+    // Mint in timed sale
+    mintPrice = await blackHoles.getPrice()
+    await blackHoles.mint(threshold.mul(10), { value: mintPrice.mul(threshold.mul(10)) })
+
+    // Progress time by 24 hours
+    await ethers.provider.send("evm_increaseTime", [24 * 60 * 60])
+    await ethers.provider.send("evm_mine", [])
+
+    /* Merge */
+    expect(await blackHoles.totalMinted()).to.equal(11_000)
+
+    const baseUpgradeMass = (await blackHoles.getBaseUpgradeMass()).toNumber()
+
+    expect(baseUpgradeMass).to.equal(3)
+
+    await expect(blackHoles.merge([1, 2, 3, 4])).to.be.revertedWith("Merging not enabled")
+
+    await blackHoles.setMergingEnabled(true)
+
+    // Update correct token's metadata and burn the right tokens
+    expect(await blackHoles.merge([1, 2, 3, 4]))
+      .to.emit(blackHoles, "MetadataUpdate")
+      .withArgs(1)
+      .and.to.emit(blackHoles, "Transfer")
+      .withArgs(2, ethers.constants.AddressZero, signers[0].address)
+      .and.to.emit(blackHoles, "Transfer")
+      .withArgs(3, ethers.constants.AddressZero, signers[0].address)
+      .and.to.emit(blackHoles, "Transfer")
+      .withArgs(4, ethers.constants.AddressZero, signers[0].address)
+
+    let tokenMetadata = await blackHoles.blackHoleForTokenId(1)
+    expect(tokenMetadata.mass).to.equal(4)
+    expect(tokenMetadata.level).to.equal(1)
+
+    let lastTokenId = 4
+
+    for (let level = 2; level <= 4; level++) {
+      // Burn to next level
+      // Array of numbers from 5 to 12
+      const mergeIds = Array.from(Array(baseUpgradeMass * 2 ** (level - 1)).keys()).map((i) => i + lastTokenId + 1)
+      expect(await blackHoles.merge([1, ...mergeIds]))
+
+      tokenMetadata = await blackHoles.blackHoleForTokenId(1)
+      console.log(tokenMetadata)
+      expect(tokenMetadata.level).to.equal(level)
+
+      lastTokenId = mergeIds[mergeIds.length - 1]
+    }
+  })
 })

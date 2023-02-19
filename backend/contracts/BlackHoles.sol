@@ -15,7 +15,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
 
   uint256 public immutable TIMED_SALE_THRESHOLD = 1000;
   uint256 public immutable MAX_LEVEL = 4;
-  uint256 public immutable MAX_SUPPLY_OF_INTERSTELLAR = 4;
+  uint256 public immutable MAX_SUPPLY_OF_INTERSTELLAR = 100;
 
   uint256 public price;
   uint256 public timedSalePrice;
@@ -67,6 +67,14 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
       return timedSalePrice;
     } else {
       return price;
+    }
+  }
+
+  function getPriceForSupply(uint256 _supply) public view returns (uint256) {
+    if (_supply < TIMED_SALE_THRESHOLD) {
+      return price;
+    } else {
+      return timedSalePrice;
     }
   }
 
@@ -132,23 +140,8 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
    * @return BlackHole Structured representation of the token.
    */
   function blackHoleForTokenId(uint256 _tokenId) public view returns (BlackHole memory) {
-    uint256 mass = massesConsumed[_tokenId] + 1;
-    uint256 level = 0;
-
-    uint256 baseUpgradeMass = _totalMinted() / MAX_SUPPLY_OF_INTERSTELLAR / 2**MAX_LEVEL;
-
-    if (mass < baseUpgradeMass) {
-      level = 0;
-    } else if (mass < baseUpgradeMass * 2) {
-      level = 1;
-    } else if (mass < baseUpgradeMass * 4) {
-      level = 2;
-    } else if (mass < baseUpgradeMass * 8) {
-      level = 3;
-    } else {
-      level = 4;
-    }
-
+    uint256 mass = massForTokenId(_tokenId);
+    uint256 level = levelForMass(mass);
     string memory name = nameForBlackHoleLevel(level);
 
     return
@@ -159,6 +152,30 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
         mass: mass,
         name: name
       });
+  }
+
+  function levelForMass(uint256 _mass) public view returns (uint256) {
+    uint256 baseUpgradeMass = getBaseUpgradeMass();
+
+    if (_mass < baseUpgradeMass) {
+      return 0;
+    } else if (_mass < baseUpgradeMass * 2) {
+      return 1;
+    } else if (_mass < baseUpgradeMass * 4) {
+      return 2;
+    } else if (_mass < baseUpgradeMass * 8) {
+      return 3;
+    } else {
+      return 4;
+    }
+  }
+
+  function getBaseUpgradeMass() public view returns (uint256) {
+    return _totalMinted() / MAX_SUPPLY_OF_INTERSTELLAR / 2**(MAX_LEVEL + 1);
+  }
+
+  function massForTokenId(uint256 _tokenId) public view returns (uint256) {
+    return massesConsumed[_tokenId] + 1;
   }
 
   /**
@@ -183,26 +200,49 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
   }
 
   /**
-   * @notice Mints new tokens for the caller.
+   * @notice Mints new tokens for the caller. If the caller
+   * mints tokens across the TIMED_SALE_THRESHOLD, it will
+   * mint as many as it can with the given amount of ETH.
    * @param _quantity Quantity of tokens to mint.
    */
   function mint(uint256 _quantity) external payable {
     uint256 currentPrice = getPrice();
-    uint256 cost = currentPrice * _quantity;
-    require(msg.value >= cost, "Insufficient fee");
-    require(getMintState() != MintState.CLOSED, "Mint is closed");
+    uint256 supplyBeforeMint = _totalMinted();
+    MintState mintState = getMintState();
+    require(mintState != MintState.CLOSED, "Mint is closed");
 
-    // Timed sale logic
-    if (timedSaleEndTimestamp == 0 && _totalMinted() + _quantity >= 1000) {
+    uint256 supplyAfterMint = supplyBeforeMint + _quantity;
+    uint256 cost = currentPrice * _quantity;
+
+    // Handle case where the mint crosses the timed sale threshold
+    if (mintState == MintState.OPEN && supplyAfterMint >= TIMED_SALE_THRESHOLD) {
+      uint256 quantityAtNewPrice = supplyAfterMint - TIMED_SALE_THRESHOLD;
+
+      // Cost for tokens at old price
+      uint256 quantityAtOldPrice = _quantity - quantityAtNewPrice;
+      cost = quantityAtOldPrice * currentPrice;
+
+      // Number of tokens that can be minted with the difference
+      quantityAtNewPrice = (msg.value - cost) / timedSalePrice;
+
+      // Add cost of tokens at new price
+      cost += quantityAtNewPrice * timedSalePrice;
+
+      // Update quantity to mint
+      _quantity = quantityAtOldPrice + quantityAtNewPrice;
+
+      // Start timed sale
       timedSaleEndTimestamp = block.timestamp + 24 hours;
       emit TimedSaleStarted();
     }
+
+    require(msg.value >= cost, "Insufficient fee");
 
     _mint(msg.sender, _quantity);
 
     // Refund any extra ETH sent
     if (msg.value > cost) {
-      (bool status, ) = payable(msg.sender).call{value: msg.value - currentPrice * _quantity}("");
+      (bool status, ) = payable(msg.sender).call{value: msg.value - cost}("");
       require(status, "Refund failed");
     }
   }
@@ -231,7 +271,6 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
    */
   function getMintState() public view returns (MintState) {
     uint256 supply = _totalMinted();
-
     if (supply < TIMED_SALE_THRESHOLD) {
       return MintState.OPEN;
     } else if (block.timestamp < timedSaleEndTimestamp) {
@@ -253,18 +292,26 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
 
     uint256 targetId = tokens[0];
 
+    require(ownerOf(tokens[0]) == msg.sender, "Must own all tokens (target)");
+
     uint256 sum;
-    for (uint256 i = 0; i < tokens.length; i++) {
-      require(ownerOf(tokens[i]) == msg.sender, "Must own all tokens");
-      if (i > 0) {
-        sum = sum + massesConsumed[tokens[i]];
-        _burn(tokens[i]);
-      }
+    for (uint256 i = 1; i < tokens.length; i++) {
+      require(ownerOf(tokens[i]) == msg.sender, "Must own all tokens (burn)");
+      sum = sum + massForTokenId(tokens[i]);
+      _burn(tokens[i]);
     }
 
-    massesConsumed[targetId] = massesConsumed[targetId] + sum;
+    massesConsumed[targetId] += sum;
 
     emit MetadataUpdate(targetId);
+  }
+
+  function totalMinted() external view returns (uint256) {
+    return _totalMinted();
+  }
+
+  function totalBurned() external view returns (uint256) {
+    return _totalBurned();
   }
 
   function _startTokenId() internal view virtual override returns (uint256) {
