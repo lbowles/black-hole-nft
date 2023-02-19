@@ -9,6 +9,7 @@ import intermediateAnimated from "../../img/blackHoles/intermediateAnimated.svg"
 import supermassiveAnimated from "../../img/blackHoles/supermassiveAnimated.svg"
 import primordialAnimated from "../../img/blackHoles/primordialAnimated.svg"
 import dropdown from "../../img/dropdown.svg"
+import blockSpinner from "../../img/blockSpinner.svg"
 import { useEffect, useState } from "react"
 
 //take in as param
@@ -59,6 +60,8 @@ export const Burn = () => {
   const [totalSM, setTotalSM] = useState(0)
   const [upgradeType, setUpgradeType] = useState("")
   const [selectedTokenId, setSelectedTokenId] = useState<number | null>(null)
+  const [mergeBtnDisabled, setMintBtnDisabled] = useState(false)
+  const [mergeBtnLoading, setMintBtnLoading] = useState(false)
 
   const handleSelect = (index: number) => {
     const updatedNFTs = [...ownedNFTs]
@@ -200,8 +203,11 @@ export const Burn = () => {
                           const tokenId = Number(e.target.value)
                           setSelectedTokenId(tokenId)
                         }}
-                        className=" text-white block appearance-none  bg-black border border-gray-500  hover:border-white px-3 py-1 leading-tight focus:outline-none transition-colors w-[112px] "
+                        className=" text-white block appearance-none  bg-black border border-gray-500  hover:border-white px-3 py-1 leading-tight focus:outline-none transition-colors w-[116px] "
                       >
+                        <option key={null} value="" disabled>
+                          Select token
+                        </option>
                         {ownedNFTs
                           .filter((nft) => nft.selected)
                           .map((nft) => (
@@ -221,6 +227,21 @@ export const Burn = () => {
                 </div>
               </div>
             </div>
+            <button className="primaryBtn min-w-[240px] mt-10" disabled={mergeBtnDisabled || selectedTokenId === null}>
+              {selectedTokenId ? (
+                <>
+                  {mergeBtnLoading ? (
+                    <div className="w-full flex justify-center h-full">
+                      <img className="h-full p-[12px]" src={blockSpinner}></img>
+                    </div>
+                  ) : (
+                    <>MINT INTO TOKEN #{selectedTokenId}</>
+                  )}
+                </>
+              ) : (
+                <>SELECT TOKEN ID ABOVE {selectedTokenId}</>
+              )}
+            </button>
           </div>
         </div>
       )}

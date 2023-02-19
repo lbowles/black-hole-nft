@@ -78,15 +78,14 @@ export const Mint = ({
                 </button>
                 <button className="primaryBtn mx-2 min-w-[222px]" disabled={mintBtnDisabled}>
                   {mintBtnLoading ? (
-                    <>
-                      "MINT" {mintAmount} FOR {ethers.utils.formatEther(totalPrice)} ETH
-                    </>
-                  ) : (
                     <div className="w-full flex justify-center h-full">
                       <img className="h-full p-[12px]" src={blockSpinner}></img>
                     </div>
+                  ) : (
+                    <>
+                      MINT {mintAmount} FOR {ethers.utils.formatEther(totalPrice)} ETH
+                    </>
                   )}
-                  {/* TODO: rounding  */}
                 </button>
                 <button
                   disabled={mintBtnDisabled}

@@ -21,11 +21,11 @@
 }
 
 button:disabled {
-  color: #6f6f6f;
+  color: #c7c7c7;
 }
 
 button:disabled:hover {
-  color: #6f6f6f;
+  color: #c7c7c7;
 }
 
 .secondaryBtn {
@@ -40,7 +40,7 @@ button:disabled:hover {
   color: rgb(47, 47, 47);
 }
 .secondaryBtn:disabled {
-  color: #bbbbbb;
+  color: rgb(164, 164, 164);
   background: #6f6f6f;
 }
 .secondaryBtn:disabled:hover {
