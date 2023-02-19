@@ -6,7 +6,7 @@
   height: 44px;
   padding-left: 25px;
   padding-right: 25px;
-  transition: 0.1s ease-in-out;
+  transition: 0.15s ease-in-out;
 }
 
 .primaryBtn:hover {

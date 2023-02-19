@@ -1,5 +1,6 @@
 import "./App.css"
 import { Navbar } from "./components/Navbar/Navbar"
+import { ethers } from "ethers"
 import "@rainbow-me/rainbowkit/styles.css"
 import { WagmiConfig, createClient, configureChains, mainnet } from "wagmi"
 import { publicProvider } from "wagmi/providers/public"
@@ -35,6 +36,15 @@ const wagmiClient = createClient({
   webSocketProvider,
 })
 
+//temp data
+const preOpenMintPrice = ethers.utils.parseEther("0.003")
+const openMintPrice = ethers.utils.parseEther("0.005")
+const mintEnded = false
+const openMintStarted = true
+const now = new Date()
+const openMintDate = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+const amountMinted = 123
+
 function App() {
   return (
     <WagmiConfig client={wagmiClient}>
@@ -52,7 +62,19 @@ function App() {
         <div className="min-h-[70vh]">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/mint" element={<Mint />} />
+            <Route
+              path="/mint"
+              element={
+                <Mint
+                  preOpenMintPrice={preOpenMintPrice}
+                  openMintPrice={openMintPrice}
+                  mintEnded={mintEnded}
+                  openMintStarted={openMintStarted}
+                  openMintDate={openMintDate}
+                  amountMinted={amountMinted}
+                />
+              }
+            />
             <Route path="/burn" element={<div>burn</div>} />
           </Routes>
         </div>

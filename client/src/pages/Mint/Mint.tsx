@@ -1,18 +1,31 @@
 import { useState } from "react"
 import { ethers } from "ethers"
 import micro from "../../img/blackHoles/micro.svg"
+import { Countdown } from "../../components/Countdown/Countdown"
 
 //Pull prices
-const preOpenMintPrice = ethers.utils.parseEther("0.003")
-const openMintPrice = ethers.utils.parseEther("0.005")
-const mintEnded = false
-const openMintStarted = false
-const startingPrice = openMintStarted ? openMintPrice : preOpenMintPrice
 
-export const Mint = () => {
+type IMint = {
+  preOpenMintPrice: ethers.BigNumber
+  openMintPrice: ethers.BigNumber
+  mintEnded: boolean
+  openMintStarted: boolean
+  openMintDate: Date
+  amountMinted: number
+}
+
+export const Mint = ({
+  preOpenMintPrice,
+  openMintPrice,
+  mintEnded,
+  openMintStarted,
+  openMintDate,
+  amountMinted,
+}: IMint) => {
+  const startingPrice = openMintStarted ? openMintPrice : preOpenMintPrice
   const [mintAmount, setMintAmount] = useState(1)
   const [totalPrice, setTotalPrice] = useState(startingPrice.mul(mintAmount))
-  const [mintEnabled, setMintEnabled] = useState(true)
+  const [mintDisabled, setMintDisabled] = useState(false)
 
   const handleMintAmountChange = (amount: number) => {
     setMintAmount(amount)
@@ -43,16 +56,15 @@ export const Mint = () => {
           <div className="flex justify-center w-screen p-5 pt-3">
             <div className=" w-full sm:w-80">
               {openMintStarted ? (
-                <p className="text-base text-white w-full text-center">
-                  123/1000 until 24 hour open edition at 0.005 ETH
-                </p>
-              ) : (
                 <>
                   <p className="text-base text-white w-full text-center">OPEN EDITION</p>
-                  <p className="text-base text-white w-full text-center">
-                    123/1000 until 24 hour open edition at 0.005 ETH
-                  </p>
+                  <Countdown endTime={openMintDate.getTime()} />
+                  <p className="text-base text-white w-full text-center pt-5">{amountMinted} minted</p>
                 </>
+              ) : (
+                <p className="text-base text-white w-full text-center">
+                  {amountMinted}/1000 until 24 hour open edition at 0.003 ETH
+                </p>
               )}
               <div className="flex justify-center mt-6">
                 <button
@@ -61,7 +73,7 @@ export const Mint = () => {
                 >
                   -
                 </button>
-                <button className="primaryBtn mx-2">
+                <button className="primaryBtn mx-2 min-w-[222px]" disabled={mintDisabled}>
                   {/* TODO: rounding  */}
                   MINT {mintAmount} FOR {ethers.utils.formatEther(totalPrice)} ETH
                 </button>
