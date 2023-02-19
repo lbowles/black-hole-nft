@@ -9,6 +9,7 @@ import { Home } from "./pages/Home/Home"
 import * as allChains from "@wagmi/chains"
 import deployments from "./deployments.json"
 import { Footer } from "./components/Footer/Footer"
+import { Mint } from "./pages/Mint/Mint"
 
 // Loop over all chains and check if they match deployments.chainId
 const deployedChain = Object.values(allChains).filter((chain) => {
@@ -51,7 +52,7 @@ function App() {
         <div className="min-h-[70vh]">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/mint" element={<div className="text-white">mint</div>} />
+            <Route path="/mint" element={<Mint />} />
             <Route path="/burn" element={<div>burn</div>} />
           </Routes>
         </div>

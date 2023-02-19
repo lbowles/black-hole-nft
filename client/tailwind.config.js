@@ -22,7 +22,7 @@ module.exports = {
       },
       width:{
         96 : "22rem" // 352px
-      }
+      },
     },
   },
   plugins: [],
