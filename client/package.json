@@ -22,13 +22,13 @@
     "react-scripts": "5.0.1",
     "typescript": "^4.9.4",
     "use-sound": "^4.0.1",
-    "wagmi": "^0.9.5",
+    "wagmi": "^0.11.5",
     "web-vitals": "^2.1.0"
   },
   "scripts": {
     "deploy": "gh-pages -d build",
     "predeploy": "yarn run build",
-    "prestart": "echo \"declare const schema: $(cat src/deployments.json); export default schema;\" > src/deployments.json.d.ts",
+    "prestart": "wagmi generate && echo \"declare const schema: $(cat src/deployments.json); export default schema;\" > src/deployments.json.d.ts",
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
@@ -53,6 +53,7 @@
     ]
   },
   "devDependencies": {
+    "@wagmi/cli": "^0.1.6",
     "autoprefixer": "^10.4.13",
     "customize-cra": "^1.0.0",
     "postcss": "^8.4.20",

@@ -37,6 +37,7 @@ export const Navbar = () => {
         }
         return (
           <button
+            key={i}
             onClick={() => {
               navigate(page.link)
               setActive(i)

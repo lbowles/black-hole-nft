@@ -24,3 +24,5 @@ yarn-error.log*
 
 deployments.json
 deployments.json.d.ts
+
+src/generated.ts

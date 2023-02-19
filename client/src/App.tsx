@@ -63,19 +63,7 @@ function App() {
         <div className="min-h-[70vh]">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route
-              path="/mint"
-              element={
-                <Mint
-                  preOpenMintPrice={preOpenMintPrice}
-                  openMintPrice={openMintPrice}
-                  mintEnded={mintEnded}
-                  openMintStarted={openMintStarted}
-                  openMintDate={openMintDate}
-                  amountMinted={amountMinted}
-                />
-              }
-            />
+            <Route path="/mint" element={<Mint />} />
             <Route path="/burn" element={<Burn />} />
           </Routes>
         </div>
