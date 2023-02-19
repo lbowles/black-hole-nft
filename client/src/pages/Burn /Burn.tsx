@@ -8,23 +8,24 @@ import stellarAnimated from "../../img/blackHoles/stellarAnimated.svg"
 import intermediateAnimated from "../../img/blackHoles/intermediateAnimated.svg"
 import supermassiveAnimated from "../../img/blackHoles/supermassiveAnimated.svg"
 import primordialAnimated from "../../img/blackHoles/primordialAnimated.svg"
+import dropdown from "../../img/dropdown.svg"
 import { useEffect, useState } from "react"
 
 //take in as param
 const baseOwnedNFTs = [
   { type: "MICRO", tokenId: 1232, SM: 1, selected: false },
-  { type: "STELLAR", tokenId: 1332, SM: 3, selected: false },
-  { type: "STELLAR", tokenId: 1332, SM: 3, selected: false },
-  { type: "INTERMEDIATE", tokenId: 1332, SM: 3, selected: false },
-  { type: "INTERMEDIATE", tokenId: 1332, SM: 3, selected: false },
-  { type: "SUPERMASSIVE", tokenId: 1332, SM: 3, selected: false },
-  { type: "SUPERMASSIVE", tokenId: 1332, SM: 3, selected: false },
-  { type: "SUPERMASSIVE", tokenId: 1332, SM: 3, selected: false },
-  { type: "PRIMORDIAL", tokenId: 1332, SM: 3, selected: false },
-  { type: "PRIMORDIAL", tokenId: 1332, SM: 3, selected: false },
-  { type: "PRIMORDIAL", tokenId: 1332, SM: 3, selected: false },
-  { type: "PRIMORDIAL", tokenId: 1332, SM: 3, selected: false },
-  { type: "PRIMORDIAL", tokenId: 1332, SM: 3, selected: false },
+  { type: "STELLAR", tokenId: 1322, SM: 3, selected: false },
+  { type: "STELLAR", tokenId: 1432, SM: 3, selected: false },
+  { type: "INTERMEDIATE", tokenId: 1632, SM: 3, selected: false },
+  { type: "INTERMEDIATE", tokenId: 1732, SM: 3, selected: false },
+  { type: "SUPERMASSIVE", tokenId: 1832, SM: 3, selected: false },
+  { type: "SUPERMASSIVE", tokenId: 8332, SM: 3, selected: false },
+  { type: "SUPERMASSIVE", tokenId: 1342, SM: 3, selected: false },
+  { type: "PRIMORDIAL", tokenId: 1532, SM: 3, selected: false },
+  { type: "PRIMORDIAL", tokenId: 1432, SM: 3, selected: false },
+  { type: "PRIMORDIAL", tokenId: 3332, SM: 3, selected: false },
+  { type: "PRIMORDIAL", tokenId: 4332, SM: 3, selected: false },
+  { type: "PRIMORDIAL", tokenId: 5332, SM: 3, selected: false },
 ]
 const nftTypeToImg: Record<string, string> = {
   MICRO: micro,
@@ -57,6 +58,7 @@ export const Burn = () => {
   const [finalPage, setFinalPage] = useState(false)
   const [totalSM, setTotalSM] = useState(0)
   const [upgradeType, setUpgradeType] = useState("")
+  const [selectedTokenId, setSelectedTokenId] = useState<number | null>(null)
 
   const handleSelect = (index: number) => {
     const updatedNFTs = [...ownedNFTs]
@@ -188,7 +190,35 @@ export const Burn = () => {
             <div className="border-2 border-white  mt-5">
               <img src={nftTypeToAnimatedImg[upgradeType]?.trim() ?? ""} className="p-1"></img>
               <div className="border-t-2 border-white p-5">
-                <p className="text-lg text-white">{upgradeType}</p>
+                <p className="text-xl text-white pb-1">{upgradeType}</p>
+                <div className="flex justify-between items-end">
+                  {totalSM > 0 && (
+                    <div className="relative mt-3">
+                      <select
+                        value={selectedTokenId ?? ""}
+                        onChange={(e) => {
+                          const tokenId = Number(e.target.value)
+                          setSelectedTokenId(tokenId)
+                        }}
+                        className=" text-white block appearance-none  bg-black border border-gray-500  hover:border-white px-3 py-1 leading-tight focus:outline-none transition-colors w-[112px] "
+                      >
+                        {ownedNFTs
+                          .filter((nft) => nft.selected)
+                          .map((nft) => (
+                            <option key={nft.tokenId} value={nft.tokenId}>
+                              {"#" + nft.tokenId + " (" + nft.SM + " SM)"}
+                            </option>
+                          ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 ">
+                        <img src={dropdown}></img>
+                      </div>
+                    </div>
+                  )}
+                  <div className="h-full items-end">
+                    <p className="text-xl text-white pb-1">{totalSM} SM</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
