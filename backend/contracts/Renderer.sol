@@ -77,7 +77,7 @@ contract Renderer {
     uint256 renderStartIndex;
   }
 
-  function getQuarterCanvas(BlackHole calldata _blackHole) public pure returns (string memory) {
+  function getQuarterCanvas(BlackHole memory _blackHole) public pure returns (string memory) {
     QuarterCanvasVariables memory vars;
 
     string memory edgeSVG = "";
@@ -103,7 +103,7 @@ contract Renderer {
     return edgeSVG;
   }
 
-  function getAnimatedStars(BlackHole calldata _blackHole) public pure returns (string memory) {
+  function getAnimatedStars(BlackHole memory _blackHole) public pure returns (string memory) {
     string memory svg = "";
 
     for (uint256 i = 0; i < 10; i++) {
@@ -222,7 +222,7 @@ contract Renderer {
     return svg;
   }
 
-  function getStaticBackground(BlackHole calldata _blackHole) public pure returns (string memory) {
+  function getStaticBackground(BlackHole memory _blackHole) public pure returns (string memory) {
     string memory svg = "";
     for (uint256 i = 0; i < 30; i++) {
       uint256 x = utils.randomRange(
@@ -265,7 +265,7 @@ contract Renderer {
     return svg;
   }
 
-  function getBlackHoleSVG(BlackHole calldata _blackHole) public pure returns (string memory) {
+  function getBlackHoleSVG(BlackHole memory _blackHole) public pure returns (string memory) {
     string memory edgeSvg = getQuarterCanvas(_blackHole);
 
     string memory svg = string.concat(
@@ -371,14 +371,9 @@ contract Renderer {
     return svg;
   }
 
-  // function render(BlackHole calldata blackHole) public pure returns (string memory) {
-  //   string memory svg = getBlackHoleSVG(blackHole);
-  //   return svg;
-  // }
-
-  // function renderSample(uint256 tokenId, uint256 level) public pure returns (string memory) {
-  //   uint256 size = PIXELS_PER_SIDE / 2 - (10 - level); // 5
-  //   BlackHole calldata blackHole = BlackHole(tokenId, level, size, 1, "Micro");
-  //   return render(blackHole);
-  // }
+  function renderSample(uint256 tokenId, uint256 level) public pure returns (string memory) {
+    uint256 size = PIXELS_PER_SIDE / 2 - (10 - level); // 5
+    BlackHole memory blackHole = BlackHole(tokenId, level, size, 1, "Micro");
+    return getBlackHoleSVG(blackHole);
+  }
 }
