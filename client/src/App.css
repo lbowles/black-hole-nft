@@ -39,3 +39,10 @@ button:disabled:hover {
 .secondaryBtn:hover {
   color: rgb(47, 47, 47);
 }
+.secondaryBtn:disabled {
+  color: #bbbbbb;
+  background: #6f6f6f;
+}
+.secondaryBtn:disabled:hover {
+  color: #bbbbbb;
+}

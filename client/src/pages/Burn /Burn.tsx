@@ -43,6 +43,16 @@ export const Burn = () => {
     setOwnedNFTs(updatedNFTs)
   }
 
+  const handleSelectAll = () => {
+    const updatedNFTs = ownedNFTs.map((nft) => ({ ...nft, selected: true }))
+    setOwnedNFTs(updatedNFTs)
+  }
+
+  const handleResetAll = () => {
+    const updatedNFTs = ownedNFTs.map((nft) => ({ ...nft, selected: false }))
+    setOwnedNFTs(updatedNFTs)
+  }
+
   useEffect(() => {
     const selectedNFTs = ownedNFTs.filter((nft) => nft.selected)
     const totalSelectedSM = selectedNFTs.reduce((acc, nft) => acc + nft.SM, 0)
@@ -61,9 +71,25 @@ export const Burn = () => {
             </p>
           </div>
           <div className="flex justify-end w-full mt-6">
-            <button className="text-base hover:text-white text-gray-500 transition-all ">SELECT ALL</button>
+            {totalSM > 0 ? (
+              <>
+                <button
+                  className="text-base hover:text-white text-gray-500 transition-all pr-2"
+                  onClick={handleResetAll}
+                >
+                  RESET |
+                </button>
+                <button className="text-base hover:text-white text-gray-500 transition-all " onClick={handleSelectAll}>
+                  SELECT ALL
+                </button>
+              </>
+            ) : (
+              <button className="text-base hover:text-white text-gray-500 transition-color " onClick={handleSelectAll}>
+                SELECT ALL
+              </button>
+            )}
           </div>
-          <div className="h-[380px] overflow-auto">
+          <div className="h-[380px] overflow-auto mt-1">
             <div className="grid grid-cols-4 gap-2 mt-2 max-h-[380px] overflow-auto pb-[60px]">
               {ownedNFTs.map((nft, i) => {
                 const img = nftTypeToImg[nft.type]?.trim() ?? ""
@@ -90,10 +116,18 @@ export const Burn = () => {
       <div className="flex justify-center w-screen p-5 -mt-[90px]">
         <div className="flex justify-between items-center w-full max-w-[380px] border-2 border-white bg-gray-900 text-lg text-white pl-5 pr-1 py-1">
           <div className="flex">
-            <p>MERGE TOTAL: ‎</p>
-            <p>{totalSM} SM (Intermediate)</p>
+            {totalSM === 0 ? (
+              <p>SELECT BLACK HOLES TO MERGE ABOVE</p>
+            ) : (
+              <>
+                <p>MERGE TOTAL: ‎</p>
+                <p>{totalSM} SM (Intermediate)</p>
+              </>
+            )}
           </div>
-          <button className="secondaryBtn text-lg py-1">NEXT</button>
+          <button className="secondaryBtn text-lg py-1" disabled={totalSM === 0}>
+            NEXT
+          </button>
         </div>
       </div>
     </>
