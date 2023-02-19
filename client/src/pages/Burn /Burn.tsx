@@ -203,13 +203,21 @@ export const Burn = () => {
                           const tokenId = Number(e.target.value)
                           setSelectedTokenId(tokenId)
                         }}
-                        className=" text-white block appearance-none  bg-black border border-gray-500  hover:border-white px-3 py-1 leading-tight focus:outline-none transition-colors w-[116px] "
+                        className="text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none transition-colors w-[116px]"
                       >
                         <option key={null} value="" disabled>
                           Select token
                         </option>
                         {ownedNFTs
                           .filter((nft) => nft.selected)
+                          .sort((a, b) => {
+                            // sort by SM (largest first) and then by tokenId (smallest first) if SM is the same
+                            if (b.SM !== a.SM) {
+                              return b.SM - a.SM
+                            } else {
+                              return a.tokenId - b.tokenId
+                            }
+                          })
                           .map((nft) => (
                             <option key={nft.tokenId} value={nft.tokenId}>
                               {"#" + nft.tokenId + " (" + nft.SM + " SM)"}
@@ -235,7 +243,7 @@ export const Burn = () => {
                       <img className="h-full p-[12px]" src={blockSpinner}></img>
                     </div>
                   ) : (
-                    <>MINT INTO TOKEN #{selectedTokenId}</>
+                    <>MERGE INTO TOKEN #{selectedTokenId}</>
                   )}
                 </>
               ) : (
@@ -248,3 +256,5 @@ export const Burn = () => {
     </>
   )
 }
+
+// how do i make the drop down be ordered first by SM (largest first) then by token id (smallest frist) if the SM is the same
