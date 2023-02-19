@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { ethers } from "ethers"
 import micro from "../../img/blackHoles/micro.svg"
+import blockSpinner from "../../img/blockSpinner.svg"
 import { Countdown } from "../../components/Countdown/Countdown"
 
 //Pull prices
@@ -25,7 +26,8 @@ export const Mint = ({
   const startingPrice = openMintStarted ? openMintPrice : preOpenMintPrice
   const [mintAmount, setMintAmount] = useState(1)
   const [totalPrice, setTotalPrice] = useState(startingPrice.mul(mintAmount))
-  const [mintDisabled, setMintDisabled] = useState(false)
+  const [mintBtnDisabled, setMintBtnDisabled] = useState(true)
+  const [mintBtnLoading, setMintBtnLoading] = useState(false)
 
   const handleMintAmountChange = (amount: number) => {
     setMintAmount(amount)
@@ -73,9 +75,17 @@ export const Mint = ({
                 >
                   -
                 </button>
-                <button className="primaryBtn mx-2 min-w-[222px]" disabled={mintDisabled}>
+                <button className="primaryBtn mx-2 min-w-[222px]" disabled={mintBtnDisabled}>
+                  {mintBtnLoading ? (
+                    <>
+                      "MINT" {mintAmount} FOR {ethers.utils.formatEther(totalPrice)} ETH
+                    </>
+                  ) : (
+                    <div className="w-full flex justify-center h-full">
+                      <img className="h-full p-[12px]" src={blockSpinner}></img>
+                    </div>
+                  )}
                   {/* TODO: rounding  */}
-                  MINT {mintAmount} FOR {ethers.utils.formatEther(totalPrice)} ETH
                 </button>
                 <button
                   className="text-gray-500 text-5xl hover:text-white"
