@@ -65,6 +65,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/mint" element={<Mint />} />
             <Route path="/burn" element={<Burn />} />
+            <Route path="*" element={<Home />} />
           </Routes>
         </div>
         <Footer />
