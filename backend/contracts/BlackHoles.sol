@@ -20,7 +20,9 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
   uint256 public price;
   uint256 public timedSalePrice;
   uint256 public timedSaleEndTimestamp;
-  bool public mergingEnabled;
+  uint256 public timedSaleDuration = 24 hours;
+  uint256 public mergingDelay = 5 days;
+
   mapping(uint256 => uint256) public massesConsumed;
 
   Renderer public renderer;
@@ -58,32 +60,39 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
     price = _price;
   }
 
+  /**
+   * @notice Sets the price of a token during the timed sale.
+   * @param _timedSalePrice Price of each token in wei.
+   */
   function setTimedSalePrice(uint256 _timedSalePrice) external onlyOwner {
     timedSalePrice = _timedSalePrice;
   }
 
-  function getPrice() public view returns (uint256) {
-    if (timedSaleEndTimestamp > block.timestamp) {
-      return timedSalePrice;
-    } else {
-      return price;
-    }
-  }
-
-  function getPriceForSupply(uint256 _supply) public view returns (uint256) {
-    if (_supply < TIMED_SALE_THRESHOLD) {
-      return price;
-    } else {
-      return timedSalePrice;
-    }
+  /**
+   * @notice Sets the timed sale duration.
+   * @param _timedSaleDuration Duration of the timed sale in seconds.
+   */
+  function setTimedSaleDuration(uint256 _timedSaleDuration) external onlyOwner {
+    timedSaleDuration = _timedSaleDuration;
   }
 
   /**
-   * @notice Enables or disables merging of tokens.
-   * @param _mergingEnabled Whether merging should be enabled.
+   * @notice Sets the merging delay.
+   * @param _mergingDelay Delay in seconds before a token can be merged after the timed sale.
    */
-  function setMergingEnabled(bool _mergingEnabled) external onlyOwner {
-    mergingEnabled = _mergingEnabled;
+  function setMergingDelay(uint256 _mergingDelay) external onlyOwner {
+    mergingDelay = _mergingDelay;
+  }
+
+  /**
+   * @notice Gets the current price of a token.
+   */
+  function getPrice() public view returns (uint256) {
+    if (getMintState() == MintState.TIMED_SALE) {
+      return timedSalePrice;
+    } else {
+      return price;
+    }
   }
 
   /**
@@ -106,9 +115,6 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
       '{"trait_type": "Level", "value": ',
       utils.uint2str(blackHole.level),
       "},",
-      // '{"trait_type": "Size", "value": ',
-      // utils.uint2str(blackHole.size),
-      // "},",
       '{"trait_type": "Name", "value": "',
       blackHole.name,
       '"},',
@@ -281,13 +287,20 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
   }
 
   /**
+   * @notice Returns whether merging is enabled or not.
+   */
+  function isMergingEnabled() public view returns (bool) {
+    return getMintState() == MintState.CLOSED && block.timestamp > timedSaleEndTimestamp + mergingDelay;
+  }
+
+  /**
    * @notice Merges a list of tokens into a single token.
    * @param tokens List of tokens to merge. The first token in the list is the target.
    */
   function merge(uint256[] memory tokens) public {
     // Burn all tokens except the first one, aka the target
     // The mass of all other tokens get added to the target
-    require(mergingEnabled, "Merging not enabled");
+    require(isMergingEnabled(), "Merging not enabled");
     require(tokens.length > 1, "Must merge at least 2 tokens");
 
     uint256 targetId = tokens[0];
