@@ -43,6 +43,7 @@ export const GeneralInfo = () => {
             <li>Now this is a story all about how, my life got flipped-turned upside down</li>
           </ol>
         </div>
+        {/* MERGE */}
         <p className="text-white text-3xl pt-9">MERGE</p>
         <div className="bg-black border-2 border-gray-800 w-full p-5 mt-6">
           <p className="text-white text-2xl">Merging Black Holes </p>
@@ -56,13 +57,18 @@ export const GeneralInfo = () => {
             hole will have a mass equal to the sum of the masses of the original black holes.
           </p>
           <p className="text-gray-600 text-base pt-3">
-            There exists five types of black holes, each more massive and rare than the last. For reasons not yet
-            discovered, the universe only allows for the existence of 10 of the largest type, the Primordial black hole.
+            There exists five types of Black Holes, each more massive and rare than the last. The exact number of Black
+            Holes needed to merge together to level up depends on the total supply. For reasons not yet discovered, the
+            universe only allows for the existence of 42 of the largest type, the Primordial black hole.
           </p>
           <Divider />
           <MergingAmountGraphic levels={levels} />
+          <Divider />
+          <div className="w-full flex justify-center">
+            <img src={primordial} className="w-[80px]"></img>
+          </div>
+          <p className="text-gray-500 text-2xl text-center pt-3">Only 42 can exist...</p>
         </div>
-        {/* MERGE */}
       </div>
     </div>
   )
