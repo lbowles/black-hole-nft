@@ -69,15 +69,15 @@ export const Navbar = () => {
   return (
     <div>
       <div className="flex justify-between w-screen p-5 ">
-        <div>
-          <p className="text-white text-2xl min-w-[117px]">BLACK HOLES</p>
+        <div className="sm:min-w-[218px] min-w-none">
+          <p className="text-white text-2xl min-w-[33%]">BLACK HOLES</p>
         </div>
         <div className="sm:block hidden w-80">{nav}</div>
-        <div>
+        <div className="sm:min-w-[218px] min-w-none flex justify-end">
           <ConnectButton />
         </div>
       </div>
-      <div className="sm:hidden block px-5">{nav}</div>
+      <div className="sm:hidden block px-5 ">{nav}</div>
     </div>
   )
 }
