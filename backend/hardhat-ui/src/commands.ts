@@ -1,5 +1,4 @@
 import { ethers } from "ethers"
-import { getSeconds } from "./App"
 import { BlackHoles__factory } from "../../types/factories/BlackHoles__factory"
 
 export interface ICommand {
@@ -62,3 +61,18 @@ export const COMMANDS: ICommand[] = [
     },
   },
 ]
+
+export function getSeconds(amount: number, unit: string): number {
+  switch (unit) {
+    case "seconds":
+      return amount
+    case "minutes":
+      return amount * 60
+    case "hours":
+      return amount * 3600
+    case "days":
+      return amount * 86400
+    default:
+      return 0
+  }
+}

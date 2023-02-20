@@ -8,21 +8,6 @@ interface ISnapshot {
   date: Date
 }
 
-export function getSeconds(amount: number, unit: string): number {
-  switch (unit) {
-    case "seconds":
-      return amount
-    case "minutes":
-      return amount * 60
-    case "hours":
-      return amount * 3600
-    case "days":
-      return amount * 86400
-    default:
-      return 0
-  }
-}
-
 function commandToString(command: ICommand) {
   const args = command.inputs.map((input) => `${input.name}: ${input.value}`).join(", ")
   return `"${command.name}" (${args})`
@@ -72,6 +57,7 @@ function App() {
 
   const handleCommandExecute = async (command: ICommand) => {
     try {
+      await handleSnapshot(commandToString(command))
       await command.execute(provider!, command.inputs)
       showOutput(`Command ${commandToString(command)} executed successfully`)
       setLastCommand(command)
@@ -81,14 +67,13 @@ function App() {
     }
   }
 
-  const handleSnapshot = async () => {
-    const block = await provider!.getBlock("latest")
-
+  const handleSnapshot = async (name?: string) => {
     const snapshotId = await provider?.send("evm_snapshot", [])
+
     setSnapshots((prevSnapshots) => [
       ...prevSnapshots,
       {
-        name: lastCommand ? commandToString(lastCommand) : "No prev command",
+        name: name ? name : lastCommand ? commandToString(lastCommand) : "No prev command",
         id: snapshotId,
         date: new Date(),
       },
@@ -152,7 +137,7 @@ function App() {
           {commandOutput && <p>{commandOutput}</p>}
           <div>
             <h2>Snapshots:</h2>
-            <button onClick={handleSnapshot}>Take snapshot</button>
+            <button onClick={() => handleSnapshot()}>Take snapshot</button>
           </div>
           {snapshots.length > 0 && (
             <ul>
