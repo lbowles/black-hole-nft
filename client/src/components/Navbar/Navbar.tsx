@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { useNavigate, useLocation } from "react-router-dom"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 
 type pagesType = { name: string; link: string; active: boolean }[]
@@ -12,6 +12,7 @@ const defaultPages = [
 
 export const Navbar = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [pages, setPages] = useState<pagesType>(defaultPages)
 
   const setActive = (i: number) => {
@@ -21,10 +22,23 @@ export const Navbar = () => {
       } else {
         return { ...p, active: false }
       }
-      return p
     })
     setPages(updatedPages)
   }
+
+  useEffect(() => {
+    // Set the active page based on the current URL path
+    const path = location.pathname
+    const updatedPages = pages.map((p) => ({
+      ...p,
+      active: p.link === path,
+    }))
+    if (!updatedPages.some((p) => p.active)) {
+      // Set HOME page as active if no other page is active
+      updatedPages[0].active = true
+    }
+    setPages(updatedPages)
+  }, [location.pathname])
 
   let nav = (
     <div className="grid grid-cols-3 bg-black h-10 w-full ">
@@ -55,15 +69,15 @@ export const Navbar = () => {
   return (
     <div>
       <div className="flex justify-between w-screen p-5 ">
-        <div>
-          <p className="text-white text-2xl min-w-[117px]">BLACK HOLES</p>
+        <div className="sm:min-w-[218px] min-w-none">
+          <p className="text-white text-2xl min-w-[33%]">BLACK HOLES</p>
         </div>
         <div className="sm:block hidden w-80">{nav}</div>
-        <div>
+        <div className="sm:min-w-[218px] min-w-none flex justify-end">
           <ConnectButton />
         </div>
       </div>
-      <div className="sm:hidden block px-5">{nav}</div>
+      <div className="sm:hidden block px-5 ">{nav}</div>
     </div>
   )
 }

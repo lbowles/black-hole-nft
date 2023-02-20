@@ -12,6 +12,8 @@ import dropdown from "../../img/dropdown.svg"
 import blockSpinner from "../../img/blockSpinner.svg"
 import { useEffect, useState } from "react"
 
+//TODO: add disclamer about burning
+
 //take in as param
 const baseOwnedNFTs = [
   { type: "MICRO", tokenId: 1232, SM: 1, selected: false },
@@ -62,6 +64,7 @@ export const Burn = () => {
   const [selectedTokenId, setSelectedTokenId] = useState<number | null>(null)
   const [mergeBtnDisabled, setMintBtnDisabled] = useState(false)
   const [mergeBtnLoading, setMintBtnLoading] = useState(false)
+  const [selectedTokens, setSelectedTokens] = useState<number[]>([])
 
   const handleSelect = (index: number) => {
     const updatedNFTs = [...ownedNFTs]
@@ -93,8 +96,18 @@ export const Burn = () => {
     }
   }
 
+  const updateSelectedTokens = (selectedToken: number) => {
+    const index = selectedTokens.indexOf(selectedToken)
+    if (index > -1) {
+      const newArray = [selectedToken, ...selectedTokens.slice(0, index), ...selectedTokens.slice(index + 1)]
+      setSelectedTokens(newArray)
+      console.log(newArray)
+    }
+  }
+
   useEffect(() => {
     const selectedNFTs = ownedNFTs.filter((nft) => nft.selected)
+    setSelectedTokens(selectedNFTs.map((nft) => nft.tokenId))
     const totalSelectedSM = selectedNFTs.reduce((acc, nft) => acc + nft.SM, 0)
     setTotalSM(totalSelectedSM)
     const type = findUpgradeType(totalSelectedSM)
@@ -202,6 +215,7 @@ export const Burn = () => {
                         onChange={(e) => {
                           const tokenId = Number(e.target.value)
                           setSelectedTokenId(tokenId)
+                          updateSelectedTokens(tokenId)
                         }}
                         className="text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none transition-colors w-[116px]"
                       >
