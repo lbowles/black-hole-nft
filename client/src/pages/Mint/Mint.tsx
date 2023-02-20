@@ -16,6 +16,7 @@ import {
 import { MintState } from "../../interfaces/IMintState"
 import { useWaitForTransaction } from "wagmi"
 import { useAddRecentTransaction } from "@rainbow-me/rainbowkit"
+import { useAccount } from "wagmi"
 
 export const Mint = () => {
   const { data: mintPrice, isLoading: priceLoading } = useBlackHolesGetPrice({ watch: true })
@@ -32,8 +33,9 @@ export const Mint = () => {
   // const price = openMintStarted ? openMintPrice : preOpenMintPrice
   const [mintCount, setMintAmount] = useState(1)
   const [totalPrice, setTotalPrice] = useState<BigNumber>()
-  const [mintBtnDisabled, setMintBtnDisabled] = useState(true)
-  const [mintBtnLoading, setMintBtnLoading] = useState(false)
+  const [mintBtnDisabled, setMintBtnDisabled] = useState<boolean>(true)
+  const [mintBtnLoading, setMintBtnLoading] = useState<boolean>(false)
+  const account = useAccount()
 
   const { config: mintConfig, error: mintError } = usePrepareBlackHolesMint({
     args: [BigNumber.from(`${mintCount}`)],
@@ -137,25 +139,41 @@ export const Mint = () => {
                 <button
                   className="text-gray-500 text-5xl hover:text-white"
                   onClick={() => handleMintAmountChange(Math.max(1, mintCount - 1))}
-                  disabled={mintBtnDisabled}
+                  disabled={mintBtnDisabled || account.isConnected === false}
                 >
                   -
                 </button>
-                <button onClick={mint} className="primaryBtn mx-2 min-w-[222px]" disabled={mintBtnDisabled}>
-                  {mintBtnLoading ? (
-                    <div className="w-full flex justify-center h-full">
-                      <img className="h-full p-[12px]" src={blockSpinner}></img>
-                    </div>
+                <button
+                  onClick={mint}
+                  className="primaryBtn mx-2 min-w-[222px]"
+                  disabled={mintBtnDisabled || account.isConnected === false}
+                >
+                  {isMintSignLoading ? (
+                    <>WAITING FOR WALLET</>
                   ) : (
-                    totalPrice !== undefined && (
-                      <>
-                        MINT {mintCount} FOR {ethers.utils.formatEther(totalPrice)} ETH
-                      </>
-                    )
+                    <>
+                      {account.isConnected ? (
+                        <>
+                          {mintBtnLoading ? (
+                            <div className="w-full flex justify-center h-full">
+                              <img className="h-full p-[12px]" src={blockSpinner}></img>
+                            </div>
+                          ) : (
+                            totalPrice !== undefined && (
+                              <>
+                                MINT {mintCount} FOR {ethers.utils.formatEther(totalPrice)} ETH
+                              </>
+                            )
+                          )}
+                        </>
+                      ) : (
+                        <>CONNECT WALLET</>
+                      )}
+                    </>
                   )}
                 </button>
                 <button
-                  disabled={mintBtnDisabled}
+                  disabled={mintBtnDisabled || account.isConnected === false}
                   className="text-gray-500 text-5xl hover:text-white"
                   onClick={() => handleMintAmountChange(mintCount + 1)}
                 >
