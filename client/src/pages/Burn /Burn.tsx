@@ -116,7 +116,7 @@ export const Burn = () => {
       </div>
       {!finalPage ? (
         <>
-          <div className="flex justify-center w-screen  ">
+          <div className="flex justify-center w-screen z-1">
             <div className="w-96">
               <div className="flex justify-end w-full mt-6">
                 {totalSM > 0 ? (
@@ -167,7 +167,7 @@ export const Burn = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-center w-screen p-5 -mt-[70px]">
+          <div className="flex justify-center w-screen p-5 -mt-[70px] z-2 relative">
             <div className="flex justify-between items-center w-full max-w-[380px] border-2 border-white bg-gray-900 text-lg text-white pl-5 pr-1 py-1">
               <div className="flex">
                 {totalSM === 0 ? (
