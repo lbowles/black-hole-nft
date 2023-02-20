@@ -17,6 +17,20 @@ import { MintState } from "../../interfaces/IMintState"
 import { useWaitForTransaction } from "wagmi"
 import { useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import { useAccount } from "wagmi"
+import { BlackHoles__factory } from "../../../../backend/types"
+import deployments from "../../deployments.json"
+
+function getOpenSeaLink(chainId: string, tokenId: string | number) {
+  return `https://${chainId !== "1" ? "testnets." : ""}opensea.io/assets/${chainId !== "1" ? "goerli/" : ""}${
+    deployments.contracts.BlackHoles.address
+  }/${tokenId}`
+}
+
+function getEtherscanBaseURL(chainId: string) {
+  return `https://${chainId !== "1" ? "goerli." : ""}etherscan.io`
+}
+
+const etherscanBaseURL = getEtherscanBaseURL(deployments.chainId)
 
 export const Mint = () => {
   const { data: mintPrice, isLoading: priceLoading } = useBlackHolesGetPrice({ watch: true })
@@ -31,11 +45,13 @@ export const Mint = () => {
   const addRecentTransaction = useAddRecentTransaction()
 
   // const price = openMintStarted ? openMintPrice : preOpenMintPrice
+  const account = useAccount()
+
   const [mintCount, setMintAmount] = useState(1)
   const [totalPrice, setTotalPrice] = useState<BigNumber>()
   const [mintBtnDisabled, setMintBtnDisabled] = useState<boolean>(true)
   const [mintBtnLoading, setMintBtnLoading] = useState<boolean>(false)
-  const account = useAccount()
+  const [mintedTokens, setMintedTokens] = useState<number[]>([])
 
   const { config: mintConfig, error: mintError } = usePrepareBlackHolesMint({
     args: [BigNumber.from(`${mintCount}`)],
@@ -44,6 +60,7 @@ export const Mint = () => {
     },
     enabled: mintState !== MintState.Closed,
   })
+
   const {
     write: mint,
     data: mintSignResult,
@@ -59,6 +76,41 @@ export const Mint = () => {
   const handleMintAmountChange = (amount: number) => {
     setMintAmount(amount)
     setTotalPrice(mintPrice?.mul(amount))
+  }
+
+  const displayMintedTokens = (tokens: number[]) => {
+    return (
+      <>
+        <span key={tokens[0]}>
+          <a
+            href={getOpenSeaLink(deployments.chainId, tokens[0])}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white hover:underline no-underline transition-colors"
+          >
+            {tokens[0]}
+          </a>
+          &nbsp;
+        </span>
+        {tokens.length > 1 && (
+          <>
+            {" "}
+            ... &nbsp;
+            <span key={tokens[tokens.length - 1]}>
+              <a
+                href={getOpenSeaLink(deployments.chainId, tokens[tokens.length - 1])}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white hover:underline no-underline transition-colors"
+              >
+                {tokens[tokens.length - 1]}
+              </a>
+              &nbsp;
+            </span>
+          </>
+        )}
+      </>
+    )
   }
 
   useEffect(() => {
@@ -97,6 +149,16 @@ export const Mint = () => {
       })
     }
   }, [mintSignResult])
+
+  useEffect(() => {
+    if (mintTx) {
+      const tokenIds = mintTx.logs.map((log) => {
+        const events = BlackHoles__factory.createInterface().decodeEventLog("Transfer", log.data, log.topics)
+        return events.tokenId.toString()
+      })
+      setMintedTokens(tokenIds)
+    }
+  }, [mintTx])
 
   return (
     <>
@@ -180,6 +242,24 @@ export const Mint = () => {
                   +
                 </button>
               </div>
+
+              {mintTx && mintTx.status && (
+                <div>
+                  <div className="w-full flex justify-center">
+                    <a
+                      href={`${etherscanBaseURL}/tx/${mintTx.transactionHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-base text-gray-500 hover:text-white hover:underline no-underline transition-colors pt-5"
+                    >
+                      View transaction
+                    </a>
+                  </div>
+                  <p className="text-base text-gray-500 transition-colors w-full text-center pt-1">
+                    Minted tokens: [ {displayMintedTokens(mintedTokens)}]
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </>
