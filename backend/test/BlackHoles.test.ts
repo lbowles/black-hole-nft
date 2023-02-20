@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { expect } from "chai"
-import { BaseContract, BigNumber } from "ethers"
+import { BigNumber } from "ethers"
 import { XMLParser } from "fast-xml-parser"
 import { deployments, ethers } from "hardhat"
 import { BlackHoles, BlackHoles__factory } from "../types"
@@ -211,6 +211,7 @@ describe("BlackHoles", function () {
 
   it.only("Should merge tokens", async function () {
     /* Complete sale (mint 11,000 tokens) */
+    expect(await blackHoles.isMergingEnabled()).to.be.false
 
     // Mint in threshold sale
     mintPrice = await blackHoles.getPrice()
@@ -220,9 +221,23 @@ describe("BlackHoles", function () {
     mintPrice = await blackHoles.getPrice()
     await blackHoles.mint(threshold.mul(10), { value: mintPrice.mul(threshold.mul(10)) })
 
-    // Progress time by 24 hours
-    await ethers.provider.send("evm_increaseTime", [24 * 60 * 60])
+    expect(await blackHoles.isMergingEnabled()).to.be.false
+
+    // Progress time by timed sale duration
+    const timedSaleDuration = await blackHoles.timedSaleDuration()
+    await ethers.provider.send("evm_increaseTime", [timedSaleDuration.toNumber()])
     await ethers.provider.send("evm_mine", [])
+
+    expect(await blackHoles.isMergingEnabled()).to.be.false
+
+    await expect(blackHoles.merge([1, 2, 3, 4])).to.be.revertedWith("Merging not enabled")
+
+    // Progress time by merging delay
+    const mergingDelay = await blackHoles.mergingDelay()
+    await ethers.provider.send("evm_increaseTime", [mergingDelay.toNumber()])
+    await ethers.provider.send("evm_mine", [])
+
+    expect(await blackHoles.isMergingEnabled()).to.be.true
 
     /* Merge */
     const totalMinted = (await blackHoles.totalMinted()).toNumber()
@@ -231,10 +246,6 @@ describe("BlackHoles", function () {
     const baseUpgradeMass = (await blackHoles.getBaseUpgradeMass()).toNumber()
     const maxLevelTokenCap = (await blackHoles.MAX_SUPPLY_OF_INTERSTELLAR()).toNumber()
     expect(baseUpgradeMass).to.equal(Math.floor(totalMinted / maxLevelTokenCap / 2 ** 5))
-
-    await expect(blackHoles.merge([1, 2, 3, 4])).to.be.revertedWith("Merging not enabled")
-
-    await blackHoles.setMergingEnabled(true)
 
     // Update correct token's metadata and burn the right tokens
     expect(await blackHoles.merge([1, 2, 3, 4]))
