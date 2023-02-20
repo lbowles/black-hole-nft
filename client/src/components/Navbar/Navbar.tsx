@@ -38,7 +38,7 @@ export const Navbar = () => {
       updatedPages[0].active = true
     }
     setPages(updatedPages)
-  }, [location.pathname, pages])
+  }, [location.pathname])
 
   let nav = (
     <div className="grid grid-cols-3 bg-black h-10 w-full ">
