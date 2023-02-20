@@ -246,7 +246,7 @@ describe("BlackHoles", function () {
 
     const baseUpgradeMass = (await blackHoles.getBaseUpgradeMass()).toNumber()
     const maxLevelTokenCap = (await blackHoles.MAX_SUPPLY_OF_INTERSTELLAR()).toNumber()
-    expect(baseUpgradeMass).to.equal(Math.floor(totalMinted / maxLevelTokenCap / 2 ** 5))
+    expect(baseUpgradeMass).to.equal(Math.floor(totalMinted / maxLevelTokenCap / 2 ** 4))
 
     // Update correct token's metadata and burn the right tokens
     expect(await blackHoles.merge([1, 2, 3, 4]))
@@ -283,5 +283,28 @@ describe("BlackHoles", function () {
     }
 
     console.log("Total gas used:", totalGas.toString())
+  })
+
+  it("Should provide the correct names for each level", async function () {
+    const names = ["Micro", "Stellar", "Intermediate", "Supermassive", "Primordial"]
+
+    for (let i = 0; i < 5; i++) {
+      expect(await blackHoles.nameForBlackHoleLevel(i)).to.equal(names[i])
+    }
+  })
+
+  it("Should provide the correct level for each mass", async function () {
+    // Mint 1,000 tokens
+    mintPrice = await blackHoles.getPrice()
+    await blackHoles.mint(10_000, { value: mintPrice.mul(10_000) })
+
+    // Get base upgrade mass
+    const baseUpgradeMass = (await blackHoles.getBaseUpgradeMass()).toNumber()
+
+    // Check each level
+    for (let level = 0; level < 4; level++) {
+      const mass = baseUpgradeMass * 2 ** level
+      expect(await blackHoles.levelForMass(mass)).to.equal((level + 1).toString())
+    }
   })
 })

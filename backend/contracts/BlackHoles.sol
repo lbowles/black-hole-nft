@@ -16,6 +16,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
   uint256 public immutable TIMED_SALE_THRESHOLD = 1000;
   uint256 public immutable MAX_LEVEL = 4;
   uint256 public immutable MAX_SUPPLY_OF_INTERSTELLAR = 42;
+  string[] public BLACK_HOLE_NAMES = ["Micro", "Stellar", "Intermediate", "Supermassive", "Primordial"];
 
   uint256 public price;
   uint256 public timedSalePrice;
@@ -161,15 +162,15 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
   }
 
   function levelForMass(uint256 _mass) public view returns (uint256) {
-    uint256 baseUpgradeMass = getBaseUpgradeMass();
+    uint256[] memory upgradeIntervals_ = upgradeIntervals();
 
-    if (_mass < baseUpgradeMass) {
+    if (_mass < upgradeIntervals_[0]) {
       return 0;
-    } else if (_mass < baseUpgradeMass * 2) {
+    } else if (_mass < upgradeIntervals_[1]) {
       return 1;
-    } else if (_mass < baseUpgradeMass * 4) {
+    } else if (_mass < upgradeIntervals_[2]) {
       return 2;
-    } else if (_mass < baseUpgradeMass * 8) {
+    } else if (_mass < upgradeIntervals_[3]) {
       return 3;
     } else {
       return 4;
@@ -177,7 +178,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
   }
 
   function getBaseUpgradeMass() public view returns (uint256) {
-    return _totalMinted() / MAX_SUPPLY_OF_INTERSTELLAR / 2**(MAX_LEVEL + 1);
+    return _totalMinted() / MAX_SUPPLY_OF_INTERSTELLAR / 2**(MAX_LEVEL);
   }
 
   function massForTokenId(uint256 _tokenId) public view returns (uint256) {
@@ -189,20 +190,23 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
    * @param _level Level of the black hole.
    * @return name of the black hole level.
    */
-  function nameForBlackHoleLevel(uint256 _level) public pure returns (string memory) {
-    if (_level == 0) {
-      return "Micro";
-    } else if (_level == 1) {
-      return "Stellar";
-    } else if (_level == 2) {
-      return "Intermediate";
-    } else if (_level == 3) {
-      return "Supermassive";
-    } else if (_level == 4) {
-      return "Primordial";
-    } else {
-      return "Unknown";
-    }
+  function nameForBlackHoleLevel(uint256 _level) public view returns (string memory) {
+    return BLACK_HOLE_NAMES[_level];
+  }
+
+  function allBlackHoleLevelNames() public view returns (string[] memory) {
+    return BLACK_HOLE_NAMES;
+  }
+
+  // The amount needed at each level to upgrade to the next level.
+  function upgradeIntervals() public view returns (uint256[] memory) {
+    uint256 baseUpgradeMass = getBaseUpgradeMass();
+    uint256[] memory intervals = new uint256[](MAX_LEVEL + 1);
+    intervals[0] = baseUpgradeMass;
+    intervals[1] = baseUpgradeMass * 2;
+    intervals[2] = baseUpgradeMass * 4;
+    intervals[3] = baseUpgradeMass * 8;
+    return intervals;
   }
 
   /**
@@ -317,6 +321,14 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
     massesConsumed[targetId] += sum;
 
     emit MetadataUpdate(targetId);
+  }
+
+  function blackHolesForTokenIds(uint256[] memory tokenIds) public view returns (BlackHole[] memory) {
+    BlackHole[] memory blackHoles = new BlackHole[](tokenIds.length);
+    for (uint256 i = 0; i < tokenIds.length; i++) {
+      blackHoles[i] = blackHoleForTokenId(tokenIds[i]);
+    }
+    return blackHoles;
   }
 
   function totalMinted() external view returns (uint256) {
