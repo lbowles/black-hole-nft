@@ -21,7 +21,7 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
 
 let hardhatNetwork: HardhatNetworkUserConfig = {
   mining: {
-    interval: 2000,
+    interval: 4_000,
   },
 }
 

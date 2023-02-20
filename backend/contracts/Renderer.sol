@@ -132,8 +132,6 @@ contract Renderer {
           maxY = PIXELS_PER_SIDE - minY;
           minY = 0;
         }
-
-        // TODO: Randomly add perimiter glow
       }
 
       // Select a random value between minY and maxY

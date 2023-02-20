@@ -10,6 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy("utils", {
     from: deployer,
     log: true,
+    autoMine: true,
   })
 }
 export default func

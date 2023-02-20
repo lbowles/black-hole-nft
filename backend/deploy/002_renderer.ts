@@ -15,6 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       utils: utilities.address,
     },
     log: true,
+    autoMine: true,
   })
 }
 export default func
