@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
 import { BigNumber, ethers } from "ethers"
 import micro from "../../img/blackHoles/microAnimated.svg"
-import blockSpinner from "../../img/blockSpinner.svg"
 import { Countdown } from "../../components/Countdown/Countdown"
 import {
   useBlackHolesGetMintState,
   useBlackHolesGetPrice,
   useBlackHolesMint,
+  useBlackHolesTimedSaleDuration,
   useBlackHolesTimedSaleEndTimestamp,
   useBlackHolesTimedSalePrice,
   useBlackHolesTimedSaleThreshold,
@@ -19,6 +19,7 @@ import { useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import { useAccount } from "wagmi"
 import { BlackHoles__factory } from "../../../../backend/types"
 import deployments from "../../deployments.json"
+import { ActionButton } from "../../components/ActionButton/ActionButton"
 
 // TODO: custom input
 
@@ -42,6 +43,7 @@ export const Mint = () => {
   const { data: timedSaleEndTimestamp, isLoading: timedSaleEndTimestampLoading } = useBlackHolesTimedSaleEndTimestamp({
     watch: true,
   })
+  const { data: timedSaleDuration } = useBlackHolesTimedSaleDuration()
   const { data: amountMinted, isLoading: amountMintedLoading } = useBlackHolesTotalMinted({ watch: true })
 
   const addRecentTransaction = useAddRecentTransaction()
@@ -54,14 +56,14 @@ export const Mint = () => {
   const [mintBtnDisabled, setMintBtnDisabled] = useState<boolean>(true)
   const [mintBtnLoading, setMintBtnLoading] = useState<boolean>(false)
   const [mintedTokens, setMintedTokens] = useState<number[]>([])
-  const [customShowen, setCustomShowen] = useState<boolean>(false)
+  const [customShowen, setCustomVisible] = useState<boolean>(false)
 
   const { config: mintConfig, error: mintError } = usePrepareBlackHolesMint({
     args: [BigNumber.from(`${mintCount}`)],
     overrides: {
       value: mintPrice?.mul(mintCount!),
     },
-    enabled: mintState !== MintState.Closed,
+    enabled: mintState !== undefined && mintState !== MintState.Closed,
   })
 
   const {
@@ -118,9 +120,9 @@ export const Mint = () => {
 
   const toggelCustomAmount = () => {
     if (customShowen) {
-      setCustomShowen(false)
+      setCustomVisible(false)
     } else {
-      setCustomShowen(true)
+      setCustomVisible(true)
     }
   }
 
@@ -136,8 +138,7 @@ export const Mint = () => {
       mintStateLoading ||
       timedSaleEndTimestampLoading ||
       amountMintedLoading ||
-      isMintTxLoading ||
-      isMintSignLoading
+      isMintTxLoading
     setMintBtnLoading(loading)
     setMintBtnDisabled(loading || mintState === MintState.Closed)
   }, [
@@ -149,14 +150,13 @@ export const Mint = () => {
     amountMintedLoading,
     mintState,
     isMintTxLoading,
-    isMintSignLoading,
   ])
 
   useEffect(() => {
     if (mintSignResult) {
       addRecentTransaction({
         hash: mintSignResult.hash,
-        description: "Mint Black Hole",
+        description: `Mint ${mintCount} Black Hole${mintCount === 1 ? "" : "s"}`,
       })
     }
   }, [mintSignResult])
@@ -196,7 +196,7 @@ export const Mint = () => {
             <div className=" w-full sm:w-80">
               {mintState === MintState.TimedSale ? (
                 <>
-                  <p className="text-base text-white w-full text-center">OPEN EDITION</p>
+                  <p className="text-base text-white w-full text-center">TIMED SALE</p>
                   {timedSaleEndTimestamp !== undefined && (
                     <Countdown endTime={new Date(timedSaleEndTimestamp.toNumber() * 1000).getTime()} />
                   )}
@@ -204,7 +204,8 @@ export const Mint = () => {
                 </>
               ) : (
                 <p className="text-base text-white w-full text-center">
-                  {amountMinted?.toString()}/{timedMintThreshold?.toString()} until 24 hour open edition at{" "}
+                  {amountMinted?.toString()}/{timedMintThreshold?.toString()} until{" "}
+                  {Math.floor((timedSaleDuration?.toNumber() || 0) / 60 / 60)} hour timed sale at{" "}
                   {timedMintPrice && ethers.utils.formatEther(timedMintPrice)} ETH
                 </p>
               )}
@@ -240,50 +241,36 @@ export const Mint = () => {
                   className="text-gray-500 text-5xl hover:text-white"
                   onClick={() => {
                     handleMintAmountChange(Math.max(1, mintCount - 1))
-                    setCustomShowen(false)
+                    setCustomVisible(false)
                   }}
-                  disabled={mintBtnDisabled || account.isConnected === false}
+                  disabled={mintBtnDisabled || !account.isConnected || isMintSignLoading}
                 >
                   -
                 </button>
-                <button
+
+                <ActionButton
+                  text={
+                    isMintSignLoading
+                      ? "WAITING FOR WALLET"
+                      : !account.isConnected
+                      ? "CONNECT WALLET"
+                      : totalPrice !== undefined
+                      ? `MINT ${mintCount} FOR ${ethers.utils.formatEther(totalPrice)} ETH`
+                      : "PRICE UNAVAILABLE"
+                  }
+                  disabled={mintBtnDisabled || !account.isConnected || isMintSignLoading}
+                  loading={mintBtnLoading}
                   onClick={() => {
                     mint?.()
-                    setCustomShowen(false)
+                    setCustomVisible(false)
                   }}
-                  className="primaryBtn mx-2 min-w-[230px]"
-                  disabled={mintBtnDisabled || account.isConnected === false}
-                >
-                  {isMintSignLoading ? (
-                    <>WAITING FOR WALLET</>
-                  ) : (
-                    <>
-                      {account.isConnected ? (
-                        <>
-                          {mintBtnLoading ? (
-                            <div className="w-full flex justify-center h-full">
-                              <img className="h-full p-[12px]" src={blockSpinner}></img>
-                            </div>
-                          ) : (
-                            totalPrice !== undefined && (
-                              <>
-                                MINT {mintCount} FOR {ethers.utils.formatEther(totalPrice)} ETH
-                              </>
-                            )
-                          )}
-                        </>
-                      ) : (
-                        <>CONNECT WALLET</>
-                      )}
-                    </>
-                  )}
-                </button>
+                />
                 <button
-                  disabled={mintBtnDisabled || account.isConnected === false}
+                  disabled={mintBtnDisabled || !account.isConnected || isMintSignLoading}
                   className="text-gray-500 text-5xl hover:text-white"
                   onClick={() => {
                     handleMintAmountChange(mintCount + 1)
-                    setCustomShowen(false)
+                    setCustomVisible(false)
                   }}
                 >
                   +
