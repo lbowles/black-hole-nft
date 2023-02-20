@@ -8,6 +8,8 @@ import {
   useBlackHolesGetPrice,
   useBlackHolesMint,
   useBlackHolesTimedSaleEndTimestamp,
+  useBlackHolesTimedSalePrice,
+  useBlackHolesTimedSaleThreshold,
   useBlackHolesTotalMinted,
   usePrepareBlackHolesMint,
 } from "../../generated"
@@ -17,6 +19,8 @@ import { useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 
 export const Mint = () => {
   const { data: mintPrice, isLoading: priceLoading } = useBlackHolesGetPrice({ watch: true })
+  const { data: timedMintPrice, isLoading: timedMintPriceLoading } = useBlackHolesTimedSalePrice()
+  const { data: timedMintThreshold, isLoading: timedMintThresholdLoading } = useBlackHolesTimedSaleThreshold()
   const { data: mintState, isLoading: mintStateLoading } = useBlackHolesGetMintState({ watch: true })
   const { data: timedSaleEndTimestamp, isLoading: timedSaleEndTimestampLoading } = useBlackHolesTimedSaleEndTimestamp({
     watch: true,
@@ -60,10 +64,28 @@ export const Mint = () => {
   }, [mintPrice])
 
   useEffect(() => {
-    const loading = priceLoading || mintStateLoading || timedSaleEndTimestampLoading || amountMintedLoading
+    const loading =
+      priceLoading ||
+      timedMintPriceLoading ||
+      timedMintThresholdLoading ||
+      mintStateLoading ||
+      timedSaleEndTimestampLoading ||
+      amountMintedLoading ||
+      isMintTxLoading ||
+      isMintSignLoading
     setMintBtnLoading(loading)
     setMintBtnDisabled(loading || mintState === MintState.Closed)
-  }, [priceLoading, mintStateLoading, timedSaleEndTimestampLoading, amountMintedLoading, mintState])
+  }, [
+    priceLoading,
+    timedMintPriceLoading,
+    timedMintThresholdLoading,
+    mintStateLoading,
+    timedSaleEndTimestampLoading,
+    amountMintedLoading,
+    mintState,
+    isMintTxLoading,
+    isMintSignLoading,
+  ])
 
   useEffect(() => {
     if (mintSignResult) {
@@ -107,7 +129,8 @@ export const Mint = () => {
                 </>
               ) : (
                 <p className="text-base text-white w-full text-center">
-                  {amountMinted?.toString()}/1000 until 24 hour open edition at 0.003 ETH
+                  {amountMinted?.toString()}/{timedMintThreshold?.toString()} until 24 hour open edition at{" "}
+                  {timedMintPrice && ethers.utils.formatEther(timedMintPrice)} ETH
                 </p>
               )}
               <div className="flex justify-center mt-6">
