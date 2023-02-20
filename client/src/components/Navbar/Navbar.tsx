@@ -37,7 +37,6 @@ export const Navbar = () => {
         }
         return (
           <button
-            key={i}
             onClick={() => {
               navigate(page.link)
               setActive(i)
@@ -57,7 +56,7 @@ export const Navbar = () => {
     <div>
       <div className="flex justify-between w-screen p-5 ">
         <div>
-          <p className="text-white text-2xl">BLACK HOLES</p>
+          <p className="text-white text-2xl min-w-[117px]">BLACK HOLES</p>
         </div>
         <div className="sm:block hidden w-80">{nav}</div>
         <div>
