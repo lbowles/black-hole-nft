@@ -115,9 +115,6 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
       '{"trait_type": "Level", "value": ',
       utils.uint2str(blackHole.level),
       "},",
-      // '{"trait_type": "Size", "value": ',
-      // utils.uint2str(blackHole.size),
-      // "},",
       '{"trait_type": "Name", "value": "',
       blackHole.name,
       '"},',
@@ -289,6 +286,9 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
     }
   }
 
+  /**
+   * @notice Returns whether merging is enabled or not.
+   */
   function isMergingEnabled() public view returns (bool) {
     return getMintState() == MintState.CLOSED && block.timestamp > timedSaleEndTimestamp + mergingDelay;
   }
