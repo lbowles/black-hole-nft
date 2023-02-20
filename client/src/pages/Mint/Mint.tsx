@@ -20,6 +20,8 @@ import { useAccount } from "wagmi"
 import { BlackHoles__factory } from "../../../../backend/types"
 import deployments from "../../deployments.json"
 
+// TODO: custom input
+
 function getOpenSeaLink(chainId: string, tokenId: string | number) {
   return `https://${chainId !== "1" ? "testnets." : ""}opensea.io/assets/${chainId !== "1" ? "goerli/" : ""}${
     deployments.contracts.BlackHoles.address
@@ -47,11 +49,12 @@ export const Mint = () => {
   // const price = openMintStarted ? openMintPrice : preOpenMintPrice
   const account = useAccount()
 
-  const [mintCount, setMintAmount] = useState(1)
+  const [mintCount, setMintAmount] = useState<number>(1)
   const [totalPrice, setTotalPrice] = useState<BigNumber>()
   const [mintBtnDisabled, setMintBtnDisabled] = useState<boolean>(true)
   const [mintBtnLoading, setMintBtnLoading] = useState<boolean>(false)
   const [mintedTokens, setMintedTokens] = useState<number[]>([])
+  const [customShowen, setCustomShowen] = useState<boolean>(false)
 
   const { config: mintConfig, error: mintError } = usePrepareBlackHolesMint({
     args: [BigNumber.from(`${mintCount}`)],
@@ -111,6 +114,14 @@ export const Mint = () => {
         )}
       </>
     )
+  }
+
+  const toggelCustomAmount = () => {
+    if (customShowen) {
+      setCustomShowen(false)
+    } else {
+      setCustomShowen(true)
+    }
   }
 
   useEffect(() => {
@@ -197,17 +208,50 @@ export const Mint = () => {
                   {timedMintPrice && ethers.utils.formatEther(timedMintPrice)} ETH
                 </p>
               )}
-              <div className="flex justify-center mt-6">
+              <div className="w-full justify-center flex mt-6 transition-all">
+                <div className="w-[230px] flex justify-end">
+                  <button
+                    className=" text-base text-gray-500 hover:text-white transition-all text-right"
+                    onClick={() => toggelCustomAmount()}
+                  >
+                    {customShowen ? <>HIDE</> : <>CUSTOM AMOUNT</>}
+                  </button>
+                </div>
+              </div>
+              <div className="w-full justify-center flex mt-1 transition-all">
+                <div className="w-[230px] flex justify-end">
+                  <input
+                    className={`text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none w-[60px] mb-1 transition-all ${
+                      customShowen ? "visible" : "hidden"
+                    }`}
+                    placeholder={mintCount.toString()}
+                    onChange={(e) => {
+                      if (e.target.value === "") {
+                        handleMintAmountChange(1)
+                      } else {
+                        handleMintAmountChange(parseInt(e.target.value))
+                      }
+                    }}
+                  ></input>
+                </div>
+              </div>
+              <div className="flex justify-center mt-1">
                 <button
                   className="text-gray-500 text-5xl hover:text-white"
-                  onClick={() => handleMintAmountChange(Math.max(1, mintCount - 1))}
+                  onClick={() => {
+                    handleMintAmountChange(Math.max(1, mintCount - 1))
+                    setCustomShowen(false)
+                  }}
                   disabled={mintBtnDisabled || account.isConnected === false}
                 >
                   -
                 </button>
                 <button
-                  onClick={mint}
-                  className="primaryBtn mx-2 min-w-[222px]"
+                  onClick={() => {
+                    mint?.()
+                    setCustomShowen(false)
+                  }}
+                  className="primaryBtn mx-2 min-w-[230px]"
                   disabled={mintBtnDisabled || account.isConnected === false}
                 >
                   {isMintSignLoading ? (
@@ -237,7 +281,10 @@ export const Mint = () => {
                 <button
                   disabled={mintBtnDisabled || account.isConnected === false}
                   className="text-gray-500 text-5xl hover:text-white"
-                  onClick={() => handleMintAmountChange(mintCount + 1)}
+                  onClick={() => {
+                    handleMintAmountChange(mintCount + 1)
+                    setCustomShowen(false)
+                  }}
                 >
                   +
                 </button>
