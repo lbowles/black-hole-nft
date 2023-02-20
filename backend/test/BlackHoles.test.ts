@@ -23,6 +23,7 @@ describe("BlackHoles", function () {
 
   it("Should have the correct price set in the constructor", async function () {
     expect(await blackHoles.price()).to.equal(ethers.utils.parseEther("0.003"))
+    expect(await blackHoles.timedSalePrice()).to.equal(ethers.utils.parseEther("0.004"))
   })
 
   it("Should mint a new NFT and assign it to the caller", async function () {
@@ -209,7 +210,7 @@ describe("BlackHoles", function () {
     )
   })
 
-  it.only("Should merge tokens", async function () {
+  it("Should merge tokens", async function () {
     /* Complete sale (mint 11,000 tokens) */
     expect(await blackHoles.isMergingEnabled()).to.be.false
 
