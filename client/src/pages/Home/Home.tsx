@@ -1,7 +1,7 @@
 import { LinksTab } from "../../components/LinksTab/LinksTab"
 import { BlackHoleIntro } from "../../components/home/BlackHoleIntro/BlackHoleIntro"
 import { GeneralInfo } from "../../components/home/GeneralInfo/GeneralInfo"
-import landingBackHole from "../../img/landingBlackHoleAnimation.svg"
+import landingBackHole from "../../img/blackHoles/primordialAnimated.svg"
 import { useNavigate } from "react-router-dom"
 import { useBlackHolesGetMintState } from "../../generated"
 import { useEffect } from "react"
