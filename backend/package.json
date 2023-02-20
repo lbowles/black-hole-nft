@@ -45,6 +45,6 @@
     "start": "yarn hardhat node --export ../client/src/deployments.json",
     "deploy": "yarn hardhat deploy --export ../client/src/deployments.json",
     "export": "yarn hardhat export --export ../client/src/deployments.json",
-    "reset": "yarn hardhat al-reset"
+    "ui": "cd hardhat-ui && yarn start"
   }
 }
