@@ -16,6 +16,7 @@ import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwne
 import useSound from "use-sound"
 import generalClickEffect from "../../sounds/generalClick.mp3"
 import linkClickEffect from "../../sounds/linkClick.mp3"
+import mergeEffect from "../../sounds/merge.mp3"
 
 import deployments from "../../deployments.json"
 import { BigNumber, BigNumberish } from "ethers"
@@ -75,9 +76,9 @@ export const Burn = () => {
 
   const [generalClickSound] = useSound(generalClickEffect)
   const [linkClickSound] = useSound(linkClickEffect)
+  const [mergeSound] = useSound(mergeEffect)
 
   const [mergeTokenIds, setMergeTokenIds] = useState<BigNumber[]>([])
-
   const [loadingTokens, setLoadingTokens] = useState<boolean>(true)
 
   const { address } = useAccount()
@@ -355,73 +356,83 @@ export const Burn = () => {
                     </div>
                   </>
                 ) : (
-                  <div className="flex justify-center w-screen  p-5 pb-0 mt-3">
-                    <div className="w-60">
-                      <p className="w-full text-center text-2xl text-white">You will receive</p>
-                      <p className="text-gray-600 text-base  w-full text-center">Select token ID to upgrade</p>
-                      <div className="border-2 border-white  mt-5">
-                        <img src={nftTypeToAnimatedImg[upgradeType]?.trim() ?? ""} className="p-1"></img>
-                        <div className="border-t-2 border-white p-5">
-                          <p className="text-xl text-white pb-1">{upgradeType}</p>
-                          <div className="flex justify-between items-end">
-                            {totalSM > 0 && (
-                              <div className="relative mt-3">
-                                <select
-                                  value={targetTokenIndexInOwnedArray ?? ""}
-                                  onChange={(e) => {
-                                    // Index of target token in owned array
-                                    const indexInOwnedArray = Number(e.target.value)
-                                    setTargetTokenIndexInOwnedArray(indexInOwnedArray)
-                                    updateMergeTokenIds(indexInOwnedArray)
-                                  }}
-                                  className="text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none transition-colors w-[116px]"
-                                >
-                                  <option key={null} value="" disabled>
-                                    Select token
-                                  </option>
-                                  {selectedTokenIndexes
-                                    .sort((a, b) => {
-                                      return compareBlackHoles(ownedNFTs[a], ownedNFTs[b])
-                                    })
-                                    .map((indexInOwnedArray, indexInSelectedArray) => {
-                                      const nft = ownedNFTs[indexInOwnedArray]
-                                      return (
-                                        <option
-                                          key={indexInSelectedArray}
-                                          value={selectedTokenIndexes[indexInSelectedArray]}
-                                        >
-                                          {"#" + nft.tokenId + " (" + nft.mass + " SM)"}
-                                        </option>
-                                      )
-                                    })}
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 ">
-                                  <img src={dropdown}></img>
+                  <>
+                    <div className="flex justify-center">
+                      <button
+                        className="text-gray-500 hover:text-white transition-colors text-base w-96 text-left mt-3"
+                        onClick={() => setFinalPage(false)}
+                      >
+                        {"<-Back"}
+                      </button>
+                    </div>
+                    <div className="flex justify-center w-screen  p-5 pb-0 ">
+                      <div className="w-60">
+                        <p className="w-full text-center text-2xl text-white">You will receive</p>
+                        <p className="text-gray-600 text-base  w-full text-center">Select token ID to upgrade</p>
+                        <div className="border-2 border-white  mt-5">
+                          <img src={nftTypeToAnimatedImg[upgradeType]?.trim() ?? ""} className="p-1"></img>
+                          <div className="border-t-2 border-white p-5">
+                            <p className="text-xl text-white pb-1">{upgradeType}</p>
+                            <div className="flex justify-between items-end">
+                              {totalSM > 0 && (
+                                <div className="relative mt-3">
+                                  <select
+                                    value={targetTokenIndexInOwnedArray ?? ""}
+                                    onChange={(e) => {
+                                      // Index of target token in owned array
+                                      const indexInOwnedArray = Number(e.target.value)
+                                      setTargetTokenIndexInOwnedArray(indexInOwnedArray)
+                                      updateMergeTokenIds(indexInOwnedArray)
+                                    }}
+                                    className="text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none transition-colors w-[116px]"
+                                  >
+                                    <option key={null} value="" disabled>
+                                      Select token
+                                    </option>
+                                    {selectedTokenIndexes
+                                      .sort((a, b) => {
+                                        return compareBlackHoles(ownedNFTs[a], ownedNFTs[b])
+                                      })
+                                      .map((indexInOwnedArray, indexInSelectedArray) => {
+                                        const nft = ownedNFTs[indexInOwnedArray]
+                                        return (
+                                          <option
+                                            key={indexInSelectedArray}
+                                            value={selectedTokenIndexes[indexInSelectedArray]}
+                                          >
+                                            {"#" + nft.tokenId + " (" + nft.mass + " SM)"}
+                                          </option>
+                                        )
+                                      })}
+                                  </select>
+                                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 ">
+                                    <img src={dropdown}></img>
+                                  </div>
                                 </div>
+                              )}
+                              <div className="h-full items-end">
+                                <p className="text-xl text-white pb-1">{totalSM} SM</p>
                               </div>
-                            )}
-                            <div className="h-full items-end">
-                              <p className="text-xl text-white pb-1">{totalSM} SM</p>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="min-w-[240px] mt-10">
-                        <ActionButton
-                          onClick={() => merge?.()}
-                          disabled={mergeBtnDisabled || targetTokenIndexInOwnedArray == null || isMergeSignLoading}
-                          text={
-                            isMergeSignLoading
-                              ? "WAITING FOR WALLET"
-                              : targetTokenIndexInOwnedArray == undefined
-                              ? "SELECT TOKEN ID ABOVE"
-                              : `MERGE INTO TOKEN #${ownedNFTs[targetTokenIndexInOwnedArray].tokenId.toString()}`
-                          }
-                          loading={mergeBtnLoading || isMergeTxLoading}
-                        />
+                        <div className="min-w-[240px] mt-10 flex justify-center">
+                          <ActionButton
+                            onClick={() => merge?.()}
+                            disabled={mergeBtnDisabled || targetTokenIndexInOwnedArray == null || isMergeSignLoading}
+                            text={
+                              isMergeSignLoading
+                                ? "WAITING FOR WALLET"
+                                : targetTokenIndexInOwnedArray == undefined
+                                ? "SELECT TOKEN ID ABOVE"
+                                : `MERGE INTO TOKEN #${ownedNFTs[targetTokenIndexInOwnedArray].tokenId.toString()}`
+                            }
+                            loading={mergeBtnLoading || isMergeTxLoading}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </>
             )}
