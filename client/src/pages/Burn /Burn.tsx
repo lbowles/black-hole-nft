@@ -13,6 +13,9 @@ import blockSpinner from "../../img/blockSpinner.svg"
 import { useEffect, useState } from "react"
 import { useAccount, useProvider, useWaitForTransaction } from "wagmi"
 import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwner"
+import useSound from "use-sound"
+import generalClickEffect from "../../sounds/generalClick.mp3"
+import linkClickEffect from "../../sounds/linkClick.mp3"
 
 import deployments from "../../deployments.json"
 import { BigNumber, BigNumberish } from "ethers"
@@ -70,6 +73,9 @@ export const Burn = () => {
   const [mergeBtnLoading, setMintBtnLoading] = useState(false)
   const [selectedTokenIndexes, setSelectedTokenIndexes] = useState<number[]>([])
 
+  const [generalClickSound] = useSound(generalClickEffect)
+  const [linkClickSound] = useSound(linkClickEffect)
+
   const [mergeTokenIds, setMergeTokenIds] = useState<BigNumber[]>([])
 
   const [loadingTokens, setLoadingTokens] = useState<boolean>(true)
@@ -100,6 +106,7 @@ export const Burn = () => {
   })
 
   const handleSelect = (index: number) => {
+    linkClickSound()
     const updatedNFTs = [...ownedNFTs]
     updatedNFTs[index].selected = !updatedNFTs[index].selected
     setOwnedNFTs(updatedNFTs)
@@ -236,13 +243,19 @@ export const Burn = () => {
                             <>
                               <button
                                 className="text-base hover:text-white text-gray-500 transition-all pr-2"
-                                onClick={handleResetAll}
+                                onClick={() => {
+                                  handleResetAll()
+                                  generalClickSound()
+                                }}
                               >
                                 RESET |
                               </button>
                               <button
                                 className="text-base hover:text-white text-gray-500 transition-all "
-                                onClick={handleSelectAll}
+                                onClick={() => {
+                                  handleSelectAll()
+                                  generalClickSound()
+                                }}
                               >
                                 SELECT ALL
                               </button>
@@ -250,7 +263,10 @@ export const Burn = () => {
                           ) : (
                             <button
                               className="text-base hover:text-white text-gray-500 transition-color "
-                              onClick={handleSelectAll}
+                              onClick={() => {
+                                handleSelectAll()
+                                generalClickSound()
+                              }}
                             >
                               SELECT ALL
                             </button>
@@ -309,6 +325,7 @@ export const Burn = () => {
                           disabled={totalSM === 0}
                           onClick={() => {
                             setFinalPage(true)
+                            generalClickSound()
                           }}
                         >
                           NEXT

@@ -6,9 +6,12 @@ import { useNavigate } from "react-router-dom"
 import { useBlackHolesGetMintState } from "../../generated"
 import { useEffect } from "react"
 import { MintState } from "../../interfaces/IMintState"
+import useSound from "use-sound"
+import generalClickEffect from "../../sounds/generalClick.mp3"
 
 export const Home = () => {
   const navigate = useNavigate()
+  const [generalClickSound] = useSound(generalClickEffect)
 
   const { data: mintState } = useBlackHolesGetMintState()
 
@@ -19,7 +22,6 @@ export const Home = () => {
   return (
     <>
       <div className="flex justify-center w-screen p-[70px] relative">
-        {/* TODO: GET CENTERED BLACK HOLE */}
         <img className="w-[400px]" src={landingBackHole}></img>
         <LinksTab />
       </div>
@@ -30,16 +32,27 @@ export const Home = () => {
       <div className="flex justify-center w-screen p-20">
         {/* TODO: Test this */}
         {mintState !== MintState.Closed ? (
-          <button onClick={() => navigate("/mint")} className="primaryBtn">
+          <button
+            onClick={() => {
+              navigate("/mint")
+              generalClickSound()
+            }}
+            className="primaryBtn"
+          >
             MINT NOW
           </button>
         ) : (
           // TODO: Link to secondary market or merge
-          <button onClick={() => navigate("/mint")} className="primaryBtn" disabled={true}>
+          <button
+            onClick={() => {
+              generalClickSound()
+            }}
+            className="primaryBtn"
+            disabled={true}
+          >
             MINT CLOSED
           </button>
         )}
-        {/* TODO: Show minted IDs after mint, loading indicators, etc */}
       </div>
       <BlackHoleIntro />
       <GeneralInfo />
