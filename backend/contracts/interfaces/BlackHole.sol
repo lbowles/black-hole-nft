@@ -7,5 +7,6 @@ struct BlackHole {
   uint256 level;
   uint256 size;
   uint256 mass;
+  uint256 adjustment;
   string name;
 }

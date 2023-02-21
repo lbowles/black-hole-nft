@@ -1,14 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
-// Core utils used extensively to format CSS and numbers.
 library utils {
-  struct HSL {
-    uint256 h;
-    uint256 s;
-    uint256 l;
-  }
-
   function assemblyKeccak(bytes memory _input) public pure returns (bytes32 x) {
     assembly {
       x := keccak256(add(_input, 0x20), mload(_input))
@@ -35,16 +28,6 @@ library utils {
 
   function max(uint256 a, uint256 b) internal pure returns (uint256) {
     return a > b ? a : b;
-  }
-
-  function generateColors(uint256 _hue, uint256 _numColors) public pure returns (HSL[] memory) {
-    HSL[] memory colors = new HSL[](_numColors);
-
-    for (uint256 i = 0; i < _numColors; i++) {
-      colors[i] = HSL(_hue, 100 - ((i * 50) / _numColors), 70 - ((i * 30) / _numColors));
-    }
-
-    return colors;
   }
 
   function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
@@ -86,6 +69,10 @@ library utils {
           "%)"
         )
       );
+  }
+
+  function unpackHsl(uint256 _packedHsl) public pure returns (uint256[3] memory) {
+    return [(_packedHsl >> (12 * 2)) & 0xFFF, (_packedHsl >> (12 * 1)) & 0xFFF, (_packedHsl >> (12 * 0)) & 0xFFF];
   }
 
   function uint2floatstr(uint256 _i_scaled, uint256 _decimals) internal pure returns (string memory) {

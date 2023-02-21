@@ -150,6 +150,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
     uint256 mass = massForTokenId(_tokenId);
     uint256 level = levelForMass(mass);
     string memory name = nameForBlackHoleLevel(level);
+    uint256 adjustment = getAdjustmentForMass(mass);
 
     return
       BlackHole({
@@ -157,8 +158,25 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
         level: level,
         size: renderer.PIXELS_PER_SIDE() / 2 - (10 - level),
         mass: mass,
-        name: name
+        name: name,
+        adjustment: adjustment
       });
+  }
+
+  /**
+   * @notice Gets adjustment for a given mass.
+   * @param _mass Mass to calculate the adjustment for.
+   * @return Adjustment.
+   */
+  function getAdjustmentForMass(uint256 _mass) public view returns (uint256) {
+    uint256 baseUpgradeMass = getBaseUpgradeMass();
+    uint256 level = levelForMass(_mass);
+    uint256 nextLevelMass = baseUpgradeMass * 2**(level + 1) - 1;
+    uint256 baseLevelMass = baseUpgradeMass * 2**level;
+    uint256 massDiff = nextLevelMass - baseLevelMass;
+    uint256 adjustment = ((20 * (nextLevelMass - _mass))) / massDiff;
+
+    return adjustment;
   }
 
   function levelForMass(uint256 _mass) public view returns (uint256) {
