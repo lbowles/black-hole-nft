@@ -1,36 +1,37 @@
-import micro from "../../img/blackHoles/micro.svg"
-import stellar from "../../img/blackHoles/stellar.svg"
-import intermediate from "../../img/blackHoles/intermediate.svg"
-import supermassive from "../../img/blackHoles/supermassive.svg"
-import primordial from "../../img/blackHoles/primordial.svg"
-import microAnimated from "../../img/blackHoles/microAnimated.svg"
-import stellarAnimated from "../../img/blackHoles/stellarAnimated.svg"
-import intermediateAnimated from "../../img/blackHoles/intermediateAnimated.svg"
-import supermassiveAnimated from "../../img/blackHoles/supermassiveAnimated.svg"
-import primordialAnimated from "../../img/blackHoles/primordialAnimated.svg"
-import dropdown from "../../img/dropdown.svg"
-import blockSpinner from "../../img/blockSpinner.svg"
+import { useAddRecentTransaction } from "@rainbow-me/rainbowkit"
+import { BigNumber } from "ethers"
 import { useEffect, useState } from "react"
-import { useAccount, useProvider, useWaitForTransaction } from "wagmi"
-import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwner"
 import useSound from "use-sound"
-import generalClickEffect from "../../sounds/generalClick.mp3"
-import linkClickEffect from "../../sounds/linkClick.mp3"
-import mergeEffect from "../../sounds/merge.mp3"
-
+import { useAccount, useProvider, useWaitForTransaction } from "wagmi"
+import { ActionButton } from "../../components/ActionButton/ActionButton"
+import { Countdown } from "../../components/Countdown/Countdown"
 import deployments from "../../deployments.json"
-import { BigNumber, BigNumberish } from "ethers"
 import {
   useBlackHolesAllBlackHoleLevelNames,
-  useBlackHolesBlackHoleNames,
   useBlackHolesGetBaseUpgradeMass,
   useBlackHolesIsMergingEnabled,
   useBlackHolesMerge,
+  useBlackHolesMergingDelay,
+  useBlackHolesTimedSaleEndTimestamp,
   useBlackHolesUpgradeIntervals,
   usePrepareBlackHolesMerge,
 } from "../../generated"
-import { useAddRecentTransaction } from "@rainbow-me/rainbowkit"
-import { ActionButton } from "../../components/ActionButton/ActionButton"
+import intermediate from "../../img/blackHoles/intermediate.svg"
+import intermediateAnimated from "../../img/blackHoles/intermediateAnimated.svg"
+import micro from "../../img/blackHoles/micro.svg"
+import microAnimated from "../../img/blackHoles/microAnimated.svg"
+import primordial from "../../img/blackHoles/primordial.svg"
+import primordialAnimated from "../../img/blackHoles/primordialAnimated.svg"
+import stellar from "../../img/blackHoles/stellar.svg"
+import stellarAnimated from "../../img/blackHoles/stellarAnimated.svg"
+import supermassive from "../../img/blackHoles/supermassive.svg"
+import supermassiveAnimated from "../../img/blackHoles/supermassiveAnimated.svg"
+import blockSpinner from "../../img/blockSpinner.svg"
+import dropdown from "../../img/dropdown.svg"
+import generalClickEffect from "../../sounds/generalClick.mp3"
+import linkClickEffect from "../../sounds/linkClick.mp3"
+import mergeEffect from "../../sounds/merge.mp3"
+import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwner"
 
 // sort by SM (largest first) and then by tokenId (smallest first) if SM is the same
 function compareBlackHoles(a: BlackHoleMetadata, b: BlackHoleMetadata) {
@@ -55,13 +56,6 @@ const nftTypeToAnimatedImg: Record<string, string> = {
   SUPERMASSIVE: supermassiveAnimated,
   PRIMORDIAL: primordialAnimated,
 }
-// const upgradeSMRequirement = {
-//   MICRO: 3,
-//   STELLAR: 6,
-//   INTERMEDIATE: 9,
-//   SUPERMASSIVE: 12,
-//   PRIMORDIAL: 15,
-// }
 
 function getOpenSeaLink(chainId: string, tokenId: string | number) {
   return `https://${chainId !== "1" ? "testnets." : ""}opensea.io/assets/${chainId !== "1" ? "goerli/" : ""}${
@@ -76,10 +70,9 @@ export const Burn = () => {
   const [upgradeType, setUpgradeType] = useState("")
   const [nextUpgradeDetails, setNextUpgradeDetails] = useState<[number, string] | null>()
   const [targetTokenIndexInOwnedArray, setTargetTokenIndexInOwnedArray] = useState<number>()
-  const [mergeBtnDisabled, setMintBtnDisabled] = useState(false)
-  const [mergeBtnLoading, setMintBtnLoading] = useState(false)
   const [selectedTokenIndexes, setSelectedTokenIndexes] = useState<number[]>([])
   const [mergeSuccess, setMergeSuccess] = useState(false)
+  const [mergeStartTimestamp, setMergeStartTimestamp] = useState<BigNumber>()
 
   const [generalClickSound] = useSound(generalClickEffect)
   const [linkClickSound] = useSound(linkClickEffect)
@@ -96,6 +89,8 @@ export const Burn = () => {
   const { data: upgradeIntervals } = useBlackHolesUpgradeIntervals()
   const { data: levelNames } = useBlackHolesAllBlackHoleLevelNames()
   const { data: isMergingEnabled } = useBlackHolesIsMergingEnabled()
+  const { data: timedSaleEndTimestamp } = useBlackHolesTimedSaleEndTimestamp()
+  const { data: mergingDelay } = useBlackHolesMergingDelay()
 
   const { config: mergeConfig } = usePrepareBlackHolesMerge({
     args: [mergeTokenIds],
@@ -197,6 +192,11 @@ export const Burn = () => {
     })
   }
 
+  useEffect(() => {
+    if (!timedSaleEndTimestamp || !mergingDelay) return
+    setMergeStartTimestamp(timedSaleEndTimestamp.add(mergingDelay))
+  }, [timedSaleEndTimestamp, mergingDelay])
+
   // Get owned NFTs
   useEffect(() => {
     if (!address || !provider || finalPage) return
@@ -262,9 +262,11 @@ export const Burn = () => {
         // TODO: General loading state (for all the other contract variables)
 
         !isMergingEnabled ? (
-          <p className="text-white text-center w-full text-xl mt-12">Merging not enabled yet.</p>
-        ) : // TODO: Countdown
-        !address ? (
+          <>
+            <p className="text-white text-center w-full text-xl mt-12">Merging not enabled yet.</p>
+            {mergeStartTimestamp && <Countdown endTime={new Date(mergeStartTimestamp.toNumber() * 1000).getTime()} />}
+          </>
+        ) : !address ? (
           <p className="text-white text-center w-full text-xl mt-12">Wallet not connected.</p>
         ) : loadingTokens ? (
           <div className="flex justify-center w-screen  p-5 items-center mt-7">
@@ -488,9 +490,7 @@ export const Burn = () => {
                             <div className="min-w-[240px] mt-10 flex justify-center">
                               <ActionButton
                                 onClick={() => merge?.()}
-                                disabled={
-                                  mergeBtnDisabled || targetTokenIndexInOwnedArray == null || isMergeSignLoading
-                                }
+                                disabled={targetTokenIndexInOwnedArray == null || isMergeSignLoading}
                                 text={
                                   isMergeSignLoading
                                     ? "WAITING FOR WALLET"
@@ -498,7 +498,7 @@ export const Burn = () => {
                                     ? "SELECT TOKEN ID ABOVE"
                                     : `MERGE INTO TOKEN #${ownedNFTs[targetTokenIndexInOwnedArray].tokenId.toString()}`
                                 }
-                                loading={mergeBtnLoading || isMergeTxLoading}
+                                loading={isMergeTxLoading}
                               />
                             </div>
                           </div>
