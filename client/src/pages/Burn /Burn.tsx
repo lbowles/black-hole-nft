@@ -151,7 +151,12 @@ export const Burn = () => {
         ...selectedTokenIndexes.slice(0, index),
         ...selectedTokenIndexes.slice(index + 1),
       ]
-      setMergeTokenIds(newArray.map((index) => BigNumber.from(ownedNFTs[index].tokenId)))
+      const tokenIds = newArray.map((index) => BigNumber.from(ownedNFTs[index].tokenId))
+      console.log(
+        "this will be merged",
+        tokenIds.map((id) => id.toString()),
+      )
+      setMergeTokenIds(tokenIds)
     }
   }
 
@@ -331,11 +336,10 @@ export const Burn = () => {
                                 <select
                                   value={targetTokenIndexInOwnedArray ?? ""}
                                   onChange={(e) => {
-                                    // Index of target token in selectedTokenIndexes
-                                    const index = Number(e.target.value)
-                                    // TODO: Probably related to the options problem
-                                    setTargetTokenIndexInOwnedArray(selectedTokenIndexes[index])
-                                    updateMergeTokenIds(selectedTokenIndexes[index])
+                                    // Index of target token in owned array
+                                    const indexInOwnedArray = Number(e.target.value)
+                                    setTargetTokenIndexInOwnedArray(indexInOwnedArray)
+                                    updateMergeTokenIds(indexInOwnedArray)
                                   }}
                                   className="text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none transition-colors w-[116px]"
                                 >
@@ -349,8 +353,10 @@ export const Burn = () => {
                                     .map((indexInOwnedArray, indexInSelectedArray) => {
                                       const nft = ownedNFTs[indexInOwnedArray]
                                       return (
-                                        // TODO: This isn't selecting properly
-                                        <option key={indexInSelectedArray} value={indexInSelectedArray}>
+                                        <option
+                                          key={indexInSelectedArray}
+                                          value={selectedTokenIndexes[indexInSelectedArray]}
+                                        >
                                           {"#" + nft.tokenId + " (" + nft.mass + " SM)"}
                                         </option>
                                       )
