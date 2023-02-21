@@ -203,39 +203,43 @@ export const Mint = () => {
                   <p className="text-base text-white w-full text-center pt-5">{amountMinted?.toString()} minted</p>
                 </>
               ) : (
-                <p className="text-base text-white w-full text-center">
+                <p className="text-base text-white w-full text-center mb-6">
                   {amountMinted?.toString()}/{timedMintThreshold?.toString()} until{" "}
                   {Math.floor((timedSaleDuration?.toNumber() || 0) / 60 / 60)} hour timed sale at{" "}
                   {timedMintPrice && ethers.utils.formatEther(timedMintPrice)} ETH
                 </p>
               )}
-              <div className="w-full justify-center flex mt-6 transition-all">
-                <div className="w-[230px] flex justify-end">
-                  <button
-                    className=" text-base text-gray-500 hover:text-white transition-all text-right"
-                    onClick={() => toggelCustomAmount()}
-                  >
-                    {customShowen ? <>HIDE</> : <>CUSTOM AMOUNT</>}
-                  </button>
-                </div>
-              </div>
-              <div className="w-full justify-center flex mt-1 transition-all">
-                <div className="w-[230px] flex justify-end">
-                  <input
-                    className={`text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none w-[60px] mb-1 transition-all ${
-                      customShowen ? "visible" : "hidden"
-                    }`}
-                    placeholder={mintCount.toString()}
-                    onChange={(e) => {
-                      if (e.target.value === "") {
-                        handleMintAmountChange(1)
-                      } else {
-                        handleMintAmountChange(parseInt(e.target.value))
-                      }
-                    }}
-                  ></input>
-                </div>
-              </div>
+              {account.isConnected && (
+                <>
+                  <div className="w-full justify-center flex mt-6 transition-all">
+                    <div className="w-[230px] flex justify-end">
+                      <button
+                        className=" text-base text-gray-500 hover:text-white transition-all text-right"
+                        onClick={() => toggelCustomAmount()}
+                      >
+                        {customShowen ? <>HIDE</> : <>CUSTOM AMOUNT</>}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="w-full justify-center flex mt-1 transition-all">
+                    <div className="w-[230px] flex justify-end">
+                      <input
+                        className={`text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none w-[60px] mb-1 transition-all ${
+                          customShowen ? "visible" : "hidden"
+                        }`}
+                        placeholder={mintCount.toString()}
+                        onChange={(e) => {
+                          if (e.target.value === "") {
+                            handleMintAmountChange(1)
+                          } else {
+                            handleMintAmountChange(parseInt(e.target.value))
+                          }
+                        }}
+                      ></input>
+                    </div>
+                  </div>
+                </>
+              )}
               <div className="flex justify-center mt-1">
                 <button
                   className="text-gray-500 text-5xl hover:text-white"
