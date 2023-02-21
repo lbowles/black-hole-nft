@@ -91,7 +91,7 @@ export const Burn = () => {
 
   const { config: mergeConfig } = usePrepareBlackHolesMerge({
     args: [mergeTokenIds],
-    enabled: selectedTokenIndexes.length >= 2 && isMergingEnabled,
+    enabled: mergeTokenIds.length >= 2 && isMergingEnabled,
   })
   const {
     write: merge,
@@ -100,7 +100,7 @@ export const Burn = () => {
     isSuccess: isMergeSignSuccess,
   } = useBlackHolesMerge(mergeConfig)
 
-  const { data: mintTx, isLoading: isMintTxLoading } = useWaitForTransaction({
+  const { data: mergeTx, isLoading: isMergeTxLoading } = useWaitForTransaction({
     hash: mergeSignResult?.hash,
     confirmations: 1,
   })
@@ -145,7 +145,7 @@ export const Burn = () => {
       }
     }
 
-    return [upgradeIntervals[level].toNumber() - totalSelectedSM, levelNames[level].toUpperCase()]
+    return [upgradeIntervals[level - 1].toNumber() - totalSelectedSM, levelNames[level].toUpperCase()]
   }
 
   // SelectedTokenIndexes contains a list of pointers to the main ownedNFTs array
@@ -158,14 +158,20 @@ export const Burn = () => {
         ...selectedTokenIndexes.slice(0, index),
         ...selectedTokenIndexes.slice(index + 1),
       ]
-      setMergeTokenIds(newArray.map((index) => BigNumber.from(ownedNFTs[index].tokenId)))
+      const tokenIds = newArray.map((index) => BigNumber.from(ownedNFTs[index].tokenId))
+      console.log(
+        "this will be merged",
+        tokenIds.map((id) => id.toString()),
+      )
+      setMergeTokenIds(tokenIds)
     }
   }
 
   // Get owned NFTs
   useEffect(() => {
-    if (!address || !provider) return
+    if (!address || !provider || finalPage) return
     const getOwnedNFTs = async () => {
+      setLoadingTokens(true)
       const ownedNFTs = await getTokensByOwner({
         address: address,
         provider,
@@ -175,7 +181,7 @@ export const Burn = () => {
       setLoadingTokens(false)
     }
     getOwnedNFTs()
-  }, [address, provider])
+  }, [address, provider, finalPage])
 
   useEffect(() => {
     if (!baseUpgradeMass || ownedNFTs.length == 0) return
@@ -200,6 +206,13 @@ export const Burn = () => {
     }
   }, [mergeSignResult])
 
+  useEffect(() => {
+    if (mergeTx?.confirmations === 1 && finalPage) {
+      setSelectedTokenIndexes([])
+      setFinalPage(false)
+    }
+  }, [mergeTx])
+
   return (
     <>
       <div className="flex justify-center w-screen  p-5 pb-0">
@@ -219,7 +232,9 @@ export const Burn = () => {
         !isMergingEnabled ? (
           <p className="text-white text-center w-full text-xl mt-12">Merging not enabled yet.</p>
         ) : // TODO: Countdown
-        loadingTokens ? (
+        !address ? (
+          <p className="text-white text-center w-full text-xl mt-12">Wallet not connected.</p>
+        ) : loadingTokens ? (
           <div className="flex justify-center w-screen  p-5 items-center mt-7">
             <div>
               <div className="flex w-full justify-center">
@@ -348,11 +363,10 @@ export const Burn = () => {
                                 <select
                                   value={targetTokenIndexInOwnedArray ?? ""}
                                   onChange={(e) => {
-                                    // Index of target token in selectedTokenIndexes
-                                    const index = Number(e.target.value)
-                                    // TODO: Probably related to the options problem
-                                    setTargetTokenIndexInOwnedArray(selectedTokenIndexes[index])
-                                    updateMergeTokenIds(selectedTokenIndexes[index])
+                                    // Index of target token in owned array
+                                    const indexInOwnedArray = Number(e.target.value)
+                                    setTargetTokenIndexInOwnedArray(indexInOwnedArray)
+                                    updateMergeTokenIds(indexInOwnedArray)
                                   }}
                                   className="text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none transition-colors w-[116px]"
                                 >
@@ -366,8 +380,10 @@ export const Burn = () => {
                                     .map((indexInOwnedArray, indexInSelectedArray) => {
                                       const nft = ownedNFTs[indexInOwnedArray]
                                       return (
-                                        // TODO: This isn't selecting properly
-                                        <option key={indexInSelectedArray} value={indexInSelectedArray}>
+                                        <option
+                                          key={indexInSelectedArray}
+                                          value={selectedTokenIndexes[indexInSelectedArray]}
+                                        >
                                           {"#" + nft.tokenId + " (" + nft.mass + " SM)"}
                                         </option>
                                       )
@@ -395,7 +411,7 @@ export const Burn = () => {
                               ? "SELECT TOKEN ID ABOVE"
                               : `MERGE INTO TOKEN #${ownedNFTs[targetTokenIndexInOwnedArray].tokenId.toString()}`
                           }
-                          loading={mergeBtnLoading}
+                          loading={mergeBtnLoading || isMergeTxLoading}
                         />
                       </div>
                     </div>
