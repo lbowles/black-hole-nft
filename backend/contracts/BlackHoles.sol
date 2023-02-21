@@ -178,7 +178,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
   }
 
   function getBaseUpgradeMass() public view returns (uint256) {
-    return _totalMinted() / MAX_SUPPLY_OF_INTERSTELLAR / 2**(MAX_LEVEL);
+    return utils.max(_totalMinted() / MAX_SUPPLY_OF_INTERSTELLAR / 2**(MAX_LEVEL), 2);
   }
 
   function massForTokenId(uint256 _tokenId) public view returns (uint256) {
