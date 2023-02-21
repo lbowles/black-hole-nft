@@ -146,7 +146,7 @@ export const Burn = () => {
       }
     }
 
-    return [upgradeIntervals[level - 1].toNumber() - totalSelectedSM, levelNames[level].toUpperCase()]
+    return [upgradeIntervals[Math.max(0, level - 1)].toNumber() - totalSelectedSM, levelNames[level].toUpperCase()]
   }
 
   // SelectedTokenIndexes contains a list of pointers to the main ownedNFTs array
@@ -166,6 +166,25 @@ export const Burn = () => {
       )
       setMergeTokenIds(tokenIds)
     }
+  }
+
+  const upgradeToNextLevel = (sMRequired: number) => {
+    let requiredSM = sMRequired
+    let tempTotalSM = totalSM
+    console.log(tempTotalSM, requiredSM)
+    const updatedNFTs = [...ownedNFTs]
+
+    ownedNFTs.forEach((nft, index) => {
+      if (tempTotalSM >= requiredSM) {
+        return
+      }
+      if (nft.selected === false) {
+        updatedNFTs[index].selected = true
+        setOwnedNFTs(updatedNFTs)
+        tempTotalSM = tempTotalSM + parseInt(nft.mass.toString())
+        setTotalSM(tempTotalSM)
+      }
+    })
   }
 
   // Get owned NFTs
@@ -319,32 +338,42 @@ export const Burn = () => {
                     </div>
                     <div className="flex justify-center w-screen p-5 -mt-[70px] z-2 relative">
                       <div className="flex justify-between items-center w-full max-w-[380px] border-2 border-white bg-gray-900 text-lg text-white pl-5 pr-1 py-1">
-                        <div className="flex">
-                          {totalSM === 0 ? (
-                            <p>SELECT BLACK HOLES TO MERGE ABOVE</p>
-                          ) : (
-                            <>
-                              {selectedTokenIndexes.length < 2 ? (
-                                <p>SELECT AT LEAST 2 BLACK HOLES TO MERGE</p>
-                              ) : (
-                                <>
-                                  <p>MERGE TOTAL: ‎</p>
-                                  <p>
-                                    {totalSM} SM → {upgradeType}
-                                  </p>
-                                  <br></br>
-                                  <div>
-                                    {nextUpgradeDetails &&
-                                      nextUpgradeDetails[0] > 0 &&
-                                      `(+${nextUpgradeDetails[0]} FOR ${nextUpgradeDetails[1]})`}
-                                  </div>
-                                </>
-                              )}
-                            </>
-                          )}
+                        <div className="w-full">
+                          <div className="flex w-full">
+                            {totalSM === 0 ? (
+                              <p>SELECT BLACK HOLES TO MERGE ABOVE</p>
+                            ) : (
+                              <>
+                                {selectedTokenIndexes.length < 2 ? (
+                                  <p>SELECT AT LEAST 2 BLACK HOLES TO MERGE</p>
+                                ) : (
+                                  <>
+                                    <p>MERGE TOTAL: ‎</p>
+                                    <p>
+                                      {totalSM} SM → {upgradeType}
+                                    </p>
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </div>
+                          {nextUpgradeDetails &&
+                            nextUpgradeDetails[0] > 0 &&
+                            totalSM !== 0 &&
+                            selectedTokenIndexes.length > 1 && (
+                              <div className="w-full pr-4">
+                                <div className="h-[2px] w-full bg-gray-500 my-1"></div>
+                                <button
+                                  className="text-lg hover:text-white transition-colors text-gray-500 "
+                                  onClick={() => upgradeToNextLevel(totalSM + nextUpgradeDetails[0])}
+                                >
+                                  +{nextUpgradeDetails[0]} SM FOR {nextUpgradeDetails[1]}
+                                </button>
+                              </div>
+                            )}
                         </div>
                         <button
-                          className="secondaryBtn text-lg py-1"
+                          className="secondaryBtn text-lg py-1 h-full"
                           disabled={totalSM === 0 || selectedTokenIndexes.length < 2}
                           onClick={() => {
                             setFinalPage(true)
