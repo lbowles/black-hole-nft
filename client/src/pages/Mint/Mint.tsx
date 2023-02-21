@@ -56,7 +56,7 @@ export const Mint = () => {
   const [mintBtnDisabled, setMintBtnDisabled] = useState<boolean>(true)
   const [mintBtnLoading, setMintBtnLoading] = useState<boolean>(false)
   const [mintedTokens, setMintedTokens] = useState<number[]>([])
-  const [customShowen, setCustomVisible] = useState<boolean>(false)
+  const [isCustomVisible, setIsCustomVisible] = useState<boolean>(false)
 
   const { config: mintConfig, error: mintError } = usePrepareBlackHolesMint({
     args: [BigNumber.from(`${mintCount}`)],
@@ -119,10 +119,10 @@ export const Mint = () => {
   }
 
   const toggelCustomAmount = () => {
-    if (customShowen) {
-      setCustomVisible(false)
+    if (isCustomVisible) {
+      setIsCustomVisible(false)
     } else {
-      setCustomVisible(true)
+      setIsCustomVisible(true)
     }
   }
 
@@ -214,10 +214,11 @@ export const Mint = () => {
                   <div className="w-full justify-center flex mt-6 transition-all">
                     <div className="w-[230px] flex justify-end">
                       <button
+                        disabled={isMintSignLoading || isMintTxLoading}
                         className=" text-base text-gray-500 hover:text-white transition-all text-right"
                         onClick={() => toggelCustomAmount()}
                       >
-                        {customShowen ? <>HIDE</> : <>CUSTOM AMOUNT</>}
+                        {isCustomVisible ? <>HIDE</> : <>CUSTOM AMOUNT</>}
                       </button>
                     </div>
                   </div>
@@ -225,7 +226,7 @@ export const Mint = () => {
                     <div className="w-[230px] flex justify-end">
                       <input
                         className={`text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none w-[60px] mb-1 transition-all ${
-                          customShowen ? "visible" : "hidden"
+                          isCustomVisible && !isMintSignLoading && !isMintTxLoading ? "visible" : "hidden"
                         }`}
                         placeholder={mintCount.toString()}
                         onChange={(e) => {
@@ -245,7 +246,7 @@ export const Mint = () => {
                   className="text-gray-500 text-5xl hover:text-white"
                   onClick={() => {
                     handleMintAmountChange(Math.max(1, mintCount - 1))
-                    setCustomVisible(false)
+                    setIsCustomVisible(false)
                   }}
                   disabled={mintBtnDisabled || !account.isConnected || isMintSignLoading}
                 >
@@ -266,7 +267,7 @@ export const Mint = () => {
                   loading={mintBtnLoading}
                   onClick={() => {
                     mint?.()
-                    setCustomVisible(false)
+                    setIsCustomVisible(false)
                   }}
                 />
                 <button
@@ -274,7 +275,7 @@ export const Mint = () => {
                   className="text-gray-500 text-5xl hover:text-white"
                   onClick={() => {
                     handleMintAmountChange(mintCount + 1)
-                    setCustomVisible(false)
+                    setIsCustomVisible(false)
                   }}
                 >
                   +
