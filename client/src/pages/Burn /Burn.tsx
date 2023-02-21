@@ -64,7 +64,7 @@ export const Burn = () => {
   const [finalPage, setFinalPage] = useState(false)
   const [totalSM, setTotalSM] = useState(0)
   const [upgradeType, setUpgradeType] = useState("")
-  const [nextUpgradeDetails, setNextUpgradeDetails] = useState<[number, string]>()
+  const [nextUpgradeDetails, setNextUpgradeDetails] = useState<[number, string] | null>()
   const [targetTokenIndexInOwnedArray, setTargetTokenIndexInOwnedArray] = useState<number>()
   const [mergeBtnDisabled, setMintBtnDisabled] = useState(false)
   const [mergeBtnLoading, setMintBtnLoading] = useState(false)
@@ -127,8 +127,8 @@ export const Burn = () => {
     return levelNames![level].toUpperCase()
   }
 
-  const findNextUpgrade = (totalSelectedSM: number): [number, string] => {
-    if (!upgradeIntervals || !levelNames) return [0, "UNKNOWN"]
+  const findNextUpgrade = (totalSelectedSM: number): [number, string] | null => {
+    if (!upgradeIntervals || !levelNames || !baseUpgradeMass) return [0, "UNKNOWN"]
 
     let level = 0
     for (let i = 0; i < upgradeIntervals.length - 1; i++) {
@@ -136,6 +136,11 @@ export const Burn = () => {
         level = i + 1
         break
       }
+    }
+
+    // If level is 0 there is no next upgrade
+    if (level === 0) {
+      return null
     }
 
     return [upgradeIntervals[level - 1].toNumber() - totalSelectedSM, levelNames[level].toUpperCase()]

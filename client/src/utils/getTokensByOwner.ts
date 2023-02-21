@@ -27,6 +27,8 @@ async function getTokensByOwnerLocal({ provider, address, tokenAddress }: IToken
   const tokenIds = events
     .filter((event) => event.args![2] !== ethers.constants.AddressZero) // exclude burned tokens
     .map((event) => event.args![2].toString())
+
+  // TODO: Query contract in batches of 500
   const tokens: BlackHoleMetadata[] = await BlackHoles__factory.connect(tokenAddress, provider!).blackHolesForTokenIds(
     tokenIds,
   )
