@@ -18,8 +18,6 @@ const deployedChain = Object.values(allChains).filter((chain) => {
   return deployments.chainId === chain.id.toString()
 })[0]
 
-console.log(deployedChain)
-
 // Check if in development
 const isDev = process.env.NODE_ENV === "development"
 

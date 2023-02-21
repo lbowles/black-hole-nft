@@ -7,7 +7,7 @@ export const MergingAmountGraphic = ({ levels }: IMergingAmountGraphic) => {
     <>
       {levels.map((level, index) => {
         return (
-          <div className="w-full justify-between items-center flex pb-2">
+          <div key={index} className="w-full justify-between items-center flex pb-2">
             {level.amount ? (
               <p className="text-white text-5xl -mt-4">{level.amount}</p>
             ) : (

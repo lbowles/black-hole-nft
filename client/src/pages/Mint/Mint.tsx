@@ -26,8 +26,6 @@ import submitEffect from "../../sounds/submit.mp3"
 import smallClickEffect from "../../sounds/smallClick.mp3"
 import generalClickEffect from "../../sounds/generalClick.mp3"
 
-// TODO: custom input
-
 function getOpenSeaLink(chainId: string, tokenId: string | number) {
   return `https://${chainId !== "1" ? "testnets." : ""}opensea.io/assets/${chainId !== "1" ? "goerli/" : ""}${
     deployments.contracts.BlackHoles.address

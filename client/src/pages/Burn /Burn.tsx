@@ -194,6 +194,12 @@ export const Burn = () => {
 
   useEffect(() => {
     if (!timedSaleEndTimestamp || !mergingDelay) return
+
+    if (timedSaleEndTimestamp.toNumber() === 0) {
+      setMergeStartTimestamp(undefined)
+      return
+    }
+
     setMergeStartTimestamp(timedSaleEndTimestamp.add(mergingDelay))
   }, [timedSaleEndTimestamp, mergingDelay])
 
@@ -258,15 +264,16 @@ export const Burn = () => {
           </div>
         </div>
       </div>
+      {!isMergingEnabled && (
+        <div className="mb-10">
+          <p className="text-white text-center w-full text-xl mt-12">Merging not enabled yet.</p>
+          {mergeStartTimestamp && <Countdown endTime={new Date(mergeStartTimestamp.toNumber() * 1000).getTime()} />}
+        </div>
+      )}
       {
         // TODO: General loading state (for all the other contract variables)
 
-        !isMergingEnabled ? (
-          <>
-            <p className="text-white text-center w-full text-xl mt-12">Merging not enabled yet.</p>
-            {mergeStartTimestamp && <Countdown endTime={new Date(mergeStartTimestamp.toNumber() * 1000).getTime()} />}
-          </>
-        ) : !address ? (
+        !address ? (
           <p className="text-white text-center w-full text-xl mt-12">Wallet not connected.</p>
         ) : loadingTokens ? (
           <div className="flex justify-center w-screen  p-5 items-center mt-7">
@@ -315,20 +322,32 @@ export const Burn = () => {
                       <>
                         <div className="flex justify-center w-screen z-1">
                           <div className="w-96">
-                            <div className="flex justify-end w-full mt-6">
-                              {totalSM > 0 ? (
-                                <>
+                            {isMergingEnabled && (
+                              <div className="flex justify-end w-full mt-6">
+                                {totalSM > 0 ? (
+                                  <>
+                                    <button
+                                      className="text-base hover:text-white text-gray-500 transition-all pr-2"
+                                      onClick={() => {
+                                        handleResetAll()
+                                        generalClickSound()
+                                      }}
+                                    >
+                                      RESET |
+                                    </button>
+                                    <button
+                                      className="text-base hover:text-white text-gray-500 transition-all "
+                                      onClick={() => {
+                                        handleSelectAll()
+                                        generalClickSound()
+                                      }}
+                                    >
+                                      SELECT ALL
+                                    </button>
+                                  </>
+                                ) : (
                                   <button
-                                    className="text-base hover:text-white text-gray-500 transition-all pr-2"
-                                    onClick={() => {
-                                      handleResetAll()
-                                      generalClickSound()
-                                    }}
-                                  >
-                                    RESET |
-                                  </button>
-                                  <button
-                                    className="text-base hover:text-white text-gray-500 transition-all "
+                                    className="text-base hover:text-white text-gray-500 transition-color "
                                     onClick={() => {
                                       handleSelectAll()
                                       generalClickSound()
@@ -336,19 +355,9 @@ export const Burn = () => {
                                   >
                                     SELECT ALL
                                   </button>
-                                </>
-                              ) : (
-                                <button
-                                  className="text-base hover:text-white text-gray-500 transition-color "
-                                  onClick={() => {
-                                    handleSelectAll()
-                                    generalClickSound()
-                                  }}
-                                >
-                                  SELECT ALL
-                                </button>
-                              )}
-                            </div>
+                                )}
+                              </div>
+                            )}
                             <div className="h-[380px] overflow-auto mt-1">
                               <div className="grid grid-cols-4 gap-2 mt-2 max-h-[380px] overflow-auto pb-[72px]">
                                 {ownedNFTs.map((nft, index) => {
@@ -360,7 +369,7 @@ export const Burn = () => {
                                     <button
                                       key={index}
                                       className={selectedStyle + " border-2 transition-colors"}
-                                      onClick={() => handleSelect(index)}
+                                      onClick={() => (isMergingEnabled ? handleSelect(index) : () => {})}
                                     >
                                       <img src={img}></img>
                                       <div className="border-t-2 border-gray-800 p-1 text-sm">
@@ -377,54 +386,56 @@ export const Burn = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="flex justify-center w-screen p-5 -mt-[70px] z-2 relative">
-                          <div className="flex justify-between items-center w-full max-w-[380px] border-2 border-white bg-gray-900 text-lg text-white pl-5 pr-1 py-1">
-                            <div className="w-full">
-                              <div className="flex w-full">
-                                {totalSM === 0 ? (
-                                  <p>SELECT BLACK HOLES TO MERGE ABOVE</p>
-                                ) : (
-                                  <>
-                                    {selectedTokenIndexes.length < 2 ? (
-                                      <p>SELECT AT LEAST 2 BLACK HOLES TO MERGE</p>
-                                    ) : (
-                                      <>
-                                        <p>MERGE TOTAL: ‎</p>
-                                        <p>
-                                          {totalSM} SM → {upgradeType}
-                                        </p>
-                                      </>
-                                    )}
-                                  </>
-                                )}
+                        {isMergingEnabled && (
+                          <div className="flex justify-center w-screen p-5 -mt-[70px] z-2 relative">
+                            <div className="flex justify-between items-center w-full max-w-[380px] border-2 border-white bg-gray-900 text-lg text-white pl-5 pr-1 py-1">
+                              <div className="w-full">
+                                <div className="flex w-full">
+                                  {totalSM === 0 ? (
+                                    <p>SELECT BLACK HOLES TO MERGE ABOVE</p>
+                                  ) : (
+                                    <>
+                                      {selectedTokenIndexes.length < 2 ? (
+                                        <p>SELECT AT LEAST 2 BLACK HOLES TO MERGE</p>
+                                      ) : (
+                                        <>
+                                          <p>MERGE TOTAL: ‎</p>
+                                          <p>
+                                            {totalSM} SM → {upgradeType}
+                                          </p>
+                                        </>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                                {nextUpgradeDetails &&
+                                  nextUpgradeDetails[0] > 0 &&
+                                  totalSM !== 0 &&
+                                  selectedTokenIndexes.length > 1 && (
+                                    <div className="w-full pr-4">
+                                      <div className="h-[2px] w-full bg-gray-500 my-1"></div>
+                                      <button
+                                        className="text-lg hover:text-white transition-colors text-gray-500 "
+                                        onClick={() => upgradeToNextLevel(totalSM + nextUpgradeDetails[0])}
+                                      >
+                                        +{nextUpgradeDetails[0]} SM FOR {nextUpgradeDetails[1]}
+                                      </button>
+                                    </div>
+                                  )}
                               </div>
-                              {nextUpgradeDetails &&
-                                nextUpgradeDetails[0] > 0 &&
-                                totalSM !== 0 &&
-                                selectedTokenIndexes.length > 1 && (
-                                  <div className="w-full pr-4">
-                                    <div className="h-[2px] w-full bg-gray-500 my-1"></div>
-                                    <button
-                                      className="text-lg hover:text-white transition-colors text-gray-500 "
-                                      onClick={() => upgradeToNextLevel(totalSM + nextUpgradeDetails[0])}
-                                    >
-                                      +{nextUpgradeDetails[0]} SM FOR {nextUpgradeDetails[1]}
-                                    </button>
-                                  </div>
-                                )}
+                              <button
+                                className="secondaryBtn text-lg py-1 h-full"
+                                disabled={totalSM === 0 || selectedTokenIndexes.length < 2}
+                                onClick={() => {
+                                  setFinalPage(true)
+                                  generalClickSound()
+                                }}
+                              >
+                                NEXT
+                              </button>
                             </div>
-                            <button
-                              className="secondaryBtn text-lg py-1 h-full"
-                              disabled={totalSM === 0 || selectedTokenIndexes.length < 2}
-                              onClick={() => {
-                                setFinalPage(true)
-                                generalClickSound()
-                              }}
-                            >
-                              NEXT
-                            </button>
                           </div>
-                        </div>
+                        )}
                       </>
                     ) : (
                       <>

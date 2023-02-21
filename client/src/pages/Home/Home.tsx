@@ -15,10 +15,6 @@ export const Home = () => {
 
   const { data: mintState } = useBlackHolesGetMintState()
 
-  useEffect(() => {
-    console.log(mintState)
-  }, [mintState])
-
   return (
     <>
       <div className="flex justify-center w-screen p-[70px] relative">

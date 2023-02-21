@@ -9,6 +9,8 @@ const chains = {
   "5": "goerli",
 }
 
+const { REACT_APP_MORALIS_API_KEY } = process.env
+
 export type BlackHoleMetadata = Omit<BlackHoleStruct, "size">
 
 export interface ITokenSearch {
@@ -51,15 +53,19 @@ async function getTokensByOwnerProd({ address, tokenAddress }: ITokenSearch) {
   const baseUrl = `https://deep-index.moralis.io/api/v2/${address}/nft?chain=${chain}&format=decimal&token_addresses%5B0%5D=${tokenAddress}`
   let url = baseUrl
   while (true) {
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      headers: {
+        "x-api-key": REACT_APP_MORALIS_API_KEY!,
+      },
+    })
     const json = await response.json()
     const newTokens: BlackHoleMetadata[] = json.result.map((token: any) => {
-      const { Level: level, Name: name, Mass: mass } = JSON.parse(token.metadata).attributes
+      const { attributes } = JSON.parse(token.metadata)
       return {
         tokenId: BigNumber.from(token.token_id),
-        level: BigNumber.from(level),
-        name: BigNumber.from(name),
-        mass: BigNumber.from(mass),
+        level: BigNumber.from(attributes.find((attr: any) => attr.trait_type === "Level").value),
+        name: attributes.find((attr: any) => attr.trait_type === "Name").value,
+        mass: BigNumber.from(attributes.find((attr: any) => attr.trait_type === "Mass").value),
       }
     })
     tokens.push(...newTokens)
@@ -81,7 +87,7 @@ export async function getTokensByOwner({ provider, address, tokenAddress }: ITok
     return []
   }
 
-  if (deployments.chainId === "31337") {
+  if ((deployments.chainId as string) === "31337") {
     return getTokensByOwnerLocal({ provider, address, tokenAddress })
   }
   return getTokensByOwnerProd({ address, tokenAddress })
