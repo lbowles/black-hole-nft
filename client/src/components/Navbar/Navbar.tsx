@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
+import useSound from "use-sound"
+import generalClickEffect from "../../sounds/generalClick.mp3"
 
 type pagesType = { name: string; link: string; active: boolean }[]
 
@@ -14,6 +16,7 @@ export const Navbar = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [pages, setPages] = useState<pagesType>(defaultPages)
+  const [generalClickSound] = useSound(generalClickEffect)
 
   const setActive = (i: number) => {
     const updatedPages = pages.map((p, index) => {
@@ -55,6 +58,7 @@ export const Navbar = () => {
             onClick={() => {
               navigate(page.link)
               setActive(i)
+              generalClickSound()
             }}
             className={
               "text-lg w-full h-full flex justify-center items-center transition duration-100 ease-in-out " + style

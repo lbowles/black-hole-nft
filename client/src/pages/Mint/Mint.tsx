@@ -20,6 +20,11 @@ import { useAccount } from "wagmi"
 import { BlackHoles__factory } from "../../../../backend/types"
 import deployments from "../../deployments.json"
 import { ActionButton } from "../../components/ActionButton/ActionButton"
+import useSound from "use-sound"
+import mintEffect from "../../sounds/mint.mp3"
+import submitEffect from "../../sounds/submit.mp3"
+import smallClickEffect from "../../sounds/smallClick.mp3"
+import generalClickEffect from "../../sounds/generalClick.mp3"
 
 // TODO: custom input
 
@@ -57,6 +62,20 @@ export const Mint = () => {
   const [mintBtnLoading, setMintBtnLoading] = useState<boolean>(false)
   const [mintedTokens, setMintedTokens] = useState<number[]>([])
   const [isCustomVisible, setIsCustomVisible] = useState<boolean>(false)
+  const [mintSound] = useSound(mintEffect)
+  const [submitSound] = useSound(submitEffect)
+  const [generalClickSound] = useSound(generalClickEffect)
+  const [playbackRate, setPlaybackRate] = useState(0.75)
+  const [smallClickSound] = useSound(smallClickEffect, { playbackRate: playbackRate })
+
+  const handleAmountClickUp = () => {
+    setPlaybackRate(playbackRate + 0.4)
+    smallClickSound()
+  }
+  const handleAmountClickDown = () => {
+    if (mintCount > 1) setPlaybackRate(playbackRate - 0.4)
+    smallClickSound()
+  }
 
   const { config: mintConfig, error: mintError } = usePrepareBlackHolesMint({
     args: [BigNumber.from(`${mintCount}`)],
@@ -158,11 +177,13 @@ export const Mint = () => {
         hash: mintSignResult.hash,
         description: `Mint ${mintCount} Black Hole${mintCount === 1 ? "" : "s"}`,
       })
+      submitSound()
     }
   }, [mintSignResult])
 
   useEffect(() => {
     if (mintTx) {
+      mintSound()
       const tokenIds = mintTx.logs.map((log) => {
         const events = BlackHoles__factory.createInterface().decodeEventLog("Transfer", log.data, log.topics)
         return events.tokenId.toString()
@@ -216,7 +237,10 @@ export const Mint = () => {
                       <button
                         disabled={isMintSignLoading || isMintTxLoading}
                         className=" text-base text-gray-500 hover:text-white transition-all text-right"
-                        onClick={() => toggelCustomAmount()}
+                        onClick={() => {
+                          toggelCustomAmount()
+                          generalClickSound()
+                        }}
                       >
                         {isCustomVisible ? <>HIDE</> : <>CUSTOM AMOUNT</>}
                       </button>
@@ -228,9 +252,10 @@ export const Mint = () => {
                         className={`text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none w-[60px] mb-1 transition-all ${
                           isCustomVisible && !isMintSignLoading && !isMintTxLoading ? "visible" : "hidden"
                         }`}
+                        type="number"
                         placeholder={mintCount.toString()}
                         onChange={(e) => {
-                          if (e.target.value === "") {
+                          if (e.target.value === "" || e.target.value === "0") {
                             handleMintAmountChange(1)
                           } else {
                             handleMintAmountChange(parseInt(e.target.value))
@@ -247,6 +272,7 @@ export const Mint = () => {
                   onClick={() => {
                     handleMintAmountChange(Math.max(1, mintCount - 1))
                     setIsCustomVisible(false)
+                    handleAmountClickDown()
                   }}
                   disabled={mintBtnDisabled || !account.isConnected || isMintSignLoading}
                 >
@@ -268,6 +294,7 @@ export const Mint = () => {
                   onClick={() => {
                     mint?.()
                     setIsCustomVisible(false)
+                    generalClickSound()
                   }}
                 />
                 <button
@@ -276,6 +303,7 @@ export const Mint = () => {
                   onClick={() => {
                     handleMintAmountChange(mintCount + 1)
                     setIsCustomVisible(false)
+                    handleAmountClickUp()
                   }}
                 >
                   +
