@@ -85,7 +85,7 @@ export const Burn = () => {
 
   const { config: mergeConfig } = usePrepareBlackHolesMerge({
     args: [mergeTokenIds],
-    enabled: selectedTokenIndexes.length >= 2 && isMergingEnabled,
+    enabled: mergeTokenIds.length >= 2 && isMergingEnabled,
   })
   const {
     write: merge,
@@ -94,7 +94,7 @@ export const Burn = () => {
     isSuccess: isMergeSignSuccess,
   } = useBlackHolesMerge(mergeConfig)
 
-  const { data: mintTx, isLoading: isMintTxLoading } = useWaitForTransaction({
+  const { data: mergeTx, isLoading: isMergeTxLoading } = useWaitForTransaction({
     hash: mergeSignResult?.hash,
     confirmations: 1,
   })
@@ -138,7 +138,7 @@ export const Burn = () => {
       }
     }
 
-    return [upgradeIntervals[level].toNumber() - totalSelectedSM, levelNames[level].toUpperCase()]
+    return [upgradeIntervals[level - 1].toNumber() - totalSelectedSM, levelNames[level].toUpperCase()]
   }
 
   // SelectedTokenIndexes contains a list of pointers to the main ownedNFTs array
@@ -162,8 +162,9 @@ export const Burn = () => {
 
   // Get owned NFTs
   useEffect(() => {
-    if (!address || !provider) return
+    if (!address || !provider || finalPage) return
     const getOwnedNFTs = async () => {
+      setLoadingTokens(true)
       const ownedNFTs = await getTokensByOwner({
         address: address,
         provider,
@@ -173,7 +174,7 @@ export const Burn = () => {
       setLoadingTokens(false)
     }
     getOwnedNFTs()
-  }, [address, provider])
+  }, [address, provider, finalPage])
 
   useEffect(() => {
     if (!baseUpgradeMass || ownedNFTs.length == 0) return
@@ -197,6 +198,13 @@ export const Burn = () => {
       })
     }
   }, [mergeSignResult])
+
+  useEffect(() => {
+    if (mergeTx?.confirmations === 1 && finalPage) {
+      setSelectedTokenIndexes([])
+      setFinalPage(false)
+    }
+  }, [mergeTx])
 
   return (
     <>
@@ -384,7 +392,7 @@ export const Burn = () => {
                               ? "SELECT TOKEN ID ABOVE"
                               : `MERGE INTO TOKEN #${ownedNFTs[targetTokenIndexInOwnedArray].tokenId.toString()}`
                           }
-                          loading={mergeBtnLoading}
+                          loading={mergeBtnLoading || isMergeTxLoading}
                         />
                       </div>
                     </div>
