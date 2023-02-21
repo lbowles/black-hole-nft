@@ -14,6 +14,9 @@
       const PIXEL_SIZE = 10
       const CANVAS_SIZE = PIXELS_PER_SIDE * PIXEL_SIZE
 
+      const baseUpgradeMass = 20
+      const maxAdjustment = 20
+
       const specialString = `
           <g id="special">
             <path fill="#182463" d="M120 0h10v10h-10V0Z" />
@@ -62,7 +65,13 @@
         return `hsl(${hue}, ${saturation}%, ${lightness}%)`
       }
 
-      function getPixelSVG(tokenId, pixelClass, x, y, level) {
+      function getColorStyleDefinitions(level, mass) {
+        const nextLevelMass = baseUpgradeMass * 2 ** (level + 1) - 1
+        const baseLevelMass = baseUpgradeMass * 2 ** level
+        const massDiff = nextLevelMass - baseLevelMass
+        const adjustment = (maxAdjustment * (nextLevelMass - mass)) / (nextLevelMass - baseLevelMass)
+        // console.log({ nextLevelMass, baseLevelMass, massDiff, adjustment: adjustment })
+
         // Decode colour scheme from 3 bytes encoded colorSchemeString
         const encoded = colorSchemeString.slice(level * 9 * 3, level * 9 * 3 + 9 * 3)
 
@@ -74,27 +83,59 @@
           for (let j = 0; j < 3; j++) {
             colors.push(parseInt(encoded.slice(i * 9 + j * 3, i * 9 + j * 3 + 3), 16))
           }
+          // Subtract up to 10% from each color's lightness
+          colors[0] -= adjustment
+          colors[1] -= adjustment * 2
           colorScheme.push(colors)
         }
 
         const blackHoleColors = ["black", ...colorScheme.map((c) => getHslString(...c))]
 
-        let fillColor = blackHoleColors[pixelClass]
+        let style = ""
+        for (let i = 0; i < blackHoleColors.length; i++) {
+          style += `.pixel-${i}-${mass} { fill: ${blackHoleColors[i]}; }`
+        }
+        return style
+      }
+
+      function getPixelSVG(tokenId, pixelClass, x, y, mass) {
+        // Decode colour scheme from 3 bytes encoded colorSchemeString
+        // const encoded = colorSchemeString.slice(level * 9 * 3, level * 9 * 3 + 9 * 3)
+
+        // const colorScheme = []
+
+        // // Convert from hex to decimal
+        // for (let i = 0; i < 3; i++) {
+        //   let colors = []
+        //   for (let j = 0; j < 3; j++) {
+        //     colors.push(parseInt(encoded.slice(i * 9 + j * 3, i * 9 + j * 3 + 3), 16))
+        //   }
+        //   // Subtract up to 10% from each color's lightness
+        //   colors[0] -= adjustment
+        //   colors[1] -= adjustment * 2
+        //   colorScheme.push(colors)
+        // }
+
+        // const blackHoleColors = ["black", ...colorScheme.map((c) => getHslString(...c))]
+
+        let fillColor = `pixel-${pixelClass}-${mass}`
 
         return `<rect x="${x * PIXEL_SIZE}" y="${
           y * PIXEL_SIZE
-        }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" fill="${fillColor}"/>`
+        }" width="${PIXEL_SIZE}" height="${PIXEL_SIZE}" class="${fillColor}"/>`
         // <text x="${x * PIXEL_SIZE + PIXEL_SIZE / 2}" y="${y * PIXEL_SIZE + PIXEL_SIZE / 2}"
-        // text-anchor="middle" dominant-baseline="middle" fill="white" font-size="10" font-family="sans-serif">${pixelClass}</text>
+        // text-anchor="middle" dominant-baseline="middle" fill="white" font-size="6" font-family="sans-serif">${adjustment}</text>
         // `
       }
 
       // Javascript
-      function createQuarterCanvas(size, level) {
-        let edgeSVG = ""
+      function createQuarterCanvas(size, level, mass) {
         const renderEndIndex = PIXELS_PER_SIDE / 2
         const renderStartIndex = renderEndIndex - size - 5
         const tokenId = 1
+
+        let edgeSVG = ""
+
         for (let i = renderStartIndex; i <= renderEndIndex; i++) {
           for (let j = renderStartIndex; j <= renderEndIndex; j++) {
             const x = j - PIXELS_PER_SIDE / 2
@@ -104,7 +145,7 @@
             const classIndex = distance - size
 
             if (distance > size && distance <= size + 3) {
-              edgeSVG = edgeSVG.concat(getPixelSVG(tokenId, classIndex, j, i, level))
+              edgeSVG = edgeSVG.concat(getPixelSVG(tokenId, classIndex, j, i, mass))
             }
           }
         }
@@ -213,13 +254,18 @@
         return svg
       }
 
-      function createSVG(level) {
+      function createSVG(level, mass) {
         const holeSize = PIXELS_PER_SIDE / 2 - (10 - level)
-        const edgeSVG = createQuarterCanvas(holeSize, level)
+        const edgeSVG = createQuarterCanvas(holeSize, level, mass)
 
-        const id = `base${level}`
+        const colors = getColorStyleDefinitions(level, mass)
+
+        const id = `base${level}-${mass}`
         let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CANVAS_SIZE} ${CANVAS_SIZE}" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}">
           <defs>
+            <style>
+              ${colors}
+              </style>
             <g id="full${id}">
               <g id="${id}">${edgeSVG}</g>
               <use href="#${id}" transform="scale(-1,1),translate(-${CANVAS_SIZE + PIXEL_SIZE},0)" />
@@ -263,10 +309,18 @@
 
       for (let i = 0; i < COLOR_SCHEMES.length / 3; i++) {
         const level = i
+        console.log("level", i)
+        for (let j = 0; j <= 2; j++) {
+          const nextLevelMass = baseUpgradeMass * 2 ** (level + 1) - 1
+          const baseLevelMass = baseUpgradeMass * 2 ** level
+          const massDiff = nextLevelMass - baseLevelMass
+          const mass = Math.floor(baseLevelMass + (massDiff / 2) * j)
 
-        const canvas = document.createElement("span")
-        canvas.innerHTML = createSVG(level)
-        document.getElementById("canvasContainer").appendChild(canvas)
+          // colors[2] -= (20 * (nextLevelMass - mass)) / nextLevelMass
+          const canvas = document.createElement("span")
+          canvas.innerHTML = createSVG(level, mass)
+          document.getElementById("canvasContainer").appendChild(canvas)
+        }
       }
     </script>
   </body>
