@@ -9,7 +9,7 @@ type pagesType = { name: string; link: string; active: boolean }[]
 const defaultPages = [
   { name: "HOME", link: "/", active: true },
   { name: "MINT", link: "/mint", active: false },
-  { name: "BURN", link: "/burn", active: false },
+  { name: "MERGE", link: "/merge", active: false },
 ]
 
 export const Navbar = () => {

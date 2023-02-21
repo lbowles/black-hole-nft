@@ -258,8 +258,9 @@ export const Burn = () => {
           <div className="bg-black border-2 border-gray-800 w-full p-5 mt-6">
             <p className="text-white text-2xl">Merge</p>
             <p className="text-gray-600 text-base pt-3">
-              Solar Systems is a fully on-chain NFT collection which features procedurally generated planets orbiting
-              around a star. Each Solar System is
+              The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
+              remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary markets
+              before upgrading.
             </p>
           </div>
         </div>

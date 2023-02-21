@@ -33,14 +33,47 @@ export const GeneralInfo = () => {
         <div className="bg-black border-2 border-gray-800 w-full p-5 mt-6">
           <p className="text-white text-2xl">What is the Black Holes Project?</p>
           <p className="text-gray-600 text-base pt-3">
-            Solar Systems is a fully on-chain NFT collection which features procedurally generated planets orbiting
-            around a star. Each Solar System is{" "}
+            Black Holes is a fully on-chain NFT collection which features procedurally generated pixel art black holes.
+            Each Black Hole has an associated mass which changes its appearance. A Black Hole’s mass is increased by
+            burning other Black Holes in the merging process.
           </p>
           <Divider />
           <p className="text-white text-2xl">Features</p>
-          <p className="text-gray-600 text-base pt-3 pb-2">Each Kaleidescope is</p>
+          <p className="text-gray-600 text-base pt-3 pb-2">Black Holes are:</p>
           <ol className="list-disc text-gray-600 text-base ml-5">
-            <li>Now this is a story all about how, my life got flipped-turned upside down</li>
+            <li>
+              <a className=" cursor-pointer text-white">Fully on-chain.</a>‎ All the code to generate all the Black Hole
+              tokens and their attributes is stored permanently on the Ethereum blockchain.
+            </li>
+            <li className="pt-1">
+              <a className=" cursor-pointer text-white">Procedurally generated.</a>‎ Each pixel of a Black Hole is
+              rendered individually based on its mass. The background contains uniquely placed stars, some of which are
+              animated to be sucked up by the Black Hole.
+            </li>
+            <li className="pt-1">
+              <a className=" cursor-pointer text-white">Deflationary.</a>‎ A Black Hole’s mass can be increased by
+              burning other Black Holes, decreasing the supply.
+            </li>
+            <li className="pt-1">
+              <a className=" text-white ">Rare.</a>‎ Only 42 of the highest level Black Hole can ever exist.
+            </li>
+          </ol>
+          <Divider />
+          <p className="text-white text-2xl">Minting</p>
+          <p className="text-gray-600 text-base pt-3 pb-2">The project has three phases:</p>
+          <ol className="list-disc text-gray-600 text-base ml-5">
+            <li>
+              <a className=" text-white">Threshold mint.</a>‎ The first 1,000 tokens are sold at a discounted price of
+              0.0003 ETH.
+            </li>
+            <li className="pt-1">
+              <a className=" cursor-pointer text-white">Timed sale.</a>‎ Once 1,000 tokens are minted, a timed sale is
+              triggered. The timed sale will be open for 24 hours where Black Holes can be minted for 0.004 ETH.
+            </li>
+            <li className="pt-1">
+              <a className=" cursor-pointer text-white">Merging</a>‎ 5 days after the end of the timed sale, merging
+              will open.
+            </li>
           </ol>
         </div>
         {/* MERGE */}

@@ -62,7 +62,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/mint" element={<Mint />} />
-            <Route path="/burn" element={<Burn />} />
+            <Route path="/merge" element={<Burn />} />
             <Route path="*" element={<Home />} />
           </Routes>
         </div>
