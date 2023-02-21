@@ -319,25 +319,25 @@ export const Burn = () => {
                       <div className="flex justify-between items-center w-full max-w-[380px] border-2 border-white bg-gray-900 text-lg text-white pl-5 pr-1 py-1">
                         <div className="flex">
                           {totalSM === 0 ? (
-                            <p>
-                              {selectedTokenIndexes.length < 2 ? (
-                                <>SELECT AT LEAST 2 BLACK HOLES TO MERGE</>
-                              ) : (
-                                <>SELECT BLACK HOLES TO MERGE ABOVE</>
-                              )}
-                            </p>
+                            <p>SELECT BLACK HOLES TO MERGE ABOVE</p>
                           ) : (
                             <>
-                              <p>MERGE TOTAL: ‎</p>
-                              <p>
-                                {totalSM} SM → {upgradeType}
-                              </p>
-                              <br></br>
-                              <div>
-                                {nextUpgradeDetails &&
-                                  nextUpgradeDetails[0] > 0 &&
-                                  `(+${nextUpgradeDetails[0]} FOR ${nextUpgradeDetails[1]})`}
-                              </div>
+                              {selectedTokenIndexes.length < 2 ? (
+                                <p>SELECT AT LEAST 2 BLACK HOLES TO MERGE</p>
+                              ) : (
+                                <>
+                                  <p>MERGE TOTAL: ‎</p>
+                                  <p>
+                                    {totalSM} SM → {upgradeType}
+                                  </p>
+                                  <br></br>
+                                  <div>
+                                    {nextUpgradeDetails &&
+                                      nextUpgradeDetails[0] > 0 &&
+                                      `(+${nextUpgradeDetails[0]} FOR ${nextUpgradeDetails[1]})`}
+                                  </div>
+                                </>
+                              )}
                             </>
                           )}
                         </div>
