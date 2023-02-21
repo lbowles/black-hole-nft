@@ -225,7 +225,9 @@ export const Burn = () => {
         !isMergingEnabled ? (
           <p className="text-white text-center w-full text-xl mt-12">Merging not enabled yet.</p>
         ) : // TODO: Countdown
-        loadingTokens ? (
+        !address ? (
+          <p className="text-white text-center w-full text-xl mt-12">Wallet not connected.</p>
+        ) : loadingTokens ? (
           <div className="flex justify-center w-screen  p-5 items-center mt-7">
             <div>
               <div className="flex w-full justify-center">
