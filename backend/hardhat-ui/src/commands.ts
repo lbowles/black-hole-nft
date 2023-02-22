@@ -60,6 +60,38 @@ export const COMMANDS: ICommand[] = [
       console.log("Minted black holes:", tx.hash)
     },
   },
+  {
+    name: "Skip to merge",
+    description: "Skip to merge",
+    command: "skipToMerge",
+    inputs: [],
+    execute: async (provider: ethers.providers.JsonRpcProvider, inputs: IInput[]) => {
+      const signer = new ethers.Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", provider)
+
+      const blackholesDeployment = require(`../../deployments/localhost/BlackHoles.json`)
+      const blackHoles = BlackHoles__factory.connect(blackholesDeployment.address, signer)
+
+      const totalMinted = await blackHoles.totalMinted()
+      const price = await blackHoles.getPrice()
+      const threshold = await blackHoles.timedSaleThreshold()
+      if (totalMinted.toNumber() === 0) {
+        // Mint threshold
+        await blackHoles.mint(threshold, { value: price.mul(threshold) })
+      } else {
+        // Set merging threshold to current total minted + 1 and mint one
+        await blackHoles.setTimedSaleThreshold(totalMinted.add(1))
+        await blackHoles.mint(1, { value: price })
+      }
+
+      // Set delays to 0
+      await blackHoles.setTimedSaleDuration(0)
+      await blackHoles.setMergingDelay(0)
+
+      // Hardhat evm_increaseTime
+      provider.send("evm_increaseTime", [100])
+      provider.send("evm_mine", [])
+    },
+  },
 ]
 
 export function getSeconds(amount: number, unit: string): number {
