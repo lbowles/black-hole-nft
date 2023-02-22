@@ -246,7 +246,6 @@ export const Burn = () => {
     if (mergeTx?.confirmations === 1 && finalPage) {
       setSelectedTokenIndexes([])
       setMergeSuccess(true)
-      setFinalPage(false)
       mergeSound()
     }
   }, [mergeTx])
