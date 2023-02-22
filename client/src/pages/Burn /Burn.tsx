@@ -395,7 +395,7 @@ export const Burn = () => {
                                         <p>SELECT AT LEAST 2 BLACK HOLES TO MERGE</p>
                                       ) : (
                                         <>
-                                          <p>MERGE TOTAL: ‎</p>
+                                          <p>MERGE TOTAL:&nbsp;</p>
                                           <p>
                                             {totalSM} SM → {upgradeType}
                                           </p>
