@@ -309,7 +309,7 @@ describe("BlackHoles", function () {
     }
   })
 
-  it.only("Should show different colors for different levels with the same mass", async function () {
+  it("Should show different colors for different levels with the same mass", async function () {
     // Mint threshold tokens
     mintPrice = await blackHoles.getPrice()
     await blackHoles.mint(threshold, { value: threshold.mul(mintPrice) })
