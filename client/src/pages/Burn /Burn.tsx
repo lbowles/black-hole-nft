@@ -36,7 +36,7 @@ import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwne
 
 // sort by SM (largest first) and then by tokenId (smallest first) if SM is the same
 function compareBlackHoles(a: BlackHoleMetadata, b: BlackHoleMetadata) {
-  if (b.mass !== a.mass) {
+  if (b.mass.toString() !== a.mass.toString()) {
     return parseInt(b.mass.toString()) - parseInt(a.mass.toString())
   } else {
     return parseInt(a.tokenId.toString()) - parseInt(b.tokenId.toString())
@@ -209,6 +209,7 @@ export const Burn = () => {
         tokenAddress: deployments.contracts.BlackHoles.address,
       })
       setOwnedNFTs(ownedNFTs.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles))
+      // console.log(ownedNFTs.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles))
       setLoadingTokens(false)
     }
     getOwnedNFTs()
