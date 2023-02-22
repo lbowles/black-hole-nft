@@ -205,8 +205,13 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
    * @return Adjustment.
    */
   function getAdjustmentForMass(uint256 _mass) public view returns (uint256) {
-    uint256 baseUpgradeMass = getBaseUpgradeMass();
     uint256 level = levelForMass(_mass);
+
+    if (level == MAX_LEVEL) {
+      return 0;
+    }
+
+    uint256 baseUpgradeMass = getBaseUpgradeMass();
 
     uint256 nextLevelMass = baseUpgradeMass * 2**(level + 1) - 1;
     uint256 baseLevelMass = baseUpgradeMass * 2**level;
