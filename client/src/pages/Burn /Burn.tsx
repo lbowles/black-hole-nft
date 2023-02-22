@@ -31,6 +31,7 @@ import dropdown from "../../img/dropdown.svg"
 import generalClickEffect from "../../sounds/generalClick.mp3"
 import linkClickEffect from "../../sounds/linkClick.mp3"
 import mergeEffect from "../../sounds/merge.mp3"
+import { getOpenSeaLink } from "../../utils/getOpenSeaLink"
 import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwner"
 
 // sort by SM (largest first) and then by tokenId (smallest first) if SM is the same
@@ -55,12 +56,6 @@ const nftTypeToAnimatedImg: Record<string, string> = {
   INTERMEDIATE: intermediateAnimated,
   SUPERMASSIVE: supermassiveAnimated,
   PRIMORDIAL: primordialAnimated,
-}
-
-function getOpenSeaLink(chainId: string, tokenId: string | number) {
-  return `https://${chainId !== "1" ? "testnets." : ""}opensea.io/assets/${chainId !== "1" ? "goerli/" : ""}${
-    deployments.contracts.BlackHoles.address
-  }/${tokenId}`
 }
 
 export const Burn = () => {

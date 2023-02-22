@@ -7,6 +7,7 @@ import { BlackHoles__factory } from "../../../backend/types"
 const chains = {
   "1": "eth",
   "5": "goerli",
+  "80001": "mumbai",
 }
 
 const { REACT_APP_MORALIS_API_KEY } = process.env

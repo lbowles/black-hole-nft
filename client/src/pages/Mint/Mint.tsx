@@ -25,16 +25,8 @@ import mintEffect from "../../sounds/mint.mp3"
 import submitEffect from "../../sounds/submit.mp3"
 import smallClickEffect from "../../sounds/smallClick.mp3"
 import generalClickEffect from "../../sounds/generalClick.mp3"
-
-function getOpenSeaLink(chainId: string, tokenId: string | number) {
-  return `https://${chainId !== "1" ? "testnets." : ""}opensea.io/assets/${chainId !== "1" ? "goerli/" : ""}${
-    deployments.contracts.BlackHoles.address
-  }/${tokenId}`
-}
-
-function getEtherscanBaseURL(chainId: string) {
-  return `https://${chainId !== "1" ? "goerli." : ""}etherscan.io`
-}
+import { getOpenSeaLink } from "../../utils/getOpenSeaLink"
+import { getEtherscanBaseURL } from "../../utils/getEtherscanBaseURL"
 
 const etherscanBaseURL = getEtherscanBaseURL(deployments.chainId)
 
