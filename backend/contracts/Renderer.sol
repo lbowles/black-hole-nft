@@ -303,11 +303,7 @@ contract Renderer {
       utils.uint2str(CANVAS_SIZE),
       " ",
       utils.uint2str(CANVAS_SIZE),
-      '" width="',
-      utils.uint2str(CANVAS_SIZE),
-      '" height="',
-      utils.uint2str(CANVAS_SIZE),
-      '">'
+      '" width="500" height="500">'
     );
 
     // -- defs
