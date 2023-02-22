@@ -199,7 +199,7 @@ export const Mint = () => {
   }, [mintSignResult])
 
   useEffect(() => {
-    if (mintTx) {
+    if (mintTx?.status === 1) {
       mintSound()
       const tokenIds = mintTx.logs.map((log) => {
         const events = BlackHoles__factory.createInterface().decodeEventLog("Transfer", log.data, log.topics)

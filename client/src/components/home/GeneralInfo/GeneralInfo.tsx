@@ -44,17 +44,17 @@ export const GeneralInfo = () => {
           <p className="text-gray-600 text-base pt-3 pb-2">Black Holes are:</p>
           <ol className="list-disc text-gray-600 text-base ml-5">
             <li>
-              <a className=" cursor-pointer text-white">Fully on-chain.</a>‎ All the code to generate all the Black Hole
-              tokens and their attributes is stored permanently on the Ethereum blockchain.
+              <a className=" text-white">Fully on-chain.</a>‎ All the code to generate all the Black Hole tokens and
+              their attributes is stored permanently on the Ethereum blockchain.
             </li>
             <li className="pt-1">
-              <a className=" cursor-pointer text-white">Procedurally generated.</a>‎ Each pixel of a Black Hole is
-              rendered individually based on its mass. The background contains uniquely placed stars, some of which are
-              animated to be sucked up by the Black Hole.
+              <a className=" text-white">Procedurally generated.</a>‎ Each pixel of a Black Hole is rendered
+              individually based on its mass. The background contains uniquely placed stars, some of which are animated
+              to be sucked up by the Black Hole.
             </li>
             <li className="pt-1">
-              <a className=" cursor-pointer text-white">Deflationary.</a>‎ A Black Hole’s mass can be increased by
-              burning other Black Holes, decreasing the supply.
+              <a className=" text-white">Deflationary.</a>‎ A Black Hole’s mass can be increased by burning other Black
+              Holes, decreasing the supply.
             </li>
             <li className="pt-1">
               <a className=" text-white ">Rare.</a>‎ Only {MAX_SUPPLY_OF_INTERSTELLAR?.toString()} of the highest level
@@ -70,12 +70,11 @@ export const GeneralInfo = () => {
               0.0003 ETH.
             </li>
             <li className="pt-1">
-              <a className=" cursor-pointer text-white">Timed sale.</a>‎ Once 1,000 tokens are minted, a timed sale is
-              triggered. The timed sale will be open for 24 hours where Black Holes can be minted for 0.004 ETH.
+              <a className="  text-white">Timed sale.</a>‎ Once 1,000 tokens are minted, a timed sale is triggered. The
+              timed sale will be open for 24 hours where Black Holes can be minted for 0.004 ETH.
             </li>
             <li className="pt-1">
-              <a className=" cursor-pointer text-white">Merging</a>‎ 5 days after the end of the timed sale, merging
-              will open.
+              <a className=" text-white">Merging</a>‎ 5 days after the end of the timed sale, merging will open.
             </li>
           </ol>
         </div>

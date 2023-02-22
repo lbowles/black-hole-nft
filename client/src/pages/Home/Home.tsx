@@ -23,7 +23,7 @@ export const Home = () => {
       </div>
       <div className="text-center w-screen">
         <p className="sm:text-5xl text-2xl text-white ">BLACK HOLES</p>
-        <p className="sm:text-4xl text-xl text-gray-500 pt-1">Dive into the depths of the void</p>
+        <p className="sm:text-3xl text-xl text-gray-500 pt-2">DIVE INTO THE DEPTHS OF THE VOID</p>
       </div>
       <div className="flex justify-center w-screen p-20">
         {/* TODO: Test this */}
