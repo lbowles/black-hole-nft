@@ -308,4 +308,46 @@ describe("BlackHoles", function () {
       expect(await blackHoles.levelForMass(mass)).to.equal((level + 1).toString())
     }
   })
+
+  it.only("Should show different colors for different levels with the same mass", async function () {
+    // Mint threshold tokens
+    mintPrice = await blackHoles.getPrice()
+    await blackHoles.mint(threshold, { value: threshold.mul(mintPrice) })
+
+    // Advance time to merging
+    const timedSaleDuration = await blackHoles.timedSaleDuration()
+    await ethers.provider.send("evm_increaseTime", [timedSaleDuration.toNumber()])
+
+    const mergingDelay = await blackHoles.mergingDelay()
+    await ethers.provider.send("evm_increaseTime", [mergingDelay.toNumber()])
+    await ethers.provider.send("evm_mine", [])
+
+    await blackHoles.merge([1, 2, 3, 4])
+
+    // Get token uri 1 and token uri 5
+    const tokenUri1 = await blackHoles.tokenURI(1)
+    const tokenUri5 = await blackHoles.tokenURI(5)
+    const tokenUri6 = await blackHoles.tokenURI(6)
+
+    function getStyle(metadata: string) {
+      // Decode base64 encoded json
+      const decoded = Buffer.from(metadata.split(",")[1], "base64").toString()
+      const json = JSON.parse(decoded)
+      // console.log(json.image)
+      const svg = Buffer.from(json.image.split(",")[1], "base64").toString()
+      const style = svg.split("<style>")[1].split("</style>")[0]
+      return style
+    }
+
+    // Get SVGs
+    const style1 = getStyle(tokenUri1)
+    const style5 = getStyle(tokenUri5)
+    const style6 = getStyle(tokenUri6)
+
+    // Merged token different to unmerged token
+    expect(style1).to.not.equal(style5)
+
+    // Two unmerged tokens have the same style
+    expect(style6).to.equal(style5)
+  })
 })
