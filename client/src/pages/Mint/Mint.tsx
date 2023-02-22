@@ -66,13 +66,32 @@ export const Mint = () => {
   const [playbackRate, setPlaybackRate] = useState(0.75)
   const [smallClickSound] = useSound(smallClickEffect, { playbackRate: playbackRate })
 
-  const handleAmountClickUp = () => {
-    setPlaybackRate(playbackRate + 0.4)
-    smallClickSound()
-  }
-  const handleAmountClickDown = () => {
-    if (mintCount > 1) setPlaybackRate(playbackRate - 0.4)
-    smallClickSound()
+  const handleAmountClick = (value: number) => {
+    let tempPlaybackRate = playbackRate
+
+    if (value > mintCount) {
+      for (let i = mintCount; i < value; i++) {
+        if (tempPlaybackRate < 10) {
+          tempPlaybackRate = tempPlaybackRate + 0.4
+        }
+      }
+      setPlaybackRate(tempPlaybackRate)
+      smallClickSound()
+    }
+    let tempMintCount = value
+    if (value < mintCount) {
+      console.log(tempPlaybackRate, value, mintCount)
+      for (let i = value; i < mintCount; i++) {
+        tempMintCount = tempMintCount - 1
+        if (tempMintCount < 24) {
+          if (tempPlaybackRate - 0.4 > 0.5) {
+            tempPlaybackRate = tempPlaybackRate - 0.4
+          }
+        }
+      }
+      setPlaybackRate(tempPlaybackRate)
+      smallClickSound()
+    }
   }
 
   const { config: mintConfig, error: mintError } = usePrepareBlackHolesMint({
@@ -247,27 +266,18 @@ export const Mint = () => {
                   <div className="w-full justify-center flex mt-1 transition-all">
                     <div className="w-[230px] flex justify-end">
                       <input
-                        className={`text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none w-[60px] mb-1 transition-all ${
+                        className={`text-white block appearance-none bg-black border border-gray-500 hover:border-white px-3 py-1 leading-tight focus:outline-none w-[90px] mb-1 transition-all ${
                           isCustomVisible && !isMintSignLoading && !isMintTxLoading ? "visible" : "hidden"
                         }`}
                         type="number"
                         placeholder={mintCount.toString()}
                         onChange={(e) => {
-                          if (e.target.value === "" || e.target.value === "0") {
+                          let value = parseInt(e.target.value)
+                          if (e.target.value === "" || value === 0) {
                             handleMintAmountChange(1)
                           } else {
-                            handleMintAmountChange(parseInt(e.target.value))
-                            let targetVal = parseInt(e.target.value)
-                            if (targetVal > mintCount) {
-                              for (let i = mintCount; i < targetVal; i++) {
-                                handleAmountClickUp()
-                              }
-                            }
-                            if (targetVal < mintCount) {
-                              for (let i = targetVal; i > mintCount; i--) {
-                                handleAmountClickDown()
-                              }
-                            }
+                            handleMintAmountChange(value)
+                            handleAmountClick(value)
                           }
                         }}
                       ></input>
@@ -281,7 +291,7 @@ export const Mint = () => {
                   onClick={() => {
                     handleMintAmountChange(Math.max(1, mintCount - 1))
                     setIsCustomVisible(false)
-                    handleAmountClickDown()
+                    handleAmountClick(mintCount - 1)
                   }}
                   disabled={mintBtnDisabled || !account.isConnected || isMintSignLoading}
                 >
@@ -312,7 +322,8 @@ export const Mint = () => {
                   onClick={() => {
                     handleMintAmountChange(mintCount + 1)
                     setIsCustomVisible(false)
-                    handleAmountClickUp()
+                    // handleAmountClickUp()
+                    handleAmountClick(mintCount + 1)
                   }}
                 >
                   +
