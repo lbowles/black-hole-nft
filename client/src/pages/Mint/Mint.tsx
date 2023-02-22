@@ -201,10 +201,16 @@ export const Mint = () => {
   useEffect(() => {
     if (mintTx?.status === 1) {
       mintSound()
-      const tokenIds = mintTx.logs.map((log) => {
-        const events = BlackHoles__factory.createInterface().decodeEventLog("Transfer", log.data, log.topics)
-        return events.tokenId.toString()
-      })
+      const tokenIds = mintTx.logs
+        .map((log) => {
+          try {
+            const events = BlackHoles__factory.createInterface().decodeEventLog("Transfer", log.data, log.topics)
+            return events.tokenId.toString()
+          } catch (e) {
+            return null
+          }
+        })
+        .filter((id) => id !== null)
       setMintedTokens(tokenIds)
     }
   }, [mintTx])
