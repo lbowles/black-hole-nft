@@ -22,8 +22,8 @@ export const Home = () => {
         <LinksTab />
       </div>
       <div className="text-center w-screen">
-        <p className="sm:text-5xl text-2xl text-white ">Lost in the Depths of the Void</p>
-        <p className="sm:text-4xl text-xl text-gray-500 pt-1">Beyond the Event Horizon</p>
+        <p className="sm:text-5xl text-2xl text-white ">BLACK HOLES</p>
+        <p className="sm:text-4xl text-xl text-gray-500 pt-1">Dive into the depths of the void</p>
       </div>
       <div className="flex justify-center w-screen p-20">
         {/* TODO: Test this */}

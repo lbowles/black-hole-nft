@@ -12,6 +12,11 @@ import deployments from "./deployments.json"
 import { Footer } from "./components/Footer/Footer"
 import { Mint } from "./pages/Mint/Mint"
 import { Burn } from "./pages/Burn /Burn"
+import useSound from "use-sound"
+import { useEffect, useState } from "react"
+import soundUrl from "./sounds/loop.mp3"
+import { EnterScreen } from "./components/EnterScreen/EnterScreen"
+import { useNavigate } from "react-router-dom"
 
 // Loop over all chains and check if they match deployments.chainId
 const deployedChain = Object.values(allChains).filter((chain) => {
@@ -45,6 +50,21 @@ const openMintDate = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 const amountMinted = 123
 
 function App() {
+  const [isMuted, setIsMuted] = useState(false)
+  const [globalVolume, setGlobalVolume] = useState(0.5)
+  const [play, { stop }] = useSound(soundUrl, { loop: true, volume: globalVolume, preloaded: true })
+  const [enterHome, setEnterHome] = useState(false)
+
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (enterHome) {
+      play()
+    } else {
+      stop()
+    }
+  }, [enterHome, play, stop])
+
   return (
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider
@@ -57,13 +77,77 @@ function App() {
           },
         }}
       >
-        <Navbar />
+        {enterHome && <Navbar />}
         <div className="min-h-[70vh]">
+          <button
+            className="fixed bottom-4 right-4 bg-gray-800 text-white rounded-md p-2"
+            onClick={() => {
+              setIsMuted(!isMuted)
+              if (isMuted) {
+                setGlobalVolume(0.5)
+              } else {
+                setGlobalVolume(0)
+              }
+            }}
+          >
+            {isMuted ? "Unmute" : "Mute"}
+          </button>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/mint" element={<Mint />} />
-            <Route path="/merge" element={<Burn />} />
-            <Route path="*" element={<Home />} />
+            {enterHome ? (
+              <>
+                <Route path="/" element={<Home />} />
+                <Route path="/mint" element={<Mint />} />
+                <Route path="/merge" element={<Burn />} />
+                <Route path="*" element={<Home />} />
+                <Route
+                  path="*"
+                  element={
+                    <p className="pt-20 text-white text-xl f-full text-center">
+                      Not found,{" "}
+                      <a
+                        onClick={() => {
+                          navigate("/")
+                          setEnterHome(false)
+                        }}
+                        className="text-xl text-gray-500 hover:text-white transition-colors cursor-pointer"
+                      >
+                        Return
+                      </a>
+                    </p>
+                  }
+                />
+              </>
+            ) : (
+              <>
+                <Route
+                  path="/"
+                  element={
+                    <EnterScreen
+                      onEnter={() => {
+                        setEnterHome(true)
+                      }}
+                    />
+                  }
+                />
+                <Route
+                  path="*"
+                  element={
+                    <p className="pt-20 text-white text-xl f-full text-center">
+                      Not found,{" "}
+                      <a
+                        onClick={() => {
+                          navigate("/")
+                          setEnterHome(false)
+                        }}
+                        className="text-xl text-gray-500 hover:text-white transition-colors cursor-pointer"
+                      >
+                        Return
+                      </a>
+                    </p>
+                  }
+                />
+              </>
+            )}
           </Routes>
         </div>
         <Footer />
