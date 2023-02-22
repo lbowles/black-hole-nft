@@ -16,7 +16,7 @@ export const MergingAmountGraphic = ({ levels }: IMergingAmountGraphic) => {
   const { data: mintState } = useBlackHolesGetMintState()
   return (
     <>
-      <p className="text-white">Total Minted: {totalMinted?.toString()}</p>
+      {mintState === MintState.Closed && <p className="text-white">Total Minted: {totalMinted?.toString()}</p>}
       {levels.map((level, index) => {
         return (
           <div key={index} className="w-full justify-between items-center flex pb-2">
