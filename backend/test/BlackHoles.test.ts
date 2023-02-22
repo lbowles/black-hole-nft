@@ -26,6 +26,13 @@ describe("BlackHoles", function () {
     expect(await blackHoles.timedSalePrice()).to.equal(ethers.utils.parseEther("0.004"))
   })
 
+  it("Should let the owner set the merge delay", async function () {
+    const tx = await blackHoles.setMergingDelay(1000)
+    const receipt = await tx.wait()
+    console.log(receipt.gasUsed.toString())
+    expect(await blackHoles.mergingDelay()).to.equal(1000)
+  })
+
   it("Should mint a new NFT and assign it to the caller", async function () {
     const initialSupply = await blackHoles.totalSupply()
     await blackHoles.connect(signers[0]).mint(1, { value: mintPrice })
