@@ -63,6 +63,17 @@ if (process.env.DEFAULT_DEPLOYER_KEY && process.env.INFURA_PROJECT_ID) {
       },
     },
   }
+
+  networks["mumbai"] = {
+    chainId: 80001,
+    url: `https://rpc.ankr.com/polygon_mumbai`,
+    accounts: [process.env.DEFAULT_DEPLOYER_KEY],
+    verify: {
+      etherscan: {
+        apiKey: process.env.POLYGONSCAN_API_KEY || "",
+      },
+    },
+  }
 }
 
 const config: HardhatUserConfig = {
