@@ -9,7 +9,7 @@ export const Footer = () => {
     <div className="w-full">
       <div>
         <div className="w-screen flex justify-center text-gray-700 text-base pt-20 pb-2">
-          Made by ‎
+          Made by&nbsp;
           <a
             className="hover:text-gray-500 underline"
             href="https://twitter.com/npm_luko"
@@ -18,7 +18,7 @@ export const Footer = () => {
           >
             @npm_luko
           </a>
-          ‎ and ‎
+          &nbsp;and&nbsp;
           <a
             className="hover:text-gray-500 underline"
             href="https://twitter.com/stephancill"
