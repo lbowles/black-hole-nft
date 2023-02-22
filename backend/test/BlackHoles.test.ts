@@ -18,7 +18,7 @@ describe("BlackHoles", function () {
     const BlackHoles = await deployments.get("BlackHoles")
     blackHoles = BlackHoles__factory.connect(BlackHoles.address, signers[0]) as BlackHoles
     mintPrice = await blackHoles.getPrice()
-    threshold = await blackHoles.TIMED_SALE_THRESHOLD()
+    threshold = await blackHoles.timedSaleThreshold()
   })
 
   it("Should have the correct price set in the constructor", async function () {
@@ -242,11 +242,12 @@ describe("BlackHoles", function () {
 
     /* Merge */
     const totalMinted = (await blackHoles.totalMinted()).toNumber()
-    expect(totalMinted).to.equal(11_000)
+    expect(totalMinted).to.equal(threshold.add(threshold.mul(10)).toNumber())
 
     const baseUpgradeMass = (await blackHoles.getBaseUpgradeMass()).toNumber()
     const maxLevelTokenCap = (await blackHoles.MAX_SUPPLY_OF_INTERSTELLAR()).toNumber()
-    expect(baseUpgradeMass).to.equal(Math.floor(totalMinted / maxLevelTokenCap / 2 ** 4))
+    const maxLevel = (await blackHoles.MAX_LEVEL()).toNumber()
+    expect(baseUpgradeMass).to.equal(Math.floor(totalMinted / maxLevelTokenCap / 2 ** (maxLevel - 1)))
 
     // Update correct token's metadata and burn the right tokens
     expect(await blackHoles.merge([1, 2, 3, 4]))

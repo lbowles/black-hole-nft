@@ -40,7 +40,6 @@ import "./interfaces/IERC4906.sol";
 contract BlackHoles is ERC721A, Ownable, IERC4906 {
   event TimedSaleStarted();
 
-  uint256 public immutable TIMED_SALE_THRESHOLD = 1000;
   uint256 public immutable MAX_LEVEL = 4;
   uint256 public immutable MAX_SUPPLY_OF_INTERSTELLAR = 42;
   string[] public BLACK_HOLE_NAMES = ["Micro", "Stellar", "Intermediate", "Supermassive", "Primordial"];
@@ -48,6 +47,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
   uint256 public price;
   uint256 public timedSalePrice;
   uint256 public timedSaleEndTimestamp;
+  uint256 public timedSaleThreshold = 500;
   uint256 public timedSaleDuration = 24 hours;
   uint256 public mergingDelay = 5 days;
 
@@ -102,6 +102,14 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
    */
   function setTimedSaleDuration(uint256 _timedSaleDuration) external onlyOwner {
     timedSaleDuration = _timedSaleDuration;
+  }
+
+  /**
+   * @notice Sets the number of tokens that need to be minted for the timed sale to start.
+   * @param _timedSaleThreshold Number of tokens.
+   */
+  function setTimedSaleThreshold(uint256 _timedSaleThreshold) external onlyOwner {
+    timedSaleThreshold = _timedSaleThreshold;
   }
 
   /**
@@ -270,8 +278,8 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
     uint256 cost = currentPrice * _quantity;
 
     // Handle case where the mint crosses the timed sale threshold
-    if (mintState == MintState.OPEN && supplyAfterMint >= TIMED_SALE_THRESHOLD) {
-      uint256 quantityAtNewPrice = supplyAfterMint - TIMED_SALE_THRESHOLD;
+    if (mintState == MintState.OPEN && supplyAfterMint >= timedSaleThreshold) {
+      uint256 quantityAtNewPrice = supplyAfterMint - timedSaleThreshold;
 
       // Cost for tokens at old price
       uint256 quantityAtOldPrice = _quantity - quantityAtNewPrice;
@@ -326,7 +334,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
    */
   function getMintState() public view returns (MintState) {
     uint256 supply = _totalMinted();
-    if (supply < TIMED_SALE_THRESHOLD) {
+    if (supply < timedSaleThreshold) {
       return MintState.OPEN;
     } else if (block.timestamp < timedSaleEndTimestamp) {
       return MintState.TIMED_SALE;
