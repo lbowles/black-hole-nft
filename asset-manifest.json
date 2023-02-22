@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.b67a0aac.css",
-    "main.js": "/static/js/main.6dc3a578.js",
+    "main.css": "/static/css/main.5451cda0.css",
+    "main.js": "/static/js/main.d6deb47d.js",
     "static/js/510.0c7fe483.chunk.js": "/static/js/510.0c7fe483.chunk.js",
     "static/js/963.ba5cc79f.chunk.js": "/static/js/963.ba5cc79f.chunk.js",
     "static/js/448.af208807.chunk.js": "/static/js/448.af208807.chunk.js",
@@ -57,6 +57,7 @@
     "static/media/stellar.svg": "/static/media/stellar.d318ce92f13dabd126ad4cd6b2a58004.svg",
     "static/media/blockSpinner.svg": "/static/media/blockSpinner.e41c4daa0784bbcfac19f7e02d179c41.svg",
     "index.html": "/index.html",
+    "static/media/etherscan.svg": "/static/media/etherscan.f1cffab3c1be1d11d24799db418a0a80.svg",
     "static/media/opensea.svg": "/static/media/opensea.36d877cf119d9755fb6b7bc99da2eaf0.svg",
     "static/media/github.svg": "/static/media/github.3d4d3b1e87fd8b57b0a232ec7711e3bf.svg",
     "static/media/twitter.svg": "/static/media/twitter.b41c0508f939d41a4f9d6c6f52cef4a8.svg",
@@ -65,7 +66,7 @@
     "static/media/unmute.svg": "/static/media/unmute.2bfa870e0b486389ef3671c38aeb8f5d.svg"
   },
   "entrypoints": [
-    "static/css/main.b67a0aac.css",
-    "static/js/main.6dc3a578.js"
+    "static/css/main.5451cda0.css",
+    "static/js/main.d6deb47d.js"
   ]
 }
