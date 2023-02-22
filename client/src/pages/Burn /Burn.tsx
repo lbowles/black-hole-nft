@@ -299,7 +299,7 @@ export const Burn = () => {
                       </button>
                     </div>
                     <p className="w-full text-center text-xl text-white mt-12">
-                      Merge successfull,{" "}
+                      Merge successful,{" "}
                       <a
                         className="transition-colors hover:text-white text-gray-500 hover:underline cursor-pointer"
                         target="_blank"
