@@ -17,6 +17,8 @@ import { useEffect, useState } from "react"
 import soundUrl from "./sounds/loop.mp3"
 import { EnterScreen } from "./components/EnterScreen/EnterScreen"
 import { useNavigate } from "react-router-dom"
+import unmute from "./img/unmute.svg"
+import mute from "./img/mute.svg"
 
 // Loop over all chains and check if they match deployments.chainId
 const deployedChain = Object.values(allChains).filter((chain) => {
@@ -80,7 +82,7 @@ function App() {
         {enterHome && <Navbar />}
         <div className="min-h-[70vh]">
           <button
-            className="fixed bottom-4 right-4 bg-gray-800 text-white rounded-md p-2"
+            className="fixed bottom-4 right-4 bg-none text-white rounded-md p-2"
             onClick={() => {
               setIsMuted(!isMuted)
               if (isMuted) {
@@ -90,7 +92,7 @@ function App() {
               }
             }}
           >
-            {isMuted ? "Unmute" : "Mute"}
+            <img src={!isMuted ? unmute : mute} className="h-7"></img>
           </button>
           <Routes>
             {enterHome ? (
