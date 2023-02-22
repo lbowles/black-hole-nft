@@ -67,6 +67,28 @@ function App() {
     }
   }, [enterHome, play, stop])
 
+  const enterScreenComponent = (
+    <EnterScreen
+      onEnter={() => {
+        setEnterHome(true)
+      }}
+    />
+  )
+
+  const pageNotFound = (
+    <p className="pt-20 text-white text-xl f-full text-center">
+      Not found,{" "}
+      <a
+        onClick={() => {
+          navigate("/")
+        }}
+        className="text-xl text-gray-500 hover:text-white transition-colors cursor-pointer"
+      >
+        Return
+      </a>
+    </p>
+  )
+
   return (
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider
@@ -95,61 +117,10 @@ function App() {
             <img src={!isMuted ? unmute : mute} className="h-7"></img>
           </button>
           <Routes>
-            {enterHome ? (
-              <>
-                <Route path="/" element={<Home />} />
-                <Route path="/mint" element={<Mint />} />
-                <Route path="/merge" element={<Burn />} />
-                <Route path="*" element={<Home />} />
-                <Route
-                  path="*"
-                  element={
-                    <p className="pt-20 text-white text-xl f-full text-center">
-                      Not found,{" "}
-                      <a
-                        onClick={() => {
-                          navigate("/")
-                          setEnterHome(false)
-                        }}
-                        className="text-xl text-gray-500 hover:text-white transition-colors cursor-pointer"
-                      >
-                        Return
-                      </a>
-                    </p>
-                  }
-                />
-              </>
-            ) : (
-              <>
-                <Route
-                  path="/"
-                  element={
-                    <EnterScreen
-                      onEnter={() => {
-                        setEnterHome(true)
-                      }}
-                    />
-                  }
-                />
-                <Route
-                  path="*"
-                  element={
-                    <p className="pt-20 text-white text-xl f-full text-center">
-                      Not found,{" "}
-                      <a
-                        onClick={() => {
-                          navigate("/")
-                          setEnterHome(false)
-                        }}
-                        className="text-xl text-gray-500 hover:text-white transition-colors cursor-pointer"
-                      >
-                        Return
-                      </a>
-                    </p>
-                  }
-                />
-              </>
-            )}
+            <Route path="/" element={enterHome ? <Home /> : enterScreenComponent} />
+            <Route path="/mint" element={enterHome ? <Mint /> : enterScreenComponent} />
+            <Route path="/merge" element={enterHome ? <Burn /> : enterScreenComponent} />
+            <Route path="*" element={pageNotFound} />
           </Routes>
         </div>
         <Footer />

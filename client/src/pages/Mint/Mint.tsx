@@ -257,6 +257,17 @@ export const Mint = () => {
                             handleMintAmountChange(1)
                           } else {
                             handleMintAmountChange(parseInt(e.target.value))
+                            let targetVal = parseInt(e.target.value)
+                            if (targetVal > mintCount) {
+                              for (let i = mintCount; i < targetVal; i++) {
+                                handleAmountClickUp()
+                              }
+                            }
+                            if (targetVal < mintCount) {
+                              for (let i = targetVal; i > mintCount; i--) {
+                                handleAmountClickDown()
+                              }
+                            }
                           }
                         }}
                       ></input>
