@@ -47,7 +47,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
   uint256 public price;
   uint256 public timedSalePrice;
   uint256 public timedSaleEndTimestamp;
-  uint256 public timedSaleThreshold = 500;
+  uint256 public timedSaleThreshold = 1000;
   uint256 public timedSaleDuration = 24 hours;
   uint256 public mergingDelay = 5 days;
 
