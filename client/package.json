@@ -27,7 +27,7 @@
   },
   "scripts": {
     "deploy": "gh-pages -d build",
-    "predeploy": "wagmi generate ** yarn run build",
+    "predeploy": "wagmi generate && yarn run build",
     "prestart": "wagmi generate && echo \"declare const schema: $(cat src/deployments.json); export default schema;\" > src/deployments.json.d.ts",
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",

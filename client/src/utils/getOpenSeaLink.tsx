@@ -7,7 +7,7 @@ const openseaChainMapping: Record<string, string> = {
 }
 
 export function getOpenSeaLink(chainId: string, tokenId: string | number) {
-  return `https://${chainId !== "1" ? "testnets." : ""}opensea.io/assets/${openseaChainMapping[chainId]}${
+  return `https://${chainId !== "1" ? "testnets." : ""}opensea.io/assets/${openseaChainMapping[chainId]}/${
     deployments.contracts.BlackHoles.address
   }/${tokenId}`
 }
