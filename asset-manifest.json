@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.0ddeae92.css",
-    "main.js": "/static/js/main.22541458.js",
+    "main.css": "/static/css/main.10db921b.css",
+    "main.js": "/static/js/main.48aa7dfc.js",
     "static/js/510.0c7fe483.chunk.js": "/static/js/510.0c7fe483.chunk.js",
     "static/js/963.ba5cc79f.chunk.js": "/static/js/963.ba5cc79f.chunk.js",
     "static/js/448.af208807.chunk.js": "/static/js/448.af208807.chunk.js",
@@ -37,6 +37,7 @@
     "static/js/836.653ab18d.chunk.js": "/static/js/836.653ab18d.chunk.js",
     "static/js/144.a58ce99f.chunk.js": "/static/js/144.a58ce99f.chunk.js",
     "static/js/743.29409fbb.chunk.js": "/static/js/743.29409fbb.chunk.js",
+    "static/media/loop.mp3": "/static/media/loop.ce9dac590a1a8b2205d4.mp3",
     "static/media/merge.mp3": "/static/media/merge.660413d8975aec259323.mp3",
     "static/media/mint.mp3": "/static/media/mint.e9b2895394d9e52b1b6e.mp3",
     "static/media/submit.mp3": "/static/media/submit.bf866a458e02178337ce.mp3",
@@ -59,10 +60,12 @@
     "static/media/opensea.svg": "/static/media/opensea.36d877cf119d9755fb6b7bc99da2eaf0.svg",
     "static/media/github.svg": "/static/media/github.3d4d3b1e87fd8b57b0a232ec7711e3bf.svg",
     "static/media/twitter.svg": "/static/media/twitter.b41c0508f939d41a4f9d6c6f52cef4a8.svg",
-    "static/media/dropdown.svg": "/static/media/dropdown.b713bfd85d4a7c2766e43757f0df8b61.svg"
+    "static/media/dropdown.svg": "/static/media/dropdown.b713bfd85d4a7c2766e43757f0df8b61.svg",
+    "static/media/mute.svg": "/static/media/mute.fcbae954b2df1a728cf2085b17a6d386.svg",
+    "static/media/unmute.svg": "/static/media/unmute.2bfa870e0b486389ef3671c38aeb8f5d.svg"
   },
   "entrypoints": [
-    "static/css/main.0ddeae92.css",
-    "static/js/main.22541458.js"
+    "static/css/main.10db921b.css",
+    "static/js/main.48aa7dfc.js"
   ]
 }
