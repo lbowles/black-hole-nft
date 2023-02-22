@@ -6,6 +6,7 @@ import supperMassive from "../../../img/blackHoles/supermassive.svg"
 import primordial from "../../../img/blackHoles/primordial.svg"
 import { MergingAmountGraphic } from "../MergingAmountGraphic/MergingAmountGraphic"
 import { useState } from "react"
+import { useBlackHolesMaxSupplyOfInterstellar, useBlackHolesUpgradeIntervals } from "../../../generated"
 
 const startingLevels = [
   { startName: "MICRO", endName: "STELLAR", startImg: micro, endImg: stellar, amount: undefined },
@@ -24,6 +25,7 @@ type Ilevels = { startImg: string; endImg: string; startName: string; endName: s
 
 export const GeneralInfo = () => {
   const [levels, setLevels] = useState<Ilevels>(startingLevels)
+  const { data: MAX_SUPPLY_OF_INTERSTELLAR } = useBlackHolesMaxSupplyOfInterstellar()
 
   return (
     <div className="flex justify-center w-screen mt-20 p-5">
@@ -55,7 +57,8 @@ export const GeneralInfo = () => {
               Holes, decreasing the supply.
             </li>
             <li className="pt-1">
-              <a className=" text-white ">Rare.</a>‎ Only 42 of the highest level Black Hole can ever exist.
+              <a className=" text-white ">Rare.</a>‎ Only {MAX_SUPPLY_OF_INTERSTELLAR?.toString()} of the highest level
+              Black Hole can ever exist.
             </li>
           </ol>
           <Divider />
@@ -91,7 +94,8 @@ export const GeneralInfo = () => {
           <p className="text-gray-600 text-base pt-3">
             There exists five types of Black Holes, each more massive and rare than the last. The exact number of Black
             Holes needed to merge together to level up depends on the total supply. For reasons not yet discovered, the
-            universe only allows for the existence of 42 of the largest type, the Primordial black hole.
+            universe only allows for the existence of {MAX_SUPPLY_OF_INTERSTELLAR?.toString()} of the largest type, the
+            Primordial black hole.
           </p>
           <Divider />
           <MergingAmountGraphic levels={levels} />
@@ -99,7 +103,9 @@ export const GeneralInfo = () => {
           <div className="w-full flex justify-center">
             <img src={primordial} className="w-[80px]"></img>
           </div>
-          <p className="text-gray-500 text-2xl text-center pt-3">Only 42 can exist...</p>
+          <p className="text-gray-500 text-2xl text-center pt-3">
+            Only {MAX_SUPPLY_OF_INTERSTELLAR?.toString()} can exist...
+          </p>
         </div>
       </div>
     </div>
