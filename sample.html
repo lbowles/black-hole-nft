@@ -14,7 +14,7 @@
       const PIXEL_SIZE = 10
       const CANVAS_SIZE = PIXELS_PER_SIDE * PIXEL_SIZE
 
-      const baseUpgradeMass = 20
+      const baseUpgradeMass = 2
       const maxAdjustment = 20
 
       const specialString = `
@@ -69,8 +69,17 @@
         const nextLevelMass = baseUpgradeMass * 2 ** (level + 1) - 1
         const baseLevelMass = baseUpgradeMass * 2 ** level
         const massDiff = nextLevelMass - baseLevelMass
-        const adjustment = (maxAdjustment * (nextLevelMass - mass)) / (nextLevelMass - baseLevelMass)
-        // console.log({ nextLevelMass, baseLevelMass, massDiff, adjustment: adjustment })
+        let prevLevelMass = 0
+        if (level > 0) {
+          prevLevelMass = baseLevelMass
+        }
+        const adjustment = Math.floor((maxAdjustment * (nextLevelMass - mass)) / (nextLevelMass - prevLevelMass))
+        console.log("--- level", level)
+        console.log("mass", mass)
+        console.log("nextLevelMass", nextLevelMass)
+        console.log("prevLevelMass", prevLevelMass)
+        console.log("adjustmentFactor", (nextLevelMass - mass) / (nextLevelMass - prevLevelMass))
+        console.log("adjustment", adjustment)
 
         // Decode colour scheme from 3 bytes encoded colorSchemeString
         const encoded = colorSchemeString.slice(level * 9 * 3, level * 9 * 3 + 9 * 3)
@@ -267,14 +276,40 @@
         return svg
       }
 
-      for (let i = 0; i < COLOR_SCHEMES.length / 3; i++) {
+      // for (let i = 0; i < COLOR_SCHEMES.length / 3; i++) {
+      //   const level = i
+      //   console.log("level", i)
+      //   for (let j = 0; j <= 2; j++) {
+      //     const nextLevelMass = baseUpgradeMass * 2 ** (level + 1) - 1
+      //     const baseLevelMass = baseUpgradeMass * 2 ** level
+      //     const massDiff = nextLevelMass - baseLevelMass
+      //     const mass = Math.floor(baseLevelMass + (massDiff / 2) * j)
+
+      //     // Print variables
+      //     console.log("nextLevelMass", nextLevelMass)
+      //     console.log("baseLevelMass", baseLevelMass)
+      //     console.log("massDiff", massDiff)
+      //     console.log("mass")
+
+      //     // colors[2] -= (20 * (nextLevelMass - mass)) / nextLevelMass
+      //     const canvas = document.createElement("span")
+      //     canvas.innerHTML = createSVG(level, mass)
+      //     document.getElementById("canvasContainer").appendChild(canvas)
+      //   }
+      // }
+
+      for (let i = 0; i < 5; i++) {
         const level = i
-        console.log("level", i)
-        for (let j = 0; j <= 2; j++) {
-          const nextLevelMass = baseUpgradeMass * 2 ** (level + 1) - 1
-          const baseLevelMass = baseUpgradeMass * 2 ** level
-          const massDiff = nextLevelMass - baseLevelMass
-          const mass = Math.floor(baseLevelMass + (massDiff / 2) * j)
+        const nextLevelMass = baseUpgradeMass * 2 ** (level + 1) - 1
+        const baseLevelMass = baseUpgradeMass * 2 ** level
+        const massDiff = nextLevelMass - baseLevelMass
+        let prevLevelMass = 0
+        if (level > 0) {
+          prevLevelMass = baseLevelMass
+        }
+
+        for (let j = prevLevelMass; j <= nextLevelMass; j++) {
+          const mass = j
 
           // colors[2] -= (20 * (nextLevelMass - mass)) / nextLevelMass
           const canvas = document.createElement("span")

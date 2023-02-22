@@ -206,10 +206,14 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
   function getAdjustmentForMass(uint256 _mass) public view returns (uint256) {
     uint256 baseUpgradeMass = getBaseUpgradeMass();
     uint256 level = levelForMass(_mass);
+
     uint256 nextLevelMass = baseUpgradeMass * 2**(level + 1) - 1;
     uint256 baseLevelMass = baseUpgradeMass * 2**level;
-    uint256 massDiff = nextLevelMass - baseLevelMass;
-    uint256 adjustment = ((20 * (nextLevelMass - _mass))) / massDiff;
+    uint256 prevLevelMass = 0;
+    if (level > 0) {
+      prevLevelMass = baseLevelMass;
+    }
+    uint256 adjustment = (20 * (nextLevelMass - _mass)) / (nextLevelMass - prevLevelMass);
 
     return adjustment;
   }
@@ -251,7 +255,9 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
     return BLACK_HOLE_NAMES;
   }
 
-  // The amount needed at each level to upgrade to the next level.
+  /**
+   * @notice Returns the mass required to upgrade to the next level for each level.
+   */
   function upgradeIntervals() public view returns (uint256[] memory) {
     uint256 baseUpgradeMass = getBaseUpgradeMass();
     uint256[] memory intervals = new uint256[](MAX_LEVEL + 1);
