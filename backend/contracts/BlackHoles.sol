@@ -46,7 +46,8 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
 
   uint256 public price;
   uint256 public timedSalePrice;
-  uint256 public timedSaleEndTimestamp;
+  // uint256 public timedSaleEndTimestamp;
+  uint256 public timedSaleStartedTimestamp;
   uint256 public timedSaleThreshold = 1000;
   uint256 public timedSaleDuration = 24 hours;
   uint256 public mergingDelay = 5 days;
@@ -301,7 +302,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
       _quantity = quantityAtOldPrice + quantityAtNewPrice;
 
       // Start timed sale
-      timedSaleEndTimestamp = block.timestamp + 24 hours;
+      timedSaleStartedTimestamp = block.timestamp;
       emit TimedSaleStarted();
     }
 
@@ -342,7 +343,7 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
     uint256 supply = _totalMinted();
     if (supply < timedSaleThreshold) {
       return MintState.OPEN;
-    } else if (block.timestamp < timedSaleEndTimestamp) {
+    } else if (block.timestamp < timedSaleStartedTimestamp + timedSaleDuration) {
       return MintState.TIMED_SALE;
     } else {
       return MintState.CLOSED;
@@ -353,7 +354,13 @@ contract BlackHoles is ERC721A, Ownable, IERC4906 {
    * @notice Returns whether merging is enabled or not.
    */
   function isMergingEnabled() public view returns (bool) {
-    return getMintState() == MintState.CLOSED && block.timestamp > timedSaleEndTimestamp + mergingDelay;
+    return
+      getMintState() == MintState.CLOSED &&
+      block.timestamp > timedSaleStartedTimestamp + timedSaleDuration + mergingDelay;
+  }
+
+  function timedSaleEndTimestamp() public view returns (uint256) {
+    return timedSaleStartedTimestamp + timedSaleDuration;
   }
 
   /**
