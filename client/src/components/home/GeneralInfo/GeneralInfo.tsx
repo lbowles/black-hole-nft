@@ -37,7 +37,7 @@ export const GeneralInfo = () => {
           <p className="text-gray-600 text-base pt-3">
             Black Holes is a fully on-chain NFT collection which features procedurally generated pixel art black holes.
             Each Black Hole has an associated mass which changes its appearance. A Black Hole’s mass is increased by
-            burning other Black Holes in the merging process.
+            burning other Black Holes in the merging process. There is no roadmap, only the void.
           </p>
           <Divider />
           <p className="text-white text-2xl">Features</p>
