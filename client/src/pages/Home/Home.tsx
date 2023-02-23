@@ -26,7 +26,6 @@ export const Home = () => {
         <p className="sm:text-3xl text-xl text-gray-500 pt-2">DIVE INTO THE DEPTHS OF THE VOID</p>
       </div>
       <div className="flex justify-center w-screen p-20">
-        {/* TODO: Test this */}
         {mintState !== MintState.Closed ? (
           <button
             onClick={() => {
@@ -38,7 +37,6 @@ export const Home = () => {
             MINT NOW
           </button>
         ) : (
-          // TODO: Link to secondary market or merge
           <button
             onClick={() => {
               generalClickSound()
