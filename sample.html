@@ -66,20 +66,35 @@
       }
 
       function getColorStyleDefinitions(level, mass) {
-        const nextLevelMass = baseUpgradeMass * 2 ** (level + 1) - 1
-        const baseLevelMass = baseUpgradeMass * 2 ** level
-        const massDiff = nextLevelMass - baseLevelMass
-        let prevLevelMass = 0
-        if (level > 0) {
-          prevLevelMass = baseLevelMass
+        // if (level == MAX_LEVEL) {
+        //   return 0;
+        // }
+
+        // uint256 baseUpgradeMass = getBaseUpgradeMass();
+
+        // uint256 nextLevelMass = baseUpgradeMass * 2**(level + 1) - 1;
+        // uint256 baseLevelMass = baseUpgradeMass * 2**level;
+        // uint256 prevLevelMass = 0;
+        // if (level > 0) {
+        //   prevLevelMass = baseLevelMass;
+        // }
+        // uint256 adjustment = (20 * (nextLevelMass - _mass)) / (nextLevelMass - prevLevelMass);
+        let adjustment = 0
+        if (level !== 4) {
+          const nextLevelMass = baseUpgradeMass * 2 ** (level + 1) - 1
+          const baseLevelMass = baseUpgradeMass * 2 ** level
+          let prevLevelMass = 0
+          if (level > 0) {
+            prevLevelMass = baseLevelMass
+          }
+          adjustment = Math.floor((maxAdjustment * (nextLevelMass - mass)) / (nextLevelMass - prevLevelMass))
+          console.log("--- level", level)
+          console.log("mass", mass)
+          console.log("nextLevelMass", nextLevelMass)
+          console.log("prevLevelMass", prevLevelMass)
+          console.log("adjustmentFactor", (nextLevelMass - mass) / (nextLevelMass - prevLevelMass))
+          console.log("adjustment", adjustment)
         }
-        const adjustment = Math.floor((maxAdjustment * (nextLevelMass - mass)) / (nextLevelMass - prevLevelMass))
-        console.log("--- level", level)
-        console.log("mass", mass)
-        console.log("nextLevelMass", nextLevelMass)
-        console.log("prevLevelMass", prevLevelMass)
-        console.log("adjustmentFactor", (nextLevelMass - mass) / (nextLevelMass - prevLevelMass))
-        console.log("adjustment", adjustment)
 
         // Decode colour scheme from 3 bytes encoded colorSchemeString
         const encoded = colorSchemeString.slice(level * 9 * 3, level * 9 * 3 + 9 * 3)
@@ -315,6 +330,10 @@
           const canvas = document.createElement("span")
           canvas.innerHTML = createSVG(level, mass)
           document.getElementById("canvasContainer").appendChild(canvas)
+
+          if (level === 4) {
+            break
+          }
         }
       }
     </script>
