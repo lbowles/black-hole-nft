@@ -357,7 +357,7 @@ export const Burn = () => {
                             <div className="h-[380px] overflow-auto mt-1">
                               <div className="grid grid-cols-4 gap-2 mt-2 max-h-[380px] overflow-auto pb-[72px]">
                                 {ownedNFTs.map((nft, index) => {
-                                  const img = nftTypeToImg[nft.name.toUpperCase()]?.trim() ?? ""
+                                  const img = nft.image ?? nftTypeToImg[nft.name.toUpperCase()]?.trim() ?? ""
                                   const selectedStyle = nft.selected
                                     ? "border-white  text-white"
                                     : "border-gray-800 hover:border-gray-600 text-gray-700 "
