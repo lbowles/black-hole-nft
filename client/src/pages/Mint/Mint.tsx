@@ -213,7 +213,11 @@ export const Mint = () => {
         <div className="w-screen h-[70vh] flex justify-center items-center">
           <p className="text-white text-2xl">
             Mint ended, view on{" "}
-            <a target="_blank" href="https://opensea.com" className="text-gray-500 hover:text-white text-2xl underline">
+            <a
+              target="_blank"
+              href="https://opensea.io/collection/onchain-blackholes"
+              className="text-gray-500 hover:text-white text-2xl underline"
+            >
               OpenSea
             </a>
           </p>
