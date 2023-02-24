@@ -10,8 +10,10 @@ import {
   useBlackHolesAllBlackHoleLevelNames,
   useBlackHolesGetBaseUpgradeMass,
   useBlackHolesIsMergingEnabled,
+  useBlackHolesLevelForMass,
   useBlackHolesMerge,
   useBlackHolesMergingDelay,
+  useBlackHolesNameForBlackHoleLevel,
   useBlackHolesTimedSaleEndTimestamp,
   useBlackHolesUpgradeIntervals,
   usePrepareBlackHolesMerge,
@@ -33,15 +35,8 @@ import linkClickEffect from "../../sounds/linkClick.mp3"
 import mergeEffect from "../../sounds/merge.mp3"
 import { getOpenSeaLink } from "../../utils/getOpenSeaLink"
 import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwner"
-
-// sort by SM (largest first) and then by tokenId (smallest first) if SM is the same
-function compareBlackHoles(a: BlackHoleMetadata, b: BlackHoleMetadata) {
-  if (b.mass.toString() !== a.mass.toString()) {
-    return parseInt(b.mass.toString()) - parseInt(a.mass.toString())
-  } else {
-    return parseInt(a.tokenId.toString()) - parseInt(b.tokenId.toString())
-  }
-}
+import { compareBlackHoles } from "../../utils/compareBlackHoles"
+import { SimulateMerge } from "../../components/SimulateMerge/SimulateMerge"
 
 const nftTypeToImg: Record<string, string> = {
   MICRO: micro,
@@ -448,7 +443,8 @@ export const Burn = () => {
                             <p className="w-full text-center text-2xl text-white">You will receive</p>
                             <p className="text-gray-600 text-base  w-full text-center">Select token ID to upgrade</p>
                             <div className="border-2 border-white  mt-5">
-                              <img src={nftTypeToAnimatedImg[upgradeType]?.trim() ?? ""} className="p-1"></img>
+                              {totalSM !== undefined && <SimulateMerge mass={BigNumber.from(totalSM)} />}
+                              {/* <img src={nftTypeToAnimatedImg[upgradeType]?.trim() ?? ""} className="p-1"></img> */}
                               <div className="border-t-2 border-white p-5">
                                 <p className="text-xl text-white pb-1">{upgradeType}</p>
                                 <div className="flex justify-between items-end">
