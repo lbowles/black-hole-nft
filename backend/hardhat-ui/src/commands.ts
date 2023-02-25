@@ -71,11 +71,18 @@ export const COMMANDS: ICommand[] = [
     description:
       "Skips to merge with 6700 total minted. 300 in 2nd signer (0x70997970C51812dc3A010C7d01b50e0d17dc79C8)",
     command: "skipToMerge",
-    inputs: [],
+    inputs: [
+      {
+        name: "amount in second signer",
+        value: "300",
+      },
+    ],
     execute: async (provider: ethers.providers.JsonRpcProvider, inputs: IInput[]) => {
       const signer = new ethers.Wallet(signer1key, provider)
 
       const signer2 = new ethers.Wallet(signer2key, provider)
+
+      const [amountInSecondSigner] = inputs
 
       const blackholesDeployment = require(`../../deployments/localhost/BlackHoles.json`)
       const blackHoles = BlackHoles__factory.connect(blackholesDeployment.address, signer)
@@ -97,7 +104,7 @@ export const COMMANDS: ICommand[] = [
 
       price = await blackHoles.getPrice()
 
-      const targetAmountInSecondSigner = 300
+      const targetAmountInSecondSigner = amountInSecondSigner.value!
       await blackHoles
         .connect(signer2)
         .mint(targetAmountInSecondSigner, { value: price.mul(targetAmountInSecondSigner) })
