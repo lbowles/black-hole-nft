@@ -337,6 +337,13 @@ export const Burn = () => {
 
   return (
     <>
+      {shouldShowWarning && (
+        <div className="bg-black border-2 border-amber-800 w-full p-5 mt-5 text-center">
+          <p className="text-amber-600 text-base">
+            Tokens may be out of sync, please allow up to 5 minutes for the list to update.
+          </p>
+        </div>
+      )}
       {ownedNFTs.length === 0 && unmigratedOwnedNFTs.length === 0 && !loadingTokens ? (
         <p className="text-white text-center w-full text-xl mt-12">This wallet does not own Black Holes.</p>
       ) : (
@@ -435,15 +442,6 @@ export const Burn = () => {
                     markets before upgrading.
                   </p>
                 </div>
-                {shouldShowWarning ? (
-                  <div className="bg-black border-2 border-amber-800 w-full p-5 mt-5 ">
-                    <p className="text-amber-600 text-base">
-                      Tokens may be out of sync, please allow up to 5 minutes for the list to update.
-                    </p>
-                  </div>
-                ) : (
-                  <></>
-                )}
               </div>
             </div>
           )}
