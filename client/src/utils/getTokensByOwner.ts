@@ -21,7 +21,7 @@ export interface ITokenSearch {
   tokenAddress: Address
 }
 
-async function getTokensByOwnerLocal({ provider, address, tokenAddress }: ITokenSearch) {
+async function getTokensByOwnerLocal({ provider, address, tokenAddress }: ITokenSearch): Promise<BlackHoleMetadata[]> {
   const contractABI = ["event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"]
 
   const contract = new ethers.Contract(tokenAddress, contractABI, provider)
@@ -53,7 +53,7 @@ async function getTokensByOwnerLocal({ provider, address, tokenAddress }: IToken
   return tokens.filter((token) => !burnedIds.includes(token.tokenId.toString()))
 }
 
-async function getTokensByOwnerMainnet({ address, tokenAddress }: ITokenSearch) {
+async function getTokensByOwnerMainnet({ address, tokenAddress }: ITokenSearch): Promise<BlackHoleMetadata[]> {
   const tokens: BlackHoleMetadata[] = []
 
   const query = gql`
