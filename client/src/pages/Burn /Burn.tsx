@@ -427,6 +427,14 @@ export const Burn = () => {
                     markets before upgrading.
                   </p>
                 </div>
+                {mergeTx !== undefined ||
+                  (migrateTx !== undefined && (
+                    <div className="bg-black border-2 border-amber-800 w-full p-5 mt-5 ">
+                      <p className="text-amber-600 text-base">
+                        Tokens may be out of sync, please allow up to 5 minutes for the list to update.
+                      </p>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
