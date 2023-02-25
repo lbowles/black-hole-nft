@@ -68,7 +68,8 @@ export const COMMANDS: ICommand[] = [
   },
   {
     name: "Skip to merge",
-    description: "Skip to merge (6700 supply)",
+    description:
+      "Skips to merge with 6700 total minted. 300 in 2nd signer (0x70997970C51812dc3A010C7d01b50e0d17dc79C8)",
     command: "skipToMerge",
     inputs: [],
     execute: async (provider: ethers.providers.JsonRpcProvider, inputs: IInput[]) => {
@@ -91,6 +92,9 @@ export const COMMANDS: ICommand[] = [
         await blackHoles.mint(1, { value: price })
       }
 
+      // Mine block
+      provider.send("evm_mine", [])
+
       price = await blackHoles.getPrice()
 
       const targetAmountInSecondSigner = 300
@@ -98,8 +102,14 @@ export const COMMANDS: ICommand[] = [
         .connect(signer2)
         .mint(targetAmountInSecondSigner, { value: price.mul(targetAmountInSecondSigner) })
 
+      // Mine block
+      provider.send("evm_mine", [])
+
       const remainingAmount = BigNumber.from(6500).sub(threshold).sub(targetAmountInSecondSigner)
       await blackHoles.mint(remainingAmount, { value: remainingAmount.mul(price) })
+
+      // Mine block
+      provider.send("evm_mine", [])
 
       // Set delays to 0
       await blackHoles.setTimedSaleDuration(0)
@@ -112,8 +122,8 @@ export const COMMANDS: ICommand[] = [
   },
   {
     name: "Migrate to v2",
-    description: "Migrate to v2",
-    command: "migrate to v2",
+    description: "Migrates all of the second signer's tokens",
+    command: "migrateV2",
     inputs: [],
     execute: async (provider: ethers.providers.JsonRpcProvider, inputs: IInput[]) => {
       const signer = new ethers.Wallet(signer2key, provider)
