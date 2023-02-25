@@ -50,6 +50,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nDeploying to ${hre.network.name}`)
   console.log(`Name: ${name}`)
   console.log(`Symbol: ${symbol}`)
+  console.log("Black Holes Address", blackHoles.address)
   console.log(
     "MergeOpenTimestamp",
     mergeOpenTimestamp.toString(),
