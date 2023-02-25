@@ -1,5 +1,6 @@
 import { BigNumber } from "ethers"
 import { useVoidableBlackHolesSimulateMerge } from "../../generated"
+import blockSpinner from "../../img/blockSpinner.svg"
 
 interface ISimulateMergeProps {
   tokenIds: BigNumber[]
@@ -45,6 +46,13 @@ export function SimulateMerge({ tokenIds }: ISimulateMergeProps) {
   return simulationData ? (
     <img src={`data:image/svg+xml;base64,${btoa(simulationData[1])}`} className="p-1"></img>
   ) : (
-    <p className="text-white">Loading</p>
+    <div className="h-full w-full flex justify-center items-center min-h-[236px]">
+      <div>
+        <div className="flex w-full justify-center">
+          <img className="h-[20px] " src={blockSpinner}></img>
+        </div>
+        <p className="text-white text-center w-full text-xl pt-2">Loading</p>
+      </div>
+    </div>
   )
 }
