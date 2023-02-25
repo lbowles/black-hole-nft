@@ -121,7 +121,7 @@ describe.only("VoidableBlackHoles", function () {
     expect(parser.parse(svg, true)).to.not.throw
   })
 
-  it("Should merge tokens", async function () {
+  it.only("Should merge tokens", async function () {
     expect(await voidableBlackHoles.unmigratedBlackHoles()).to.equal(blackHoles.address)
 
     expect(await voidableBlackHoles.isMergingEnabled()).to.be.true
@@ -160,12 +160,15 @@ describe.only("VoidableBlackHoles", function () {
       // Merge to next level
       // Array of numbers from 5 to 12
       const mergeIds = Array.from(Array(upgradeIntervals[level].toNumber()).keys()).map((i) => i + lastTokenId + 1)
+      const [simuulatedResult, simulatedResultSvg] = await voidableBlackHoles.simulateMerge([1, ...mergeIds])
+
       const tx = await voidableBlackHoles.merge([1, ...mergeIds])
       const receipt = await tx.wait()
 
       totalGas = totalGas.add(receipt.gasUsed)
 
       tokenMetadata = await voidableBlackHoles.blackHoleForTokenId(1)
+      expect(tokenMetadata.mass).to.equal(simuulatedResult.mass)
       console.log(tokenMetadata)
       expect(tokenMetadata.level).to.equal(level + 1)
 

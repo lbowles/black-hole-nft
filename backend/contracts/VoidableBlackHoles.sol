@@ -271,6 +271,35 @@ contract VoidableBlackHoles is ERC721, Ownable, IERC4906Lean {
     return block.timestamp > mergeOpenTimestamp;
   }
 
+  function simulateMerge(uint256[] memory tokens) public view returns (BlackHole memory, string memory) {
+    uint256 targetId = tokens[0];
+
+    uint256 sum;
+    for (uint256 i = 1; i < tokens.length; ) {
+      sum = sum + massForTokenId(tokens[i]);
+
+      unchecked {
+        ++i;
+      }
+    }
+
+    uint256 mass = massForTokenId(targetId) + sum;
+    uint256 level = levelForMass(mass);
+    string memory name = nameForBlackHoleLevel(level);
+    uint256 adjustment = getAdjustmentForMass(mass);
+
+    BlackHole memory blackHole = BlackHole({
+      tokenId: targetId,
+      level: level,
+      size: renderer.PIXELS_PER_SIDE() / 2 - (10 - level),
+      mass: mass,
+      name: name,
+      adjustment: adjustment
+    });
+
+    return (blackHole, renderer.getBlackHoleSVG(blackHole));
+  }
+
   /**
    * @notice Merges a list of tokens into a single token.
    * @param tokens List of token IDs to merge. The first token in the list is the target.
@@ -289,7 +318,6 @@ contract VoidableBlackHoles is ERC721, Ownable, IERC4906Lean {
     for (uint256 i = 1; i < tokens.length; ) {
       require(ownerOf(tokens[i]) == msg.sender, "Must own all tokens (burn)");
       sum = sum + massForTokenId(tokens[i]);
-      massesConsumed[tokens[i]] = 0;
       _burn(tokens[i]);
 
       unchecked {
