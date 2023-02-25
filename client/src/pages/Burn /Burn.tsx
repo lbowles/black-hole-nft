@@ -21,7 +21,9 @@ import {
   useBlackHolesUpgradeIntervals,
   usePrepareBlackHolesMerge,
   usePrepareBlackHolesSetApprovalForAll,
+  usePrepareVoidableBlackHolesMint,
   useVoidableBlackHolesApprove,
+  useVoidableBlackHolesMint,
 } from "../../generated"
 import intermediate from "../../img/blackHoles/intermediate.svg"
 import intermediateAnimated from "../../img/blackHoles/intermediateAnimated.svg"
@@ -77,9 +79,6 @@ export const Burn = () => {
 
   const [mergeTokenIds, setMergeTokenIds] = useState<BigNumber[]>([])
   const [loadingTokens, setLoadingTokens] = useState<boolean>(true)
-
-  const [isMigrationSignLoading, setIsMigrationSignLoading] = useState<boolean>(false)
-  const [isMigrateTokensTxLoading, setIsMigrateTokensTxLoading] = useState<boolean>(false)
   const [migrateTokenIds, setMigrateTokenIds] = useState<BigNumber[]>([])
 
   const { address } = useAccount()
@@ -93,6 +92,14 @@ export const Burn = () => {
   const { data: timedSaleEndTimestamp } = useBlackHolesTimedSaleEndTimestamp()
   const { data: mergingDelay } = useBlackHolesMergingDelay()
 
+  const { data: isApprovedForAll } = useBlackHolesIsApprovedForAll({
+    args: [
+      address ? address : deployments.contracts.VoidableBlackHoles.address,
+      deployments.contracts.VoidableBlackHoles.address,
+    ],
+    watch: true,
+  })
+
   const { config: mergeConfig } = usePrepareBlackHolesMerge({
     args: [mergeTokenIds],
     enabled: mergeTokenIds.length >= 2 && isMergingEnabled,
@@ -104,32 +111,44 @@ export const Burn = () => {
     isSuccess: isMergeSignSuccess,
   } = useBlackHolesMerge(mergeConfig)
 
-  const { data: mergeTx, isLoading: isMergeTxLoading } = useWaitForTransaction({
-    hash: mergeSignResult?.hash,
-    confirmations: 1,
-  })
-
-  const { config: migrateConfig } = usePrepareBlackHolesSetApprovalForAll({
+  const { config: approvalConfig } = usePrepareBlackHolesSetApprovalForAll({
     args: [deployments.contracts.VoidableBlackHoles.address, true],
-    enabled: migrateTokenIds.length >= 2 && isMergingEnabled,
+    enabled: unmigratedOwnedNFTs.length > 0,
   })
-
-  const { data: isApprovedForAll } = useBlackHolesIsApprovedForAll({
-    args: [
-      address ? address : deployments.contracts.VoidableBlackHoles.address,
-      deployments.contracts.VoidableBlackHoles.address,
-    ],
-  })
-
   const {
     write: approveMigrate,
     data: migrateApproveSignResult,
     isLoading: isApproveMigrationSignLoading,
     isSuccess: isMigrateApproveSignSuccess,
-  } = useBlackHolesSetApprovalForAll(migrateConfig)
+  } = useBlackHolesSetApprovalForAll(approvalConfig)
+
+  const { config: migrateConfig } = usePrepareVoidableBlackHolesMint({
+    args: [migrateTokenIds],
+    enabled: migrateTokenIds.length > 0 && isApprovedForAll,
+  })
+  const {
+    write: migrate,
+    data: migrateSignResult,
+    isLoading: isMigrateSignLoading,
+    isSuccess: isMigrateSignSuccess,
+  } = useVoidableBlackHolesMint(migrateConfig)
+
+  const { data: mergeTx, isLoading: isMergeTxLoading } = useWaitForTransaction({
+    hash: mergeSignResult?.hash,
+    confirmations: 1,
+  })
 
   const { data: approveTx, isLoading: isApproveTxLoading } = useWaitForTransaction({
     hash: migrateApproveSignResult?.hash,
+    confirmations: 1,
+  })
+
+  const {
+    data: migrateTx,
+    isLoading: isMigrateTxLoading,
+    isSuccess: isMigrateTxSuccess,
+  } = useWaitForTransaction({
+    hash: migrateSignResult?.hash,
     confirmations: 1,
   })
 
@@ -243,46 +262,48 @@ export const Burn = () => {
         provider,
         tokenAddress: deployments.contracts.BlackHoles.address,
       })
-      const storedMigratedTokens = localStorage.getItem("migratableNFTs")
-      const storedTime = localStorage.getItem("unmigratedOwnedNFTsTime")
+      // const storedMigratedTokens = localStorage.getItem("migratableNFTs")
+      // const storedTime = localStorage.getItem("unmigratedOwnedNFTsTime")
 
-      if (storedMigratedTokens !== null && storedMigratedTokens[0][0] && storedTime) {
-        const parsedMigratedTokens: BlackHoleMetadata[] = JSON.parse(storedMigratedTokens)
-        const storedTimeNumber = parseInt(storedTime, 10)
-        const currentTime = new Date().getTime()
+      // if (storedMigratedTokens !== null && storedMigratedTokens[0][0] && storedTime) {
+      //   const parsedMigratedTokens: BlackHoleMetadata[] = JSON.parse(storedMigratedTokens)
+      //   const storedTimeNumber = parseInt(storedTime, 10)
+      //   const currentTime = new Date().getTime()
 
-        if (currentTime - storedTimeNumber <= 5 * 60 * 1000 && ownedNFTs.length > -0) {
-          ownedNFTs.map((ownedNft, i) => {
-            parsedMigratedTokens.map((storedNft) => {
-              if (ownedNft.tokenId === storedNft.tokenId) {
-                ownedNFTs[i].adjustment = storedNft.adjustment
-                ownedNFTs[i].mass = storedNft.mass
-                ownedNFTs[i].level = storedNft.level
-                ownedNFTs[i].image = storedNft.image
-              }
-            })
-          })
-          setUnmigratedOwnedNFTs(parsedMigratedTokens)
-        } else {
-          if (unmigratedNFTs.length > 0) {
-            setUnmigratedOwnedNFTs(unmigratedNFTs)
-            localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
-            localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
-          }
-        }
-      } else {
-        if (unmigratedNFTs.length > 0) {
-          setUnmigratedOwnedNFTs(unmigratedNFTs)
-          localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
-          localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
-        }
-      }
+      //   if (currentTime - storedTimeNumber <= 5 * 60 * 1000 && ownedNFTs.length > -0) {
+      //     ownedNFTs.map((ownedNft, i) => {
+      //       parsedMigratedTokens.map((storedNft) => {
+      //         if (ownedNft.tokenId === storedNft.tokenId) {
+      //           ownedNFTs[i].adjustment = storedNft.adjustment
+      //           ownedNFTs[i].mass = storedNft.mass
+      //           ownedNFTs[i].level = storedNft.level
+      //           ownedNFTs[i].image = storedNft.image
+      //         }
+      //       })
+      //     })
+      //     setUnmigratedOwnedNFTs(parsedMigratedTokens)
+      //   } else {
+      //     if (unmigratedNFTs.length > 0) {
+      //       setUnmigratedOwnedNFTs(unmigratedNFTs)
+      //       localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
+      //       localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
+      //     }
+      //   }
+      // } else {
+      //   if (unmigratedNFTs.length > 0) {
+
+      //     localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
+      //     localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
+      //   }
+      // }
+
+      setUnmigratedOwnedNFTs(unmigratedNFTs)
 
       setOwnedNFTs(ownedNFTs.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles))
       setLoadingTokens(false)
     }
     getOwnedNFTs()
-  }, [address, provider, finalPage])
+  }, [address, provider, finalPage, isMigrateTxSuccess])
 
   useEffect(() => {
     if (!baseUpgradeMass || ownedNFTs.length == 0) return
@@ -369,24 +390,31 @@ export const Burn = () => {
           <div className="flex justify-center w-screen  p-5 pb-0">
             <div className="w-96 pt-4">
               <div className="w-full flex justify-center mb-16">
-                <ActionButton
-                  onClick={() => {
-                    if (isApprovedForAll) {
-                      console.log(isApprovedForAll)
-                    } else {
-                      approveMigrate?.()
-                    }
-                  }}
-                  disabled={isApproveMigrationSignLoading || isMigrationSignLoading}
-                  text={
-                    isApproveMigrationSignLoading || isMigrationSignLoading
-                      ? "WAITING FOR WALLET"
-                      : isApprovedForAll || isMigrateApproveSignSuccess
-                      ? "MIGRATE ALL TOKENS"
-                      : `APPROVE MIGRATION`
-                  }
-                  loading={isApproveTxLoading || isMigrateTokensTxLoading}
-                />
+                {migrateTokenIds.length > 0 ? (
+                  !isApprovedForAll ? (
+                    <ActionButton
+                      onClick={() => {
+                        if (isApprovedForAll) {
+                          console.log(isApprovedForAll)
+                        } else {
+                          approveMigrate?.()
+                        }
+                      }}
+                      text={isApproveMigrationSignLoading ? "WAITING FOR WALLET" : `APPROVE MIGRATION (1/2)`}
+                      loading={isApproveTxLoading}
+                    />
+                  ) : (
+                    <ActionButton
+                      onClick={() => {
+                        migrate?.()
+                      }}
+                      text={isMigrateSignLoading ? "WAITING FOR WALLET" : "MIGRATE ALL TOKENS (2/2)"}
+                      loading={isMigrateSignLoading}
+                    />
+                  )
+                ) : (
+                  <></>
+                )}
               </div>
               <Divider />
             </div>
