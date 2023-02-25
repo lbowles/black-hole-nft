@@ -116,8 +116,8 @@ export const Burn = () => {
 
   const { data: isApprovedForAll } = useBlackHolesIsApprovedForAll({
     args: [
-      deployments.contracts.VoidableBlackHoles.address,
       address ? address : deployments.contracts.VoidableBlackHoles.address,
+      deployments.contracts.VoidableBlackHoles.address,
     ],
   })
 
@@ -381,7 +381,7 @@ export const Burn = () => {
                   text={
                     isApproveMigrationSignLoading || isMigrationSignLoading
                       ? "WAITING FOR WALLET"
-                      : isApprovedForAll
+                      : isApprovedForAll || isMigrateApproveSignSuccess
                       ? "MIGRATE ALL TOKENS"
                       : `APPROVE MIGRATION`
                   }
