@@ -38,14 +38,29 @@ export const MergingAmountGraphic = ({ levels }: IMergingAmountGraphic) => {
             <p className="text-white text-5xl -mt-4 text-right w-1/4">x</p>
             <div className="max-w-[80px]">
               <img src={level.startImg}></img>
-              <p className="text-gray-600 text-base text-center">{level.startName}</p>
+              <p className="text-gray-600 text-base text-center">
+                {level.startName}
+                {level.endName !== "STELLAR" && (
+                  <>
+                    <br></br>‎
+                  </>
+                )}
+              </p>
             </div>
             <div className="flex items-center justify-center w-1/4">
               <p className="text-white text-5xl -mt-4">=</p>
             </div>
             <div className="max-w-[80px]">
               <img src={level.endImg}></img>
-              <p className="text-gray-600 text-base text-center">{level.endName}</p>
+              <p className="text-gray-600 text-base text-center">
+                {level.endName}{" "}
+                {level.endName !== "STELLAR" && (
+                  <>
+                    <br></br>
+                    <div className="text-[#6A6969]">{microsForLevel} MICROs</div>
+                  </>
+                )}
+              </p>
             </div>
           </div>
         )
