@@ -63,7 +63,7 @@ const nftTypeToAnimatedImg: Record<string, string> = {
 
 export const Burn = () => {
   const [ownedNFTs, setOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
-  const [unmigratedOwnedNFTs, setUnmigratedOwnedNFTs] = useState<BlackHoleMetadata[]>([])
+  const [unmigratedOwnedNFTs, setUnmigratedOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
   const [finalPage, setFinalPage] = useState(false)
   const [totalSM, setTotalSM] = useState(0)
   const [upgradeType, setUpgradeType] = useState("")
@@ -239,6 +239,31 @@ export const Burn = () => {
     })
   }
 
+  const deselectMigrateItem = (index: number) => {
+    const updatedNFTs = [...unmigratedOwnedNFTs]
+    updatedNFTs[index].selected = false
+
+    // Remive item from migrateTokenIds
+    let migrateTokenIdsCopy = [...migrateTokenIds]
+    const migrateTokenIndex = migrateTokenIdsCopy.indexOf(BigNumber.from(unmigratedOwnedNFTs[index].tokenId))
+    migrateTokenIdsCopy.splice(migrateTokenIndex, 1)
+    setMigrateTokenIds(migrateTokenIdsCopy)
+
+    setUnmigratedOwnedNFTs(updatedNFTs)
+  }
+
+  const selectMigrateItem = (index: number) => {
+    const updatedNFTs = [...unmigratedOwnedNFTs]
+    updatedNFTs[index].selected = true
+
+    // Add to migrateTokenIds
+    const migrateTokenIdsCopy = [...migrateTokenIds]
+    migrateTokenIdsCopy.push(BigNumber.from(unmigratedOwnedNFTs[index].tokenId))
+    setMigrateTokenIds(migrateTokenIdsCopy)
+
+    setUnmigratedOwnedNFTs(updatedNFTs)
+  }
+
   useEffect(() => {
     if (!mergeOpenTimestamp) return
 
@@ -265,7 +290,8 @@ export const Burn = () => {
         provider,
         tokenAddress: deployments.contracts.BlackHoles.address,
       })
-      setUnmigratedOwnedNFTs(unmigratedNFTs)
+      setUnmigratedOwnedNFTs(unmigratedNFTs.map((token) => ({ ...token, selected: true })).sort(compareBlackHoles))
+      setMigrateTokenIds(unmigratedNFTs.map((nft) => BigNumber.from(nft.tokenId)))
       setOwnedNFTs(ownedNFTs.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles))
       setLoadingTokens(false)
     }
@@ -331,9 +357,13 @@ export const Burn = () => {
     }
   }, [isMergeTxSuccess, isMigrateTxSuccess])
 
+  // useEffect(() => {
+  //   setMigrateTokenIds(unmigratedOwnedNFTs.map((nft) => BigNumber.from(nft.tokenId)))
+  // }, [unmigratedOwnedNFTs])
+
   useEffect(() => {
-    setMigrateTokenIds(unmigratedOwnedNFTs.map((nft) => BigNumber.from(nft.tokenId)))
-  }, [unmigratedOwnedNFTs])
+    console.log("merging enabled", isMergingEnabled)
+  }, [isMergingEnabled])
 
   return (
     <>
@@ -344,11 +374,19 @@ export const Burn = () => {
           </p>
         </div>
       )}
+
+      {!isMergingEnabled && (
+        <div className="mb-10">
+          <p className="text-white text-center w-full text-xl mt-12">Merging not enabled yet.</p>
+          {mergeStartTimestamp && <Countdown endTime={new Date(mergeStartTimestamp.toNumber() * 1000).getTime()} />}
+        </div>
+      )}
+
       {ownedNFTs.length === 0 && unmigratedOwnedNFTs.length === 0 && !loadingTokens ? (
         <p className="text-white text-center w-full text-xl mt-12">This wallet does not own Black Holes.</p>
       ) : (
         <>
-          {unmigratedOwnedNFTs.length > 0 && isMergingEnabled && address && (
+          {unmigratedOwnedNFTs.length > 0 && address && (
             <>
               <div className="flex justify-center w-screen  p-5 pb-0">
                 <div className="w-96">
@@ -367,8 +405,21 @@ export const Burn = () => {
                       <div className="grid grid-cols-4 gap-2 mt-2 max-h-[280px] overflow-auto pb-[30px]">
                         {unmigratedOwnedNFTs.map((nft, index) => {
                           const img = nft.image ?? nftTypeToImg[nft.name.toUpperCase()]?.trim() ?? ""
+                          const selectedStyle = nft.selected
+                            ? "border-white  text-white"
+                            : "border-gray-800 hover:border-gray-600 text-gray-700 "
                           return (
-                            <div key={index} className={"border-gray-800 text-gray-700  border-2 transition-colors "}>
+                            <button
+                              key={index}
+                              className={`${selectedStyle} border-2`}
+                              onClick={() => {
+                                if (!nft.selected) {
+                                  selectMigrateItem(index)
+                                } else {
+                                  deselectMigrateItem(index)
+                                }
+                              }}
+                            >
                               <img src={img}></img>
                               <div className="border-t-2 border-gray-800 p-1 text-sm">
                                 <p className="w-full text-left">{nft.name.toUpperCase()}</p>
@@ -377,7 +428,7 @@ export const Burn = () => {
                                   <p>{nft.mass.toString()} SM</p>
                                 </div>
                               </div>
-                            </div>
+                            </button>
                           )
                         })}
                       </div>
@@ -393,7 +444,6 @@ export const Burn = () => {
                         <ActionButton
                           onClick={() => {
                             if (isApprovedForAll) {
-                              console.log(isApprovedForAll)
                             } else {
                               approveMigrate?.()
                             }
@@ -411,7 +461,7 @@ export const Burn = () => {
                           text={
                             isMigrateSignLoading
                               ? "WAITING FOR WALLET"
-                              : `MIGRATE ALL ${unmigratedOwnedNFTs.length} TOKENS (2/2)`
+                              : `MIGRATE ALL ${migrateTokenIds.length} TOKENS (2/2)`
                           }
                           loading={isMigrateTxLoading}
                         />
@@ -443,12 +493,6 @@ export const Burn = () => {
                   </p>
                 </div>
               </div>
-            </div>
-          )}
-          {!isMergingEnabled && (
-            <div className="mb-10">
-              <p className="text-white text-center w-full text-xl mt-12">Merging not enabled yet.</p>
-              {mergeStartTimestamp && <Countdown endTime={new Date(mergeStartTimestamp.toNumber() * 1000).getTime()} />}
             </div>
           )}
           {
