@@ -16,17 +16,22 @@ export const MergingAmountGraphic = ({ levels }: IMergingAmountGraphic) => {
         console.log(level)
 
         let microsForLevel = ""
+        let prevForLevel = ""
         if (upgradeIntervals) {
           if (levelNumber === 0) {
             microsForLevel = upgradeIntervals[levelNumber].toString()
+            prevForLevel = microsForLevel
           } else {
             microsForLevel = (upgradeIntervals[levelNumber].toNumber() / upgradeIntervals[0].toNumber()).toFixed(0)
+            prevForLevel = (
+              upgradeIntervals[levelNumber].toNumber() / upgradeIntervals[levelNumber - 1].toNumber()
+            ).toFixed(0)
           }
         }
         return (
           <div key={levelNumber} className="w-full justify-between items-center flex pb-2">
             {upgradeIntervals ? (
-              <p className="text-white text-5xl -mt-4 text-right w-1/4">{upgradeIntervals[levelNumber].toNumber()}</p>
+              <p className="text-white text-5xl -mt-4 text-right w-1/4">{prevForLevel}</p>
             ) : (
               <p className="text-white text-5xl -mt-4 text-right w-1/4">?</p>
             )}
