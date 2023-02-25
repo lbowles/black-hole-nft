@@ -32,10 +32,18 @@ async function getTokensByOwnerLocal({ provider, address, tokenAddress }: IToken
     .filter((event) => event.args![2] !== ethers.constants.AddressZero) // exclude burned tokens
     .map((event) => event.args![2].toString())
 
-  // TODO: Query contract in batches of 500
-  const tokens: BlackHoleMetadata[] = await BlackHoles__factory.connect(tokenAddress, provider!).blackHolesForTokenIds(
-    tokenIds,
-  )
+  // TODO: Query contract in batches of 500 instead
+  const batchSize = 500
+  const batches = Math.ceil(tokenIds.length / batchSize)
+  const tokens: BlackHoleMetadata[] = []
+  for (let i = 0; i < batches; i++) {
+    const batch = tokenIds.slice(i * batchSize, (i + 1) * batchSize)
+    const batchTokens: BlackHoleMetadata[] = await BlackHoles__factory.connect(
+      tokenAddress,
+      provider!,
+    ).blackHolesForTokenIds(batch)
+    tokens.push(...batchTokens)
+  }
 
   filter = contract.filters.Transfer(address, ethers.constants.AddressZero, null)
   events = await contract.queryFilter(filter)

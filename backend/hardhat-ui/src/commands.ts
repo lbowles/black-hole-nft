@@ -1,4 +1,4 @@
-import { ethers } from "ethers"
+import { BigNumber, ethers } from "ethers"
 import { BlackHoles__factory } from "../../types/factories/BlackHoles__factory"
 
 export interface ICommand {
@@ -62,17 +62,19 @@ export const COMMANDS: ICommand[] = [
   },
   {
     name: "Skip to merge",
-    description: "Skip to merge",
+    description: "Skip to merge (6700 supply)",
     command: "skipToMerge",
     inputs: [],
     execute: async (provider: ethers.providers.JsonRpcProvider, inputs: IInput[]) => {
       const signer = new ethers.Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", provider)
 
+      const signer2 = new ethers.Wallet("0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d", provider)
+
       const blackholesDeployment = require(`../../deployments/localhost/BlackHoles.json`)
       const blackHoles = BlackHoles__factory.connect(blackholesDeployment.address, signer)
 
       const totalMinted = await blackHoles.totalMinted()
-      const price = await blackHoles.getPrice()
+      let price = await blackHoles.getPrice()
       const threshold = await blackHoles.timedSaleThreshold()
       if (totalMinted.toNumber() === 0) {
         // Mint threshold
@@ -82,6 +84,16 @@ export const COMMANDS: ICommand[] = [
         await blackHoles.setTimedSaleThreshold(totalMinted.add(1))
         await blackHoles.mint(1, { value: price })
       }
+
+      price = await blackHoles.getPrice()
+
+      const targetAmountInSecondSigner = 300
+      await blackHoles
+        .connect(signer2)
+        .mint(targetAmountInSecondSigner, { value: price.mul(targetAmountInSecondSigner) })
+
+      const remainingAmount = BigNumber.from(6500).sub(threshold).sub(targetAmountInSecondSigner)
+      await blackHoles.mint(remainingAmount, { value: remainingAmount.mul(price) })
 
       // Set delays to 0
       await blackHoles.setTimedSaleDuration(0)
