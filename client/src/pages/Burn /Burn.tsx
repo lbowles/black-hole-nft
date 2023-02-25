@@ -394,6 +394,7 @@ export const Burn = () => {
                     <p className="text-white text-2xl">Migrate to Voidable Black Holes</p>
                     <p className="text-gray-600 text-base pt-3">
                       Migrate your Black Holes to Voidable Black Holes to be able to merge them with other Black Holes.
+                      Select the ones you want to migrate below.
                     </p>
                   </div>
                 </div>
