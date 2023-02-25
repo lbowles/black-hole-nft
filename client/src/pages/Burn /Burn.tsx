@@ -314,7 +314,7 @@ export const Burn = () => {
   }, [migrateSignResult])
 
   useEffect(() => {
-    if (mergeTx?.confirmations === 1 && finalPage) {
+    if (isMergeTxSuccess && finalPage) {
       triggerMetadataUpdate({
         tokenAddress: deployments.contracts.VoidableBlackHoles.address,
         tokenId: mergeTokenIds[0].toNumber(),
@@ -323,7 +323,7 @@ export const Burn = () => {
       setMergeSuccess(true)
       mergeSound()
     }
-  }, [mergeTx])
+  }, [isMergeTxSuccess])
 
   useEffect(() => {
     if (isMergeTxSuccess || isMigrateTxSuccess) {
@@ -346,11 +346,9 @@ export const Burn = () => {
               <div className="flex justify-center w-screen  p-5 pb-0">
                 <div className="w-96">
                   <div className="bg-black border-2 border-gray-800 w-full p-5 mt-6">
-                    <p className="text-white text-2xl">Migrate to V1</p>
+                    <p className="text-white text-2xl">Migrate to Voidable Black Holes</p>
                     <p className="text-gray-600 text-base pt-3">
-                      The merging process allows you to upgrade the mass of one of your Black Holes by burning others.
-                      The remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from
-                      secondary markets before upgrading.
+                      Migrate your Black Holes to Voidable Black Holes to be able to merge them with other Black Holes.
                     </p>
                   </div>
                 </div>
