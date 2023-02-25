@@ -45,7 +45,7 @@ async function getTokensByOwnerLocal({ provider, address, tokenAddress }: IToken
     tokens.push(...batchTokens)
   }
 
-  filter = contract.filters.Transfer(address, ethers.constants.One, null)
+  filter = contract.filters.Transfer(address, "0x0000000000000000000000000000000000000001", null)
   events = await contract.queryFilter(filter)
 
   const burnedIds = events.map((event) => event.args![2].toString())
