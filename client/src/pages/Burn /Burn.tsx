@@ -8,15 +8,20 @@ import { Countdown } from "../../components/Countdown/Countdown"
 import deployments from "../../deployments.json"
 import {
   useBlackHolesAllBlackHoleLevelNames,
+  useBlackHolesApprove,
   useBlackHolesGetBaseUpgradeMass,
+  useBlackHolesIsApprovedForAll,
   useBlackHolesIsMergingEnabled,
   useBlackHolesLevelForMass,
   useBlackHolesMerge,
   useBlackHolesMergingDelay,
   useBlackHolesNameForBlackHoleLevel,
+  useBlackHolesSetApprovalForAll,
   useBlackHolesTimedSaleEndTimestamp,
   useBlackHolesUpgradeIntervals,
   usePrepareBlackHolesMerge,
+  usePrepareBlackHolesSetApprovalForAll,
+  useVoidableBlackHolesApprove,
 } from "../../generated"
 import intermediate from "../../img/blackHoles/intermediate.svg"
 import intermediateAnimated from "../../img/blackHoles/intermediateAnimated.svg"
@@ -72,11 +77,10 @@ export const Burn = () => {
 
   const [mergeTokenIds, setMergeTokenIds] = useState<BigNumber[]>([])
   const [loadingTokens, setLoadingTokens] = useState<boolean>(true)
-  const [isApproveMigrationSignLoading, setIsApproveMigrationSignLoading] = useState<boolean>(false)
+
   const [isMigrationSignLoading, setIsMigrationSignLoading] = useState<boolean>(false)
-  const [isMigrationApproved, setIsMigrationApproved] = useState<boolean>(false)
-  const [isApproveTxLoading, setIsApproveTxLoading] = useState<boolean>(false)
   const [isMigrateTokensTxLoading, setIsMigrateTokensTxLoading] = useState<boolean>(false)
+  const [migrateTokenIds, setMigrateTokenIds] = useState<BigNumber[]>([])
 
   const { address } = useAccount()
   const provider = useProvider()
@@ -102,6 +106,30 @@ export const Burn = () => {
 
   const { data: mergeTx, isLoading: isMergeTxLoading } = useWaitForTransaction({
     hash: mergeSignResult?.hash,
+    confirmations: 1,
+  })
+
+  const { config: migrateConfig } = usePrepareBlackHolesSetApprovalForAll({
+    args: [deployments.contracts.VoidableBlackHoles.address, true],
+    enabled: migrateTokenIds.length >= 2 && isMergingEnabled,
+  })
+
+  const { data: isApprovedForAll } = useBlackHolesIsApprovedForAll({
+    args: [
+      address ? address : deployments.contracts.VoidableBlackHoles.address,
+      deployments.contracts.VoidableBlackHoles.address,
+    ],
+  })
+
+  const {
+    write: approveMigrate,
+    data: migrateApproveSignResult,
+    isLoading: isApproveMigrationSignLoading,
+    isSuccess: isMigrateApproveSignSuccess,
+  } = useBlackHolesSetApprovalForAll(migrateConfig)
+
+  const { data: approveTx, isLoading: isApproveTxLoading } = useWaitForTransaction({
+    hash: migrateApproveSignResult?.hash,
     confirmations: 1,
   })
 
@@ -208,24 +236,22 @@ export const Burn = () => {
       const ownedNFTs = await getTokensByOwner({
         address: address,
         provider,
-        tokenAddress: deployments.contracts.BlackHoles.address,
+        tokenAddress: deployments.contracts.VoidableBlackHoles.address,
       })
       const unmigratedNFTs = await getTokensByOwner({
         address: address,
         provider,
-        tokenAddress: deployments.contracts.VoidableBlackHoles.address,
+        tokenAddress: deployments.contracts.BlackHoles.address,
       })
-
       const storedMigratedTokens = localStorage.getItem("migratableNFTs")
       const storedTime = localStorage.getItem("unmigratedOwnedNFTsTime")
 
-      if (storedMigratedTokens && storedTime) {
-        console.log(JSON.parse(storedMigratedTokens))
+      if (storedMigratedTokens !== null && storedMigratedTokens[0][0] && storedTime) {
         const parsedMigratedTokens: BlackHoleMetadata[] = JSON.parse(storedMigratedTokens)
         const storedTimeNumber = parseInt(storedTime, 10)
         const currentTime = new Date().getTime()
 
-        if (currentTime - storedTimeNumber <= 5 * 60 * 1000) {
+        if (currentTime - storedTimeNumber <= 5 * 60 * 1000 && ownedNFTs.length > -0) {
           ownedNFTs.map((ownedNft, i) => {
             parsedMigratedTokens.map((storedNft) => {
               if (ownedNft.tokenId === storedNft.tokenId) {
@@ -236,15 +262,20 @@ export const Burn = () => {
               }
             })
           })
+          setUnmigratedOwnedNFTs(parsedMigratedTokens)
         } else {
+          if (unmigratedNFTs.length > 0) {
+            setUnmigratedOwnedNFTs(unmigratedNFTs)
+            localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
+            localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
+          }
+        }
+      } else {
+        if (unmigratedNFTs.length > 0) {
           setUnmigratedOwnedNFTs(unmigratedNFTs)
           localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
           localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
         }
-      } else {
-        setUnmigratedOwnedNFTs(unmigratedNFTs)
-        localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
-        localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
       }
 
       setOwnedNFTs(ownedNFTs.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles))
@@ -284,6 +315,16 @@ export const Burn = () => {
     }
   }, [mergeTx])
 
+  useEffect(() => {
+    if (approveTx?.confirmations === 1) {
+      //
+    }
+  }, [approveTx])
+
+  useEffect(() => {
+    setMigrateTokenIds(unmigratedOwnedNFTs.map((nft) => BigNumber.from(nft.tokenId)))
+  }, [unmigratedOwnedNFTs])
+
   return (
     <>
       {unmigratedOwnedNFTs.length > 0 && isMergingEnabled && address && (
@@ -303,9 +344,9 @@ export const Burn = () => {
           <>
             <div className="flex justify-center w-screen z-1 mt-5">
               <div className="w-96">
-                <div className="max-h-[240px] overflow-auto mt-1">
-                  <div className="grid grid-cols-4 gap-2 mt-2 max-h-[380px] overflow-auto pb-[72px]">
-                    {ownedNFTs.map((nft, index) => {
+                <div className="max-h-[280px] overflow-auto mt-1">
+                  <div className="grid grid-cols-4 gap-2 mt-2 max-h-[280px] overflow-auto pb-[30px]">
+                    {unmigratedOwnedNFTs.map((nft, index) => {
                       const img = nft.image ?? nftTypeToImg[nft.name.toUpperCase()]?.trim() ?? ""
                       return (
                         <div key={index} className={"border-gray-800 text-gray-700  border-2 transition-colors "}>
@@ -329,12 +370,18 @@ export const Burn = () => {
             <div className="w-96 pt-4">
               <div className="w-full flex justify-center mb-16">
                 <ActionButton
-                  onClick={() => {}}
+                  onClick={() => {
+                    if (isApprovedForAll) {
+                      console.log(isApprovedForAll)
+                    } else {
+                      approveMigrate?.()
+                    }
+                  }}
                   disabled={isApproveMigrationSignLoading || isMigrationSignLoading}
                   text={
                     isApproveMigrationSignLoading || isMigrationSignLoading
                       ? "WAITING FOR WALLET"
-                      : isMigrationApproved
+                      : isApprovedForAll || isMigrateApproveSignSuccess
                       ? "MIGRATE ALL TOKENS"
                       : `APPROVE MIGRATION`
                   }
