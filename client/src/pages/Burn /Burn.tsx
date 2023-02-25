@@ -329,6 +329,24 @@ export const Burn = () => {
   }, [mergeSignResult])
 
   useEffect(() => {
+    if (migrateApproveSignResult) {
+      addRecentTransaction({
+        hash: migrateApproveSignResult.hash,
+        description: `Approve Voided Black Holes to Migrate Black Holes`,
+      })
+    }
+  }, [migrateApproveSignResult])
+
+  useEffect(() => {
+    if (migrateSignResult) {
+      addRecentTransaction({
+        hash: migrateSignResult.hash,
+        description: `Migrate ${migrateTokenIds.length} Black Holes`,
+      })
+    }
+  }, [migrateSignResult])
+
+  useEffect(() => {
     if (mergeTx?.confirmations === 1 && finalPage) {
       setSelectedTokenIndexes([])
       setMergeSuccess(true)
@@ -400,6 +418,7 @@ export const Burn = () => {
                           approveMigrate?.()
                         }
                       }}
+                      disabled={isApproveMigrationSignLoading}
                       text={isApproveMigrationSignLoading ? "WAITING FOR WALLET" : `APPROVE MIGRATION (1/2)`}
                       loading={isApproveTxLoading}
                     />
@@ -408,8 +427,9 @@ export const Burn = () => {
                       onClick={() => {
                         migrate?.()
                       }}
+                      disabled={isMigrateSignLoading}
                       text={isMigrateSignLoading ? "WAITING FOR WALLET" : "MIGRATE ALL TOKENS (2/2)"}
-                      loading={isMigrateSignLoading}
+                      loading={isMigrateTxLoading}
                     />
                   )
                 ) : (
