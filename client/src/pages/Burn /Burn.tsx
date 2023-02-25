@@ -5,24 +5,25 @@ import useSound from "use-sound"
 import { useAccount, useProvider, useWaitForTransaction } from "wagmi"
 import { ActionButton } from "../../components/ActionButton/ActionButton"
 import { Countdown } from "../../components/Countdown/Countdown"
+import { Divider } from "../../components/Divider/Divider"
+import { SimulateMerge } from "../../components/SimulateMerge/SimulateMerge"
 import deployments from "../../deployments.json"
 import {
   useBlackHolesAllBlackHoleLevelNames,
-  useBlackHolesApprove,
   useBlackHolesGetBaseUpgradeMass,
   useBlackHolesIsApprovedForAll,
   useBlackHolesIsMergingEnabled,
-  useBlackHolesLevelForMass,
   useBlackHolesMerge,
-  useBlackHolesMergingDelay,
-  useBlackHolesNameForBlackHoleLevel,
   useBlackHolesSetApprovalForAll,
-  useBlackHolesTimedSaleEndTimestamp,
   useBlackHolesUpgradeIntervals,
   usePrepareBlackHolesMerge,
   usePrepareBlackHolesSetApprovalForAll,
+  usePrepareVoidableBlackHolesMerge,
   usePrepareVoidableBlackHolesMint,
-  useVoidableBlackHolesApprove,
+  useVoidableBlackHolesGetUpgradeIntervals,
+  useVoidableBlackHolesIsMergingEnabled,
+  useVoidableBlackHolesMerge,
+  useVoidableBlackHolesMergeOpenTimestamp,
   useVoidableBlackHolesMint,
 } from "../../generated"
 import intermediate from "../../img/blackHoles/intermediate.svg"
@@ -40,11 +41,9 @@ import dropdown from "../../img/dropdown.svg"
 import generalClickEffect from "../../sounds/generalClick.mp3"
 import linkClickEffect from "../../sounds/linkClick.mp3"
 import mergeEffect from "../../sounds/merge.mp3"
+import { compareBlackHoles } from "../../utils/compareBlackHoles"
 import { getOpenSeaLink } from "../../utils/getOpenSeaLink"
 import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwner"
-import { compareBlackHoles } from "../../utils/compareBlackHoles"
-import { SimulateMerge } from "../../components/SimulateMerge/SimulateMerge"
-import { Divider } from "../../components/Divider/Divider"
 
 const nftTypeToImg: Record<string, string> = {
   MICRO: micro,
@@ -85,12 +84,10 @@ export const Burn = () => {
   const provider = useProvider()
   const addRecentTransaction = useAddRecentTransaction()
 
-  const { data: baseUpgradeMass, isLoading: baseUpgradeMassLoading } = useBlackHolesGetBaseUpgradeMass()
-  const { data: upgradeIntervals } = useBlackHolesUpgradeIntervals()
+  const { data: upgradeIntervals } = useVoidableBlackHolesGetUpgradeIntervals()
   const { data: levelNames } = useBlackHolesAllBlackHoleLevelNames()
-  const { data: isMergingEnabled } = useBlackHolesIsMergingEnabled()
-  const { data: timedSaleEndTimestamp } = useBlackHolesTimedSaleEndTimestamp()
-  const { data: mergingDelay } = useBlackHolesMergingDelay()
+  const { data: isMergingEnabled } = useVoidableBlackHolesIsMergingEnabled()
+  const { data: mergeOpenTimestamp } = useVoidableBlackHolesMergeOpenTimestamp()
 
   const { data: isApprovedForAll } = useBlackHolesIsApprovedForAll({
     args: [
@@ -99,17 +96,6 @@ export const Burn = () => {
     ],
     watch: true,
   })
-
-  const { config: mergeConfig } = usePrepareBlackHolesMerge({
-    args: [mergeTokenIds],
-    enabled: mergeTokenIds.length >= 2 && isMergingEnabled,
-  })
-  const {
-    write: merge,
-    data: mergeSignResult,
-    isLoading: isMergeSignLoading,
-    isSuccess: isMergeSignSuccess,
-  } = useBlackHolesMerge(mergeConfig)
 
   const { config: approvalConfig } = usePrepareBlackHolesSetApprovalForAll({
     args: [deployments.contracts.VoidableBlackHoles.address, true],
@@ -132,6 +118,17 @@ export const Burn = () => {
     isLoading: isMigrateSignLoading,
     isSuccess: isMigrateSignSuccess,
   } = useVoidableBlackHolesMint(migrateConfig)
+
+  const { config: mergeConfig } = usePrepareVoidableBlackHolesMerge({
+    args: [mergeTokenIds],
+    enabled: mergeTokenIds.length >= 2 && isMergingEnabled,
+  })
+  const {
+    write: merge,
+    data: mergeSignResult,
+    isLoading: isMergeSignLoading,
+    isSuccess: isMergeSignSuccess,
+  } = useVoidableBlackHolesMerge(mergeConfig)
 
   const { data: mergeTx, isLoading: isMergeTxLoading } = useWaitForTransaction({
     hash: mergeSignResult?.hash,
@@ -182,7 +179,7 @@ export const Burn = () => {
   }
 
   const findNextUpgrade = (totalSelectedSM: number): [number, string] | null => {
-    if (!upgradeIntervals || !levelNames || !baseUpgradeMass) return [0, "UNKNOWN"]
+    if (!upgradeIntervals || !levelNames) return [0, "UNKNOWN"]
 
     let level = 0
     for (let i = 0; i < upgradeIntervals.length - 1; i++) {
@@ -237,15 +234,15 @@ export const Burn = () => {
   }
 
   useEffect(() => {
-    if (!timedSaleEndTimestamp || !mergingDelay) return
+    if (!mergeOpenTimestamp) return
 
-    if (timedSaleEndTimestamp.toNumber() === 0) {
+    if (mergeOpenTimestamp.toNumber() === 0) {
       setMergeStartTimestamp(undefined)
       return
     }
 
-    setMergeStartTimestamp(timedSaleEndTimestamp.add(mergingDelay))
-  }, [timedSaleEndTimestamp, mergingDelay])
+    setMergeStartTimestamp(mergeOpenTimestamp)
+  }, [mergeOpenTimestamp])
 
   // Get owned NFTs
   useEffect(() => {
@@ -306,7 +303,7 @@ export const Burn = () => {
   }, [address, provider, finalPage, isMigrateTxSuccess])
 
   useEffect(() => {
-    if (!baseUpgradeMass || ownedNFTs.length == 0) return
+    if (!upgradeIntervals || ownedNFTs.length == 0) return
     const selectedIndexes = ownedNFTs
       .map((nft, index) => (nft.selected ? index : null))
       .filter((i) => i !== null) as number[]
@@ -317,7 +314,7 @@ export const Burn = () => {
     setUpgradeType(type)
     const nextUpgrade = findNextUpgrade(totalSelectedSM)
     setNextUpgradeDetails(nextUpgrade)
-  }, [ownedNFTs, baseUpgradeMass])
+  }, [ownedNFTs, upgradeIntervals])
 
   useEffect(() => {
     if (mergeSignResult) {
@@ -428,7 +425,11 @@ export const Burn = () => {
                         migrate?.()
                       }}
                       disabled={isMigrateSignLoading}
-                      text={isMigrateSignLoading ? "WAITING FOR WALLET" : "MIGRATE ALL TOKENS (2/2)"}
+                      text={
+                        isMigrateSignLoading
+                          ? "WAITING FOR WALLET"
+                          : `MIGRATE ALL ${unmigratedOwnedNFTs.length} TOKENS (2/2)`
+                      }
                       loading={isMigrateTxLoading}
                     />
                   )
@@ -491,7 +492,7 @@ export const Burn = () => {
                           setMergeSuccess(false)
                         }}
                       >
-                        {"<-Back"}
+                        {"<- Back"}
                       </button>
                     </div>
                     <p className="w-full text-center text-xl text-white mt-12">
@@ -619,6 +620,7 @@ export const Burn = () => {
                                 disabled={totalSM === 0 || selectedTokenIndexes.length < 2}
                                 onClick={() => {
                                   setFinalPage(true)
+                                  setTargetTokenIndexInOwnedArray(undefined)
                                   generalClickSound()
                                 }}
                               >
@@ -633,7 +635,9 @@ export const Burn = () => {
                         <div className="flex justify-center">
                           <button
                             className="text-gray-500 hover:text-white transition-colors text-base w-96 text-left mt-3"
-                            onClick={() => setFinalPage(false)}
+                            onClick={() => {
+                              setFinalPage(false)
+                            }}
                           >
                             {"<-Back"}
                           </button>
@@ -643,7 +647,13 @@ export const Burn = () => {
                             <p className="w-full text-center text-2xl text-white">You will receive</p>
                             <p className="text-gray-600 text-base  w-full text-center">Select token ID to upgrade</p>
                             <div className="border-2 border-white  mt-5">
-                              {totalSM !== undefined && <SimulateMerge mass={BigNumber.from(totalSM)} />}
+                              {totalSM !== undefined && (
+                                <SimulateMerge
+                                  tokenIds={selectedTokenIndexes.map((index) =>
+                                    BigNumber.from(ownedNFTs[index].tokenId),
+                                  )}
+                                />
+                              )}
                               {/* <img src={nftTypeToAnimatedImg[upgradeType]?.trim() ?? ""} className="p-1"></img> */}
                               <div className="border-t-2 border-white p-5">
                                 <p className="text-xl text-white pb-1">{upgradeType}</p>

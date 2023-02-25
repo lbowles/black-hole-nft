@@ -1,20 +1,11 @@
 import { BigNumber } from "ethers"
-import { useEffect, useState } from "react"
-import { BlackHoleStruct } from "../../../../backend/types/Renderer"
-import {
-  useBlackHolesGetAdjustmentForMass,
-  useBlackHolesLevelForMass,
-  useBlackHolesNameForBlackHoleLevel,
-  useRendererGetBlackHoleSvg,
-  useRendererPixelsPerSide,
-} from "../../generated"
-import { BlackHoleMetadata } from "../../utils/getTokensByOwner"
+import { useVoidableBlackHolesSimulateMerge } from "../../generated"
 
 interface ISimulateMergeProps {
-  mass: BigNumber
+  tokenIds: BigNumber[]
 }
 
-export function SimulateMerge({ mass }: ISimulateMergeProps) {
+export function SimulateMerge({ tokenIds }: ISimulateMergeProps) {
   // renderer.PIXELS_PER_SIDE() / 2 - (10 - level)
   // tokenId: BigNumberish;
   // level: BigNumberish;
@@ -22,35 +13,38 @@ export function SimulateMerge({ mass }: ISimulateMergeProps) {
   // mass: BigNumberish;
   // adjustment: BigNumberish;
   // name: string;
-  const { data: adjustment } = useBlackHolesGetAdjustmentForMass({ args: [mass] })
-  const { data: pixelsPerSide } = useRendererPixelsPerSide()
-  const { data: level } = useBlackHolesLevelForMass({ args: [mass], enabled: !!mass })
-  const { data: name } = useBlackHolesNameForBlackHoleLevel({ args: [level!], enabled: !!level })
+  const { data: simulationData } = useVoidableBlackHolesSimulateMerge({
+    args: [tokenIds],
+    enabled: tokenIds.length > 1,
+  })
+  // const [simulatedNewToken, setSimulatedNewToken] = useState<{
+  //   tokenId: BigNumber
+  //   level: BigNumber
+  //   size: BigNumber
+  //   mass: BigNumber
+  //   adjustment: BigNumber
+  //   name: string
+  // }>()
 
-  const [simulatedNewToken, setSimulatedNewToken] = useState<{
-    tokenId: BigNumber
-    level: BigNumber
-    size: BigNumber
-    mass: BigNumber
-    adjustment: BigNumber
-    name: string
-  }>()
+  // const { data: svg } = useRendererGetBlackHoleSvg({ args: [simulatedNewToken!], enabled: !!simulatedNewToken })
 
-  const { data: svg } = useRendererGetBlackHoleSvg({ args: [simulatedNewToken!], enabled: !!simulatedNewToken })
+  // useEffect(() => {
+  //   if (mass && adjustment && level && pixelsPerSide && name) {
+  //     console.log(adjustment.toString())
+  //     setSimulatedNewToken({
+  //       tokenId: BigNumber.from(0),
+  //       level: level,
+  //       size: pixelsPerSide.div(2).sub(10).add(level),
+  //       mass: mass,
+  //       adjustment: adjustment,
+  //       name: name,
+  //     })
+  //   }
+  // }, [mass, adjustment, level, pixelsPerSide, name])
 
-  useEffect(() => {
-    if (mass && adjustment && level && pixelsPerSide && name) {
-      console.log(adjustment.toString())
-      setSimulatedNewToken({
-        tokenId: BigNumber.from(0),
-        level: level,
-        size: pixelsPerSide.div(2).sub(10).add(level),
-        mass: mass,
-        adjustment: adjustment,
-        name: name,
-      })
-    }
-  }, [mass, adjustment, level, pixelsPerSide, name])
-
-  return svg ? <img src={`data:image/svg+xml;base64,${btoa(svg)}`} className="p-1"></img> : <p>Loading</p>
+  return simulationData ? (
+    <img src={`data:image/svg+xml;base64,${btoa(simulationData[1])}`} className="p-1"></img>
+  ) : (
+    <p className="text-white">Loading</p>
+  )
 }
