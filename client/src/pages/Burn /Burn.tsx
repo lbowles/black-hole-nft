@@ -210,13 +210,18 @@ export const Burn = () => {
         provider,
         tokenAddress: deployments.contracts.BlackHoles.address,
       })
+      const unmigratedNFTs = await getTokensByOwner({
+        address: address,
+        provider,
+        tokenAddress: deployments.contracts.VoidableBlackHoles.address,
+      })
 
-      const migratedTokens = localStorage.getItem("migratableNFTs")
+      const storedMigratedTokens = localStorage.getItem("migratableNFTs")
       const storedTime = localStorage.getItem("unmigratedOwnedNFTsTime")
-      if (migratedTokens && storedTime) {
-        console.log(JSON.parse(migratedTokens))
 
-        const parsedMigratedTokens: BlackHoleMetadata[] = JSON.parse(migratedTokens)
+      if (storedMigratedTokens && storedTime) {
+        console.log(JSON.parse(storedMigratedTokens))
+        const parsedMigratedTokens: BlackHoleMetadata[] = JSON.parse(storedMigratedTokens)
         const storedTimeNumber = parseInt(storedTime, 10)
         const currentTime = new Date().getTime()
 
@@ -231,18 +236,18 @@ export const Burn = () => {
               }
             })
           })
+        } else {
+          setUnmigratedOwnedNFTs(unmigratedNFTs)
+          localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
+          localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
         }
+      } else {
+        setUnmigratedOwnedNFTs(unmigratedNFTs)
+        localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
+        localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
       }
 
       setOwnedNFTs(ownedNFTs.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles))
-
-      // TODO: only get migratable NFTS, only set UnmigradedOwnedNFTs if there are some
-      // if (tempMigratableNFTs) {
-      //   setUnmigratedOwnedNFTs(tempMigratableNFTs)
-      //   localStorage.setItem("migratableNFTs", JSON.stringify(tempMigratableNFTs))
-      //   localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
-      // }
-
       setLoadingTokens(false)
     }
     getOwnedNFTs()
