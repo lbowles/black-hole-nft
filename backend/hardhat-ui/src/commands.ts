@@ -1,5 +1,10 @@
 import { BigNumber, ethers } from "ethers"
 import { BlackHoles__factory } from "../../types/factories/BlackHoles__factory"
+import { VoidableBlackHoles__factory } from "../../types/factories/VoidableBlackHoles__factory"
+import { getTokensByOwnerLocal } from "./getTokensByOwner"
+
+const blackholesDeployment = require(`../../deployments/localhost/BlackHoles.json`)
+const voidableBlackHolesDeployment = require(`../../deployments/localhost/VoidableBlackHoles.json`)
 
 export interface ICommand {
   name: string
@@ -13,6 +18,8 @@ interface IInput {
   value?: string
   options?: string[]
 }
+const signer1key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+const signer2key = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
 export const COMMANDS: ICommand[] = [
   {
     name: "Increase time",
@@ -47,11 +54,10 @@ export const COMMANDS: ICommand[] = [
       const [amountInput] = inputs
       console.log(provider.network.name, inputs)
       const amount = ethers.BigNumber.from(amountInput.value!)
-      const signer = new ethers.Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", provider)
+      const signer = new ethers.Wallet(signer1key, provider)
 
       console.log(provider.network.name)
 
-      const blackholesDeployment = require(`../../deployments/localhost/BlackHoles.json`)
       const blackHoles = BlackHoles__factory.connect(blackholesDeployment.address, signer)
 
       const price = await blackHoles.getPrice()
@@ -66,9 +72,9 @@ export const COMMANDS: ICommand[] = [
     command: "skipToMerge",
     inputs: [],
     execute: async (provider: ethers.providers.JsonRpcProvider, inputs: IInput[]) => {
-      const signer = new ethers.Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", provider)
+      const signer = new ethers.Wallet(signer1key, provider)
 
-      const signer2 = new ethers.Wallet("0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d", provider)
+      const signer2 = new ethers.Wallet(signer2key, provider)
 
       const blackholesDeployment = require(`../../deployments/localhost/BlackHoles.json`)
       const blackHoles = BlackHoles__factory.connect(blackholesDeployment.address, signer)
@@ -98,6 +104,31 @@ export const COMMANDS: ICommand[] = [
       // Set delays to 0
       await blackHoles.setTimedSaleDuration(0)
       await blackHoles.setMergingDelay(0)
+
+      // Hardhat evm_increaseTime
+      provider.send("evm_increaseTime", [100])
+      provider.send("evm_mine", [])
+    },
+  },
+  {
+    name: "Migrate to v2",
+    description: "Migrate to v2",
+    command: "migrate to v2",
+    inputs: [],
+    execute: async (provider: ethers.providers.JsonRpcProvider, inputs: IInput[]) => {
+      const signer = new ethers.Wallet(signer2key, provider)
+
+      const blackHoles = BlackHoles__factory.connect(blackholesDeployment.address, signer)
+      const voidableBlackHoles = VoidableBlackHoles__factory.connect(voidableBlackHolesDeployment.address, signer)
+
+      await blackHoles.setApprovalForAll(voidableBlackHoles.address, true)
+
+      const tokenIds = await getTokensByOwnerLocal({
+        provider,
+        address: signer.address,
+        tokenAddress: blackholesDeployment.address,
+      })
+      await voidableBlackHoles.mint(tokenIds)
 
       // Hardhat evm_increaseTime
       provider.send("evm_increaseTime", [100])
