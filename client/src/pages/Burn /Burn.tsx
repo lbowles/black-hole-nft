@@ -44,6 +44,7 @@ import mergeEffect from "../../sounds/merge.mp3"
 import { compareBlackHoles } from "../../utils/compareBlackHoles"
 import { getOpenSeaLink } from "../../utils/getOpenSeaLink"
 import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwner"
+import { triggerMetadataUpdate } from "../../utils/triggerMetadataUpdate"
 
 const nftTypeToImg: Record<string, string> = {
   MICRO: micro,
@@ -71,6 +72,7 @@ export const Burn = () => {
   const [selectedTokenIndexes, setSelectedTokenIndexes] = useState<number[]>([])
   const [mergeSuccess, setMergeSuccess] = useState(false)
   const [mergeStartTimestamp, setMergeStartTimestamp] = useState<BigNumber>()
+  const [shouldShowWarning, setShouldShowWarning] = useState(false)
 
   const [generalClickSound] = useSound(generalClickEffect)
   const [linkClickSound] = useSound(linkClickEffect)
@@ -130,7 +132,11 @@ export const Burn = () => {
     isSuccess: isMergeSignSuccess,
   } = useVoidableBlackHolesMerge(mergeConfig)
 
-  const { data: mergeTx, isLoading: isMergeTxLoading } = useWaitForTransaction({
+  const {
+    data: mergeTx,
+    isLoading: isMergeTxLoading,
+    isSuccess: isMergeTxSuccess,
+  } = useWaitForTransaction({
     hash: mergeSignResult?.hash,
     confirmations: 1,
   })
@@ -309,6 +315,10 @@ export const Burn = () => {
 
   useEffect(() => {
     if (mergeTx?.confirmations === 1 && finalPage) {
+      triggerMetadataUpdate({
+        tokenAddress: deployments.contracts.VoidableBlackHoles.address,
+        tokenId: mergeTokenIds[0].toNumber(),
+      })
       setSelectedTokenIndexes([])
       setMergeSuccess(true)
       mergeSound()
@@ -316,10 +326,10 @@ export const Burn = () => {
   }, [mergeTx])
 
   useEffect(() => {
-    if (approveTx?.confirmations === 1) {
-      //
+    if (isMergeTxSuccess || isMigrateTxSuccess) {
+      setShouldShowWarning(true)
     }
-  }, [approveTx])
+  }, [isMergeTxSuccess, isMigrateTxSuccess])
 
   useEffect(() => {
     setMigrateTokenIds(unmigratedOwnedNFTs.map((nft) => BigNumber.from(nft.tokenId)))
@@ -427,14 +437,15 @@ export const Burn = () => {
                     markets before upgrading.
                   </p>
                 </div>
-                {mergeTx !== undefined ||
-                  (migrateTx !== undefined && (
-                    <div className="bg-black border-2 border-amber-800 w-full p-5 mt-5 ">
-                      <p className="text-amber-600 text-base">
-                        Tokens may be out of sync, please allow up to 5 minutes for the list to update.
-                      </p>
-                    </div>
-                  ))}
+                {shouldShowWarning ? (
+                  <div className="bg-black border-2 border-amber-800 w-full p-5 mt-5 ">
+                    <p className="text-amber-600 text-base">
+                      Tokens may be out of sync, please allow up to 5 minutes for the list to update.
+                    </p>
+                  </div>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           )}

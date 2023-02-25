@@ -136,12 +136,13 @@ async function getTokensByOwnerTestnet({ address, tokenAddress }: ITokenSearch) 
     })
     const json = await response.json()
     const newTokens: BlackHoleMetadata[] = json.result.map((token: any) => {
-      const { attributes } = JSON.parse(token.metadata)
+      const { attributes, image } = JSON.parse(token.metadata)
       return {
         tokenId: BigNumber.from(token.token_id),
         level: BigNumber.from(attributes.find((attr: any) => attr.trait_type === "Level").value),
         name: attributes.find((attr: any) => attr.trait_type === "Name").value,
         mass: BigNumber.from(attributes.find((attr: any) => attr.trait_type === "Mass").value),
+        image: image,
       }
     })
     tokens.push(...newTokens)

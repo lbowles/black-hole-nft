@@ -30,15 +30,14 @@
 pragma solidity ^0.8.12;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC4906} from "./interfaces/ERC4906.sol";
 import "./Utilities.sol";
 import "./Renderer.sol";
 import "./BlackHoles.sol";
 import "./interfaces/BlackHole.sol";
 import "svgnft/contracts/Base64.sol";
-import "./interfaces/IERC4906Lean.sol";
 
-contract VoidableBlackHoles is ERC721, Ownable, IERC4906Lean {
+contract VoidableBlackHoles is ERC4906, Ownable {
   error NotAllowed();
   error URIQueryForNonexistentToken();
 
@@ -66,7 +65,7 @@ contract VoidableBlackHoles is ERC721, Ownable, IERC4906Lean {
     uint256 _mergeOpenTimestamp,
     address _renderer,
     address _unmigratedBlackHoles
-  ) ERC721(_name, _symbol) {
+  ) ERC4906(_name, _symbol) {
     mergeOpenTimestamp = _mergeOpenTimestamp;
     renderer = Renderer(_renderer);
     unmigratedBlackHoles = BlackHoles(_unmigratedBlackHoles);
@@ -85,7 +84,7 @@ contract VoidableBlackHoles is ERC721, Ownable, IERC4906Lean {
    * @param _tokenId ID of the token to get the URI for.
    * @return Token URI.
    */
-  function tokenURI(uint256 _tokenId) public view virtual override(ERC721) returns (string memory) {
+  function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
     if (!_exists(_tokenId)) revert URIQueryForNonexistentToken();
 
     string memory name = string(abi.encodePacked("BlackHole #", utils.uint2str(_tokenId)));
