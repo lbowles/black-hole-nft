@@ -103,8 +103,8 @@ describe.only("VoidableBlackHoles", function () {
     await voidableBlackHoles.mint([1])
 
     const tokenId = 1
-    const name = "BlackHole #" + tokenId
-    const description = "Fully on-chain, procedurally generated, animated black holes."
+    const name = "Voidable BlackHole #" + tokenId
+    const description = "Fully on-chain, procedurally generated, animated black holes. Ready to be merged."
     const metadata = await voidableBlackHoles.tokenURI(tokenId)
 
     // Decode base64 encoded json
@@ -121,7 +121,7 @@ describe.only("VoidableBlackHoles", function () {
     expect(parser.parse(svg, true)).to.not.throw
   })
 
-  it.only("Should merge tokens", async function () {
+  it("Should merge tokens", async function () {
     expect(await voidableBlackHoles.unmigratedBlackHoles()).to.equal(blackHoles.address)
 
     expect(await voidableBlackHoles.isMergingEnabled()).to.be.true
@@ -205,69 +205,4 @@ describe.only("VoidableBlackHoles", function () {
       }
     }
   })
-
-  // it("Should provide the correct names for each level", async function () {
-  //   const names = ["Micro", "Stellar", "Intermediate", "Supermassive", "Primordial"]
-
-  //   for (let i = 0; i < 5; i++) {
-  //     expect(await voidableBlackHoles.nameForBlackHoleLevel(i)).to.equal(names[i])
-  //   }
-  // })
-
-  // it("Should provide the correct level for each mass", async function () {
-  //   // Mint 1,000 tokens
-  //   mintPrice = await voidableBlackHoles.getPrice()
-  //   await voidableBlackHoles.mint(10_000, { value: mintPrice.mul(10_000) })
-
-  //   // Get base upgrade mass
-  //   const baseUpgradeMass = (await voidableBlackHoles.getBaseUpgradeMass()).toNumber()
-
-  //   // Check each level
-  //   for (let level = 0; level < 4; level++) {
-  //     const mass = baseUpgradeMass * 2 ** level
-  //     expect(await voidableBlackHoles.levelForMass(mass)).to.equal((level + 1).toString())
-  //   }
-  // })
-
-  // it("Should show different colors for different levels with the same mass", async function () {
-  //   // Mint threshold tokens
-  //   mintPrice = await voidableBlackHoles.getPrice()
-  //   await voidableBlackHoles.mint(threshold, { value: threshold.mul(mintPrice) })
-
-  //   // Advance time to merging
-  //   const timedSaleDuration = await voidableBlackHoles.timedSaleDuration()
-  //   await ethers.provider.send("evm_increaseTime", [timedSaleDuration.toNumber()])
-
-  //   const mergingDelay = await voidableBlackHoles.mergingDelay()
-  //   await ethers.provider.send("evm_increaseTime", [mergingDelay.toNumber()])
-  //   await ethers.provider.send("evm_mine", [])
-
-  //   await voidableBlackHoles.merge([1, 2, 3, 4])
-
-  //   // Get token uri 1 and token uri 5
-  //   const tokenUri1 = await voidableBlackHoles.tokenURI(1)
-  //   const tokenUri5 = await voidableBlackHoles.tokenURI(5)
-  //   const tokenUri6 = await voidableBlackHoles.tokenURI(6)
-
-  //   function getStyle(metadata: string) {
-  //     // Decode base64 encoded json
-  //     const decoded = Buffer.from(metadata.split(",")[1], "base64").toString()
-  //     const json = JSON.parse(decoded)
-  //     // console.log(json.image)
-  //     const svg = Buffer.from(json.image.split(",")[1], "base64").toString()
-  //     const style = svg.split("<style>")[1].split("</style>")[0]
-  //     return style
-  //   }
-
-  //   // Get SVGs
-  //   const style1 = getStyle(tokenUri1)
-  //   const style5 = getStyle(tokenUri5)
-  //   const style6 = getStyle(tokenUri6)
-
-  //   // Merged token different to unmerged token
-  //   expect(style1).to.not.equal(style5)
-
-  //   // Two unmerged tokens have the same style
-  //   expect(style6).to.equal(style5)
-  // })
 })

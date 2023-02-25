@@ -13,16 +13,15 @@ export const MergingAmountGraphic = ({ levels }: IMergingAmountGraphic) => {
       <p className="text-gray-600 text-xl">{new Date().toLocaleString()}</p>
       {/* {<p className="text-white text-xl mt-4">{totalMinted?.toNumber().toLocaleString()} MINTED</p>} */}
       {levels.map((level, levelNumber) => {
-        console.log(level)
-
         let microsForLevel = ""
         let prevForLevel = ""
         if (upgradeIntervals) {
+          console.log(upgradeIntervals.map((interval) => interval.toNumber()))
           if (levelNumber === 0) {
             microsForLevel = upgradeIntervals[levelNumber].toString()
             prevForLevel = microsForLevel
           } else {
-            microsForLevel = (upgradeIntervals[levelNumber].toNumber() / upgradeIntervals[0].toNumber()).toFixed(0)
+            microsForLevel = upgradeIntervals[levelNumber].toNumber().toFixed(0)
             prevForLevel = (
               upgradeIntervals[levelNumber].toNumber() / upgradeIntervals[levelNumber - 1].toNumber()
             ).toFixed(0)

@@ -112,7 +112,7 @@ export const COMMANDS: ICommand[] = [
       // Mine block
       provider.send("evm_mine", [])
 
-      const remainingAmount = BigNumber.from(6500).sub(threshold).sub(targetAmountInSecondSigner)
+      const remainingAmount = BigNumber.from(6570).sub(threshold).sub(targetAmountInSecondSigner)
       await blackHoles.mint(remainingAmount, { value: remainingAmount.mul(price) })
 
       // Mine block

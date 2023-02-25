@@ -98,8 +98,8 @@ contract VoidableBlackHoles is ERC4906, Ownable {
   function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
     if (!_exists(_tokenId)) revert URIQueryForNonexistentToken();
 
-    string memory name = string(abi.encodePacked("BlackHole #", utils.uint2str(_tokenId)));
-    string memory description = "Fully on-chain, procedurally generated, animated black holes.";
+    string memory name = string(abi.encodePacked("Voidable BlackHole #", utils.uint2str(_tokenId)));
+    string memory description = "Fully on-chain, procedurally generated, animated black holes. Ready to be merged.";
 
     BlackHole memory blackHole = blackHoleForTokenId(_tokenId);
 
@@ -219,7 +219,7 @@ contract VoidableBlackHoles is ERC4906, Ownable {
       2
     );
     uint256[] memory intervals = new uint256[](unmigratedBlackHoles.MAX_LEVEL() + 1);
-    intervals[0] = utils.max(baseUpgradeMass / 2, 2);
+    intervals[0] = 5;
     intervals[1] = baseUpgradeMass * 2;
     intervals[2] = baseUpgradeMass * 4;
     intervals[3] = baseUpgradeMass * 8;
@@ -281,6 +281,12 @@ contract VoidableBlackHoles is ERC4906, Ownable {
     return block.timestamp > mergeOpenTimestamp;
   }
 
+  /**
+   * @notice Simulates the merge for an array of tokens.
+   * @param tokens Array of tokens to merge.
+   * @return BlackHole struct of new Black Hole.
+   * @return SVG of new Black Hole.
+   */
   function simulateMerge(uint256[] memory tokens) public view returns (BlackHole memory, string memory) {
     uint256 targetId = tokens[0];
 
@@ -354,6 +360,7 @@ contract VoidableBlackHoles is ERC4906, Ownable {
 
   function burn(uint256 tokenId) public {
     require(ownerOf(tokenId) == msg.sender, "Must own token");
+    burned += 1;
     _burn(tokenId);
   }
 
