@@ -39,12 +39,12 @@ export const Home = () => {
         ) : (
           <button
             onClick={() => {
+              navigate("/merge")
               generalClickSound()
             }}
             className="primaryBtn"
-            disabled={true}
           >
-            MINT CLOSED
+            MERGE
           </button>
         )}
       </div>
