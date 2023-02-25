@@ -37,6 +37,7 @@ import { getOpenSeaLink } from "../../utils/getOpenSeaLink"
 import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwner"
 import { compareBlackHoles } from "../../utils/compareBlackHoles"
 import { SimulateMerge } from "../../components/SimulateMerge/SimulateMerge"
+import { Divider } from "../../components/Divider/Divider"
 
 const nftTypeToImg: Record<string, string> = {
   MICRO: micro,
@@ -55,6 +56,7 @@ const nftTypeToAnimatedImg: Record<string, string> = {
 
 export const Burn = () => {
   const [ownedNFTs, setOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
+  const [unmigratedOwnedNFTs, setUnmigratedOwnedNFTs] = useState<BlackHoleMetadata[]>([])
   const [finalPage, setFinalPage] = useState(false)
   const [totalSM, setTotalSM] = useState(0)
   const [upgradeType, setUpgradeType] = useState("")
@@ -70,6 +72,11 @@ export const Burn = () => {
 
   const [mergeTokenIds, setMergeTokenIds] = useState<BigNumber[]>([])
   const [loadingTokens, setLoadingTokens] = useState<boolean>(true)
+  const [isApproveMigrationSignLoading, setIsApproveMigrationSignLoading] = useState<boolean>(false)
+  const [isMigrationSignLoading, setIsMigrationSignLoading] = useState<boolean>(false)
+  const [isMigrationApproved, setIsMigrationApproved] = useState<boolean>(false)
+  const [isApproveTxLoading, setIsApproveTxLoading] = useState<boolean>(false)
+  const [isMigrateTokensTxLoading, setIsMigrateTokensTxLoading] = useState<boolean>(false)
 
   const { address } = useAccount()
   const provider = useProvider()
@@ -203,8 +210,44 @@ export const Burn = () => {
         provider,
         tokenAddress: deployments.contracts.BlackHoles.address,
       })
+      const unmigratedNFTs = await getTokensByOwner({
+        address: address,
+        provider,
+        tokenAddress: deployments.contracts.VoidableBlackHoles.address,
+      })
+
+      const storedMigratedTokens = localStorage.getItem("migratableNFTs")
+      const storedTime = localStorage.getItem("unmigratedOwnedNFTsTime")
+
+      if (storedMigratedTokens && storedTime) {
+        console.log(JSON.parse(storedMigratedTokens))
+        const parsedMigratedTokens: BlackHoleMetadata[] = JSON.parse(storedMigratedTokens)
+        const storedTimeNumber = parseInt(storedTime, 10)
+        const currentTime = new Date().getTime()
+
+        if (currentTime - storedTimeNumber <= 5 * 60 * 1000) {
+          ownedNFTs.map((ownedNft, i) => {
+            parsedMigratedTokens.map((storedNft) => {
+              if (ownedNft.tokenId === storedNft.tokenId) {
+                ownedNFTs[i].adjustment = storedNft.adjustment
+                ownedNFTs[i].mass = storedNft.mass
+                ownedNFTs[i].level = storedNft.level
+                ownedNFTs[i].image = storedNft.image
+              }
+            })
+          })
+        } else {
+          setUnmigratedOwnedNFTs(unmigratedNFTs)
+          localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
+          localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
+        }
+      } else {
+        setUnmigratedOwnedNFTs(unmigratedNFTs)
+        localStorage.setItem("migratableNFTs", JSON.stringify(unmigratedNFTs))
+        localStorage.setItem("unmigratedOwnedNFTsTime", new Date().getTime().toString())
+      }
+
       setOwnedNFTs(ownedNFTs.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles))
-      // console.log(ownedNFTs.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles))
       setLoadingTokens(false)
     }
     getOwnedNFTs()
@@ -243,6 +286,67 @@ export const Burn = () => {
 
   return (
     <>
+      {unmigratedOwnedNFTs.length > 0 && isMergingEnabled && address && (
+        <>
+          <div className="flex justify-center w-screen  p-5 pb-0">
+            <div className="w-96">
+              <div className="bg-black border-2 border-gray-800 w-full p-5 mt-6">
+                <p className="text-white text-2xl">Migrate to V1</p>
+                <p className="text-gray-600 text-base pt-3">
+                  The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
+                  remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
+                  markets before upgrading.
+                </p>
+              </div>
+            </div>
+          </div>
+          <>
+            <div className="flex justify-center w-screen z-1 mt-5">
+              <div className="w-96">
+                <div className="max-h-[240px] overflow-auto mt-1">
+                  <div className="grid grid-cols-4 gap-2 mt-2 max-h-[380px] overflow-auto pb-[72px]">
+                    {ownedNFTs.map((nft, index) => {
+                      const img = nft.image ?? nftTypeToImg[nft.name.toUpperCase()]?.trim() ?? ""
+                      return (
+                        <div key={index} className={"border-gray-800 text-gray-700  border-2 transition-colors "}>
+                          <img src={img}></img>
+                          <div className="border-t-2 border-gray-800 p-1 text-sm">
+                            <p className="w-full text-left">{nft.name.toUpperCase()}</p>
+                            <div className="flex justify-between w-full">
+                              <p>#{nft.tokenId.toString()}</p>
+                              <p>{nft.mass.toString()} SM</p>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+          <div className="flex justify-center w-screen  p-5 pb-0">
+            <div className="w-96 pt-4">
+              <div className="w-full flex justify-center mb-16">
+                <ActionButton
+                  onClick={() => {}}
+                  disabled={isApproveMigrationSignLoading || isMigrationSignLoading}
+                  text={
+                    isApproveMigrationSignLoading || isMigrationSignLoading
+                      ? "WAITING FOR WALLET"
+                      : isMigrationApproved
+                      ? "MIGRATE ALL TOKENS"
+                      : `APPROVE MIGRATION`
+                  }
+                  loading={isApproveTxLoading || isMigrateTokensTxLoading}
+                />
+              </div>
+              <Divider />
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="flex justify-center w-screen  p-5 pb-0">
         <div className="w-96">
           <div className="bg-black border-2 border-gray-800 w-full p-5 mt-6">
@@ -263,7 +367,6 @@ export const Burn = () => {
       )}
       {
         // TODO: General loading state (for all the other contract variables)
-
         !address ? (
           <p className="text-white text-center w-full text-xl mt-12">Wallet not connected.</p>
         ) : loadingTokens ? (
@@ -278,7 +381,9 @@ export const Burn = () => {
         ) : (
           <>
             {ownedNFTs.length == 0 ? (
-              <p className="text-white text-center w-full text-xl mt-12">This wallet does not own any Black Holes.</p>
+              <p className="text-white text-center w-full text-xl mt-12">
+                This wallet does not own migrated Black Holes.
+              </p>
             ) : (
               <>
                 {mergeSuccess ? (
