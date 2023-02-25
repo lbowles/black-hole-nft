@@ -167,7 +167,8 @@ export async function getTokensByOwner({ provider, address, tokenAddress }: ITok
   if ((deployments.chainId as string) === "31337") {
     return getTokensByOwnerLocal({ provider, address, tokenAddress })
   } else if ((deployments.chainId as string) === "1") {
-    return getTokensByOwnerMainnet({ address, tokenAddress })
+    // return getTokensByOwnerMainnet({ address, tokenAddress })
+    return getTokensByOwnerTestnet({ address, tokenAddress })
   }
   return getTokensByOwnerTestnet({ address, tokenAddress })
 }

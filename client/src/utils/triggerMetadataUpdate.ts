@@ -35,7 +35,8 @@ export async function triggerMetadataUpdate({ tokenAddress, tokenId }: IMetadata
   if ((deployments.chainId as string) === "31337") {
     return
   } else if ((deployments.chainId as string) === "1") {
-    await triggerMetadataUpdateMainnet({ tokenAddress, tokenId })
+    // await triggerMetadataUpdateMainnet({ tokenAddress, tokenId })
+    await triggerMetadataUpdateTestnet({ tokenAddress, tokenId })
   }
   await triggerMetadataUpdateTestnet({ tokenAddress, tokenId })
 }
