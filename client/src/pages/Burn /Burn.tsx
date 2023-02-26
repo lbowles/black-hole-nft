@@ -45,6 +45,7 @@ import { compareBlackHoles } from "../../utils/compareBlackHoles"
 import { getOpenSeaLink } from "../../utils/getOpenSeaLink"
 import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwner"
 import { triggerMetadataUpdate } from "../../utils/triggerMetadataUpdate"
+import { SmallNavbar } from "../../components/SmallNavbar/SmallNavbar"
 
 const nftTypeToImg: Record<string, string> = {
   MICRO: micro,
@@ -61,6 +62,14 @@ const nftTypeToAnimatedImg: Record<string, string> = {
   PRIMORDIAL: primordialAnimated,
 }
 
+const defaultPages = [
+  { name: "V1", active: true },
+  { name: "V2", active: false },
+  { name: "V3", active: false },
+]
+
+type PagesType = { name: string; active: boolean }[]
+
 export const Burn = () => {
   const [ownedNFTs, setOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
   const [unmigratedOwnedNFTs, setUnmigratedOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
@@ -73,6 +82,7 @@ export const Burn = () => {
   const [mergeSuccess, setMergeSuccess] = useState(false)
   const [mergeStartTimestamp, setMergeStartTimestamp] = useState<BigNumber>()
   const [shouldShowWarning, setShouldShowWarning] = useState(false)
+  const [mergeVersion, setMergeVersion] = useState<PagesType>(defaultPages)
 
   const [generalClickSound] = useSound(generalClickEffect)
   const [linkClickSound] = useSound(linkClickEffect)
@@ -262,6 +272,18 @@ export const Burn = () => {
     setMigrateTokenIds(migrateTokenIdsCopy)
 
     setUnmigratedOwnedNFTs(updatedNFTs)
+  }
+
+  const setActiveNavBar = (index: number) => {
+    let tempMergeVersion = [...mergeVersion]
+    tempMergeVersion.map((page, i) => {
+      if (i === index) {
+        page.active = true
+      } else {
+        page.active = false
+      }
+    })
+    setMergeVersion(tempMergeVersion)
   }
 
   useEffect(() => {
@@ -492,6 +514,9 @@ export const Burn = () => {
                     remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
                     markets before upgrading.
                   </p>
+                  <div className="w-full mt-4">
+                    <SmallNavbar navItems={defaultPages} setActiveNavBar={setActiveNavBar} />
+                  </div>
                 </div>
               </div>
             </div>
