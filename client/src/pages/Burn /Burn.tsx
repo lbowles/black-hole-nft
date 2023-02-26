@@ -275,6 +275,7 @@ export const Burn = () => {
                     migrateProps={{
                       useApprove: useBlackHolesSetApprovalForAll,
                       usePrepareApprove: usePrepareBlackHolesSetApprovalForAll,
+                      useIsApprovedForAll: useBlackHolesIsApprovedForAll,
                     }}
                   />
                 )}

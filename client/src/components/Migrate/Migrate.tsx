@@ -15,7 +15,7 @@ import { BigNumber, BigNumberish } from "ethers"
 import { ActionButton } from "../ActionButton/ActionButton"
 import { useBlackHolesV2IsApprovedForAll, useBlackHolesV2Migrate, usePrepareBlackHolesV2Migrate } from "../../generated"
 import deployments from "../../deployments.json"
-import { useWaitForTransaction } from "wagmi"
+import { useAccount, useWaitForTransaction } from "wagmi"
 import { IMigrateProps } from "../../interfaces/IMigrateProps"
 
 const nftTypeToImg: Record<string, string> = {
@@ -26,19 +26,28 @@ const nftTypeToImg: Record<string, string> = {
   PRIMORDIAL: primordial,
 }
 
-export function Migrate({ tokens, tokenAddress, usePrepareApprove, useApprove }: IMigrateProps) {
+export function Migrate({
+  tokens,
+  tokenAddress,
+  usePrepareApprove,
+  useApprove,
+  useIsApprovedForAll,
+  migrateComplete,
+}: IMigrateProps) {
   const [unmigratedOwnedNFTs, setUnmigratedOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
   const [migrateTokenIds, setMigrateTokenIds] = useState<BigNumber[]>([])
 
   const addRecentTransaction = useAddRecentTransaction()
 
-  const { data: isApprovedForAll } = useBlackHolesV2IsApprovedForAll({
-    args: [tokenAddress as `0x${string}`, deployments.contracts.BlackHolesV2.address],
+  const { address } = useAccount()
+
+  const { data: isApprovedForAll } = useIsApprovedForAll({
+    args: [address, deployments.contracts.BlackHolesV2.address],
     watch: true,
   })
 
   const { config: approvalConfig } = usePrepareApprove({
-    args: [deployments.contracts.VoidableBlackHoles.address, true],
+    args: [deployments.contracts.BlackHolesV2.address, true],
     enabled: unmigratedOwnedNFTs.length > 0,
   })
   const {
@@ -108,6 +117,14 @@ export function Migrate({ tokens, tokenAddress, usePrepareApprove, useApprove }:
       })
     }
   }, [migrateSignResult])
+
+  useEffect(() => {
+    console.log("is approved for all", isApprovedForAll)
+  }, [isApprovedForAll])
+
+  useEffect(() => {
+    if (migrateTx?.status === 1) migrateComplete()
+  }, [migrateTx])
 
   return (
     <>

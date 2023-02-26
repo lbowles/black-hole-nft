@@ -66,7 +66,7 @@ export function Merge({
   usePrepare,
   useWrite,
   migrateProps,
-}: IMergeProps & { migrateProps: Pick<IMigrateProps, "usePrepareApprove" | "useApprove"> }) {
+}: IMergeProps & { migrateProps: Pick<IMigrateProps, "usePrepareApprove" | "useApprove" | "useIsApprovedForAll"> }) {
   const [totalSM, setTotalSM] = useState(0)
   const [ownedNFTs, setOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
   const [targetTokenIndexInOwnedArray, setTargetTokenIndexInOwnedArray] = useState<number>()
