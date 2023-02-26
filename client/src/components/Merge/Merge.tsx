@@ -3,6 +3,8 @@ import { BigNumber } from "ethers"
 import { useEffect, useState } from "react"
 import useSound from "use-sound"
 import { useWaitForTransaction } from "wagmi"
+import deployments from "../../deployments.json"
+import { useBlackHolesV2BlackHoleForMass } from "../../generated"
 import intermediate from "../../img/blackHoles/intermediate.svg"
 import intermediateAnimated from "../../img/blackHoles/intermediateAnimated.svg"
 import micro from "../../img/blackHoles/micro.svg"
@@ -14,19 +16,17 @@ import stellarAnimated from "../../img/blackHoles/stellarAnimated.svg"
 import supermassive from "../../img/blackHoles/supermassive.svg"
 import supermassiveAnimated from "../../img/blackHoles/supermassiveAnimated.svg"
 import dropdown from "../../img/dropdown.svg"
+import { IMigrateProps } from "../../interfaces/IMigrateProps"
 import generalClickEffect from "../../sounds/generalClick.mp3"
 import linkClickEffect from "../../sounds/linkClick.mp3"
 import mergeEffect from "../../sounds/merge.mp3"
 import { compareBlackHoles } from "../../utils/compareBlackHoles"
+import { getOpenSeaLink } from "../../utils/getOpenSeaLink"
 import { BlackHoleMetadata } from "../../utils/getTokensByOwner"
 import { triggerMetadataUpdate } from "../../utils/triggerMetadataUpdate"
 import { ActionButton } from "../ActionButton/ActionButton"
-import { SimulateMerge } from "../SimulateMerge/SimulateMerge"
-
-import deployments from "../../deployments.json"
 import { Migrate } from "../Migrate/Migrate"
-import { IMigrateProps } from "../../interfaces/IMigrateProps"
-import { useBlackHolesV2Migrate, usePrepareBlackHolesV2Migrate } from "../../generated"
+import { SimulateMerge } from "../SimulateMerge/SimulateMerge"
 
 const nftTypeToImg: Record<string, string> = {
   MICRO: micro,
@@ -101,11 +101,16 @@ export function Merge({
     confirmations: 1,
   })
 
-  // const { config: migrateConfig } = usePrepareBlackHolesV2Migrate({
-  //   args: [tokenAddress as `0x${string}`, mergeTokenIds ? [mergeTokenIds[0]] : []],
-  //   enabled: isMergeTxSuccess
-  // })
-  // const { write: migrate, data: migrateSignResult, isLoading: isMigrateSignLoading, isSuccess: isMigrateSignSuccess } = useBlackHolesV2Migrate(migrateConfig)
+  const { data: simulationDataForMerge } = useBlackHolesV2BlackHoleForMass({
+    args: [
+      mergeTokenIds.length > 0 ? mergeTokenIds[0] : BigNumber.from(1),
+      totalSM ? BigNumber.from(totalSM) : BigNumber.from(1),
+    ],
+  })
+
+  useEffect(() => {
+    console.log(mergeTokenIds, totalSM)
+  }, [mergeTokenIds, totalSM])
 
   const handleSelectAll = () => {
     const updatedNFTs = ownedNFTs.map((nft) => ({ ...nft, selected: true }))
@@ -142,8 +147,8 @@ export function Merge({
   }
 
   useEffect(() => {
-    setOwnedNFTs(tokens)
-  }, tokens)
+    setOwnedNFTs(tokens.map((token) => ({ ...token, selected: true })))
+  }, [tokens])
 
   useEffect(() => {
     if (signResult) {
@@ -176,6 +181,29 @@ export function Merge({
         tokenId: mergeTokenIds[0].toNumber(),
       })
       setSelectedTokenIndexes([])
+      if (tokenAddress === deployments.contracts.BlackHolesV2.address)
+        triggerMetadataUpdate({ tokenAddress: tokenAddress, tokenId: mergeTokenIds[0].toNumber() })
+
+        // Fetch metadata on-chain
+      ;(async () => {
+        // Start loading state
+        try {
+          if (simulationDataForMerge === undefined) return
+          const [metadata, svg] = simulationDataForMerge
+          const blackHoleMetadata: BlackHoleMetadata = {
+            ...metadata,
+            image: `data:image/svg+xml;base64,${btoa(svg)}`,
+          }
+          // Update token in ownedNFTs array
+          const updatedNFTs = [{ ...blackHoleMetadata, selected: true }, ...ownedNFTs.slice(1, ownedNFTs.length)]
+          setOwnedNFTs(updatedNFTs)
+        } catch (error) {
+          console.error(error)
+        }
+        // End loading state
+      })()
+
+      // mergeComplete()
       mergeSound()
     }
   }, [mergeTx])
@@ -277,7 +305,12 @@ export function Merge({
                     ) : (
                       <>
                         {selectedTokenIndexes.length < 2 ? (
-                          <p>SELECT AT LEAST 2 BLACK HOLES TO MERGE</p>
+                          selectedTokenIndexes.length === tokens.length &&
+                          tokenAddress !== deployments.contracts.BlackHolesV2.address ? (
+                            <p>MIGRATE TO V2 TO COMPLETE MERGE</p>
+                          ) : (
+                            <p>SELECT AT LEAST 2 BLACK HOLES TO MERGE</p>
+                          )
                         ) : (
                           <>
                             <p>MERGE TOTAL:&nbsp;</p>
@@ -304,17 +337,35 @@ export function Merge({
                       </div>
                     )}
                 </div>
-                <button
-                  className="secondaryBtn text-lg py-1 h-full"
-                  disabled={totalSM === 0 || selectedTokenIndexes.length < 2}
-                  onClick={() => {
-                    setFinalPage(true)
-                    setTargetTokenIndexInOwnedArray(undefined)
-                    generalClickSound()
-                  }}
-                >
-                  NEXT
-                </button>
+                {selectedTokenIndexes.length === tokens.length &&
+                tokenAddress !== deployments.contracts.BlackHolesV2.address &&
+                tokens.length === 1 ? (
+                  <button
+                    className="secondaryBtn text-lg py-1 h-full"
+                    disabled={false}
+                    onClick={() => {
+                      setFinalPage(true)
+                      setMigrationPage(true)
+                      setTargetTokenIndexInOwnedArray(undefined)
+                      setMergeTokenIds(tokens.map((token) => BigNumber.from(token.tokenId)))
+                      generalClickSound()
+                    }}
+                  >
+                    MIGRATE
+                  </button>
+                ) : (
+                  <button
+                    className="secondaryBtn text-lg py-1 h-full"
+                    disabled={totalSM === 0 || selectedTokenIndexes.length < 2}
+                    onClick={() => {
+                      setFinalPage(true)
+                      setTargetTokenIndexInOwnedArray(undefined)
+                      generalClickSound()
+                    }}
+                  >
+                    NEXT
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -337,8 +388,11 @@ export function Merge({
               <p className="text-gray-600 text-base  w-full text-center">Select token ID to upgrade</p>
               <div className="border-2 border-white  mt-5">
                 {totalSM !== undefined && (
+                  // <></>
                   <SimulateMerge
-                    tokenIds={selectedTokenIndexes.map((index) => BigNumber.from(ownedNFTs[index].tokenId))}
+                    totalMass={selectedTokenIndexes
+                      .map((index) => BigNumber.from(ownedNFTs[index].mass))
+                      .reduce((a, b) => a.add(b))}
                   />
                 )}
                 {/* <img src={nftTypeToAnimatedImg[upgradeType]?.trim() ?? ""} className="p-1"></img> */}
@@ -406,12 +460,39 @@ export function Merge({
           <Migrate
             {...migrateProps}
             tokenAddress={tokenAddress}
-            migrateComplete={() => console.log("Migration complete")}
+            migrateComplete={() => {
+              console.log("Migration complete")
+              mergeComplete()
+              setMigrationPage(false)
+              setFinalPage(false)
+            }}
             tokens={ownedNFTs.filter((nft) => mergeTokenIds[0].eq(nft.tokenId))}
           />
         </>
       ) : (
-        <div className="flex justify-center w-screen p-5 pb-0 text-white">Done</div>
+        <div className="flex justify-center w-[100%] p-5 pb-0 text-white">
+          <div className="w-3 h-[70vh] flex justify-center items-center">
+            <p className="text-white text-2xl">
+              Merge complete, view on{" "}
+              <a
+                target="_blank"
+                href={getOpenSeaLink(deployments.contracts.BlackHolesV2.address, mergeTokenIds[0].toString())}
+                className="text-gray-500 hover:text-white text-2xl underline"
+              >
+                OpenSea.
+              </a>
+              <button
+                className="text-gray-500 hover:text-white transition-colors text-base w-96 text-left mt-3"
+                onClick={() => {
+                  setFinalPage(false)
+                  setMigrationPage(false)
+                }}
+              >
+                {"Back"}
+              </button>
+            </p>
+          </div>
+        </div>
       )}
     </div>
   )

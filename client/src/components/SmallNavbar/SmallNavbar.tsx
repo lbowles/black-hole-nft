@@ -2,7 +2,7 @@ import { useState } from "react"
 import useSound from "use-sound"
 import generalClickEffect from "../../sounds/generalClick.mp3"
 
-type PagesType = { name: string; active: boolean; visible: boolean }[]
+export type PagesType = { name: string; visible: boolean; active: boolean }[]
 type ISmallNav = {
   navItems: PagesType | undefined
   setActiveNavBar(i: number): void

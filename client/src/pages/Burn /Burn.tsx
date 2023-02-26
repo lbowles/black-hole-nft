@@ -52,10 +52,9 @@ import generalClickEffect from "../../sounds/generalClick.mp3"
 import linkClickEffect from "../../sounds/linkClick.mp3"
 import mergeEffect from "../../sounds/merge.mp3"
 import { compareBlackHoles } from "../../utils/compareBlackHoles"
-import { getOpenSeaLink } from "../../utils/getOpenSeaLink"
 import { BlackHoleMetadata, getTokensByOwner } from "../../utils/getTokensByOwner"
 import { triggerMetadataUpdate } from "../../utils/triggerMetadataUpdate"
-import { SmallNavbar } from "../../components/SmallNavbar/SmallNavbar"
+import { PagesType, SmallNavbar } from "../../components/SmallNavbar/SmallNavbar"
 
 const nftTypeToImg: Record<string, string> = {
   MICRO: micro,
@@ -72,16 +71,14 @@ const nftTypeToImg: Record<string, string> = {
 //   PRIMORDIAL: primordialAnimated,
 // }
 
-type PagesType = { name: string; active: boolean; visible: boolean }[]
-
 const defaultPageOptions: PagesType = [
   {
     name: "V1",
-    active: false,
     visible: false,
+    active: false,
   },
-  { name: "Voidable", active: false, visible: false },
-  { name: "V2", active: false, visible: false },
+  { name: "Voidable", visible: false, active: false },
+  { name: "V2", visible: false, active: false },
 ]
 
 export const Burn = () => {
@@ -90,13 +87,7 @@ export const Burn = () => {
   const [voidableBlackHolesTokens, setVoidableBlackHolesTokens] = useState<
     (BlackHoleMetadata & { selected: boolean })[]
   >([])
-  const [finalPage, setFinalPage] = useState(false)
-  const [totalSM, setTotalSM] = useState(0)
-  const [upgradeType, setUpgradeType] = useState("")
-  const [nextUpgradeDetails, setNextUpgradeDetails] = useState<[number, string] | null>()
-  const [targetTokenIndexInOwnedArray, setTargetTokenIndexInOwnedArray] = useState<number>()
-  const [selectedTokenIndexes, setSelectedTokenIndexes] = useState<number[]>([])
-  const [mergeSuccess, setMergeSuccess] = useState(false)
+  const [forceRefresh, setForceRefresh] = useState(0)
   const [mergeStartTimestamp, setMergeStartTimestamp] = useState<BigNumber>()
   const [shouldShowWarning, setShouldShowWarning] = useState(false)
   const [mergeVersion, setMergeVersion] = useState<PagesType>(defaultPageOptions)
@@ -173,7 +164,7 @@ export const Burn = () => {
 
   // Get owned NFTs
   useEffect(() => {
-    if (!address || !provider || finalPage) return
+    if (!address || !provider) return
     const getOwnedNFTs = async () => {
       setLoadingTokens(true)
       const _blackHolesV1Tokens = await getTokensByOwner({
@@ -204,64 +195,37 @@ export const Burn = () => {
       setLoadingTokens(false)
     }
     getOwnedNFTs()
-  }, [address, provider, finalPage]) //isMigrateTxSuccess
+  }, [address, provider, forceRefresh]) //isMigrateTxSuccess
 
-  useEffect(() => {
-    if (!upgradeIntervals || blackHolesV2Tokens.length == 0) return
-    const selectedIndexes = blackHolesV2Tokens
-      .map((nft, index) => (nft.selected ? index : null))
-      .filter((i) => i !== null) as number[]
-    setSelectedTokenIndexes(selectedIndexes)
-    const totalSelectedSM = selectedIndexes.reduce(
-      (acc, index) => acc + parseInt(blackHolesV2Tokens[index].mass.toString()),
-      0,
-    )
-    setTotalSM(totalSelectedSM)
-    const type = findUpgradeType(totalSelectedSM)
-    setUpgradeType(type)
-    const nextUpgrade = findNextUpgrade(totalSelectedSM)
-    setNextUpgradeDetails(nextUpgrade)
-  }, [blackHolesV2Tokens, upgradeIntervals])
-
-  // useEffect(() => {
-  //   if (isMergeTxSuccess || isMigrateTxSuccess) {
-  //     setShouldShowWarning(true)
-  //   }
-  // }, [isMergeTxSuccess, isMigrateTxSuccess])
-
-  // useEffect(() => {
-  //   setMigrateTokenIds(unmigratedOwnedNFTs.map((nft) => BigNumber.from(nft.tokenId)))
-  // }, [unmigratedOwnedNFTs])
+  const handleMergeComplete = () => {
+    setForceRefresh(forceRefresh + 1)
+  }
 
   useEffect(() => {
     console.log("merging enabled", isMergingEnabled)
   }, [isMergingEnabled])
 
   useEffect(() => {
-    let active = false
-    const options = [...mergeVersion]
-    if (blackHolesV1Tokens.length > 0) {
-      options[0].visible = true
-      if (!active) {
-        options[0].active = true
-        active = true
+    const options: PagesType = [
+      {
+        name: "V1",
+        visible: blackHolesV1Tokens.length > 0,
+        active: false,
+      },
+      { name: "Voidable", visible: voidableBlackHolesTokens.length > 0, active: false },
+      { name: "V2", visible: blackHolesV2Tokens.length > 0, active: false },
+    ].map((page, i) => ({ ...page }))
+
+    console.log(options)
+
+    // Set the page index to the index of the first visible page
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].visible) {
+        options[i].active = true
+        break
       }
     }
-    if (voidableBlackHolesTokens.length > 0) {
-      options[1].visible = true
-      if (!active) {
-        options[1].active = true
-        active = true
-      }
-    }
-    if (blackHolesV2Tokens.length > 0) {
-      options[2].visible = true
-      if (!active) {
-        options[2].active = true
-        active = true
-      }
-    }
-    console.log("options", options)
+
     setMergeVersion(options)
   }, [blackHolesV1Tokens, blackHolesV2Tokens, voidableBlackHolesTokens])
 
@@ -286,30 +250,29 @@ export const Burn = () => {
             <div className="bg-black border-2 border-gray-800 w-full p-5 ">
               <p className="text-white text-2xl">Merge</p>
               <p className="text-gray-600 text-base pt-3">
+                The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
+                remaining token's metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
+                markets before upgrading.
+              </p>
+              <p className="text-gray-600 text-base pt-3">
                 {/* V1 */}
                 {mergeVersion[0].active && (
                   <>
-                    The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
-                    remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
-                    markets before upgrading.
+                    Black Holes V1 is the original deployment of Black Holes. These Black Holes can be migrated to Black
+                    Holes V2, which has improvements such as lower upgrade masses for Stellar and Supermassive Black
+                    Holes.
                   </>
                 )}
                 {/* Voidable */}
                 {mergeVersion[1].active && (
                   <>
-                    The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
-                    remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
-                    markets before upgrading.
+                    Voidable Black Holes are Black Holes which needed to be migrated in order to be merged. These Black
+                    Holes should be migrated to V2 and if you are the owner of such Black Holes, your migration gas
+                    costs have been refunded.
                   </>
                 )}
                 {/* V2 */}
-                {mergeVersion[2].active && (
-                  <>
-                    The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
-                    remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
-                    markets before upgrading.
-                  </>
-                )}
+                {mergeVersion[2].active && <>Black Holes V2 is the latest deployment of Black Holes.</>}
               </p>
               <div className="w-full mt-4">
                 <SmallNavbar navItems={mergeVersion} setActiveNavBar={setActiveNavBar} />
@@ -343,7 +306,9 @@ export const Burn = () => {
                   tokenAddress={deployments.contracts.BlackHolesV2.address}
                   findNextUpgrade={findNextUpgrade}
                   findUpgradeType={findUpgradeType}
-                  mergeComplete={() => {}}
+                  mergeComplete={() => {
+                    handleMergeComplete()
+                  }}
                   upgradeIntervals={upgradeIntervals.map((interval) => interval.toNumber())}
                   tokens={blackHolesV2Tokens}
                   usePrepare={usePrepareBlackHolesV2Merge}
@@ -363,7 +328,9 @@ export const Burn = () => {
                   tokenAddress={deployments.contracts.BlackHoles.address}
                   findNextUpgrade={findNextUpgrade}
                   findUpgradeType={findUpgradeType}
-                  mergeComplete={() => {}}
+                  mergeComplete={() => {
+                    handleMergeComplete()
+                  }}
                   upgradeIntervals={upgradeIntervals.map((interval) => interval.toNumber())}
                   tokens={blackHolesV1Tokens}
                   usePrepare={usePrepareBlackHolesMerge}
@@ -386,7 +353,9 @@ export const Burn = () => {
                     tokenAddress={deployments.contracts.VoidableBlackHoles.address}
                     findNextUpgrade={findNextUpgrade}
                     findUpgradeType={findUpgradeType}
-                    mergeComplete={() => {}}
+                    mergeComplete={() => {
+                      handleMergeComplete()
+                    }}
                     upgradeIntervals={upgradeIntervals.map((interval) => interval.toNumber())}
                     tokens={voidableBlackHolesTokens}
                     usePrepare={usePrepareVoidableBlackHolesMerge}

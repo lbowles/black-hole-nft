@@ -116,7 +116,7 @@ export const Mint = () => {
       <>
         <span key={tokens[0]}>
           <a
-            href={getOpenSeaLink(deployments.chainId, tokens[0])}
+            href={getOpenSeaLink(deployments.contracts.BlackHoles.address, tokens[0])}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-white hover:underline no-underline transition-colors"

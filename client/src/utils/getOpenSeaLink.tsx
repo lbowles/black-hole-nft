@@ -6,8 +6,8 @@ const openseaChainMapping: Record<string, string> = {
   "80001": "mumbai",
 }
 
-export function getOpenSeaLink(chainId: string, tokenId: string | number) {
-  return `https://${chainId !== "1" ? "testnets." : ""}opensea.io/assets/${openseaChainMapping[chainId]}/${
-    deployments.contracts.VoidableBlackHoles.address
-  }/${tokenId}`
+export function getOpenSeaLink(collectionAddress: string, tokenId: string | number) {
+  return `https://${(deployments.chainId as unknown) !== "1" ? "testnets." : ""}opensea.io/assets/${
+    openseaChainMapping[deployments.chainId]
+  }/${collectionAddress}/${tokenId}`
 }
