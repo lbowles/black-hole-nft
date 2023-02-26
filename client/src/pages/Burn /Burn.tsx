@@ -77,7 +77,7 @@ type PagesType = { name: string; active: boolean; visible: boolean }[]
 const defaultPageOptions: PagesType = [
   {
     name: "V1",
-    active: true,
+    active: false,
     visible: false,
   },
   { name: "Voidable", active: false, visible: false },
@@ -238,16 +238,28 @@ export const Burn = () => {
   }, [isMergingEnabled])
 
   useEffect(() => {
+    let active = false
     const options = [...mergeVersion]
-
     if (blackHolesV1Tokens.length > 0) {
       options[0].visible = true
+      if (!active) {
+        options[0].active = true
+        active = true
+      }
     }
     if (voidableBlackHolesTokens.length > 0) {
       options[1].visible = true
+      if (!active) {
+        options[1].active = true
+        active = true
+      }
     }
     if (blackHolesV2Tokens.length > 0) {
       options[2].visible = true
+      if (!active) {
+        options[2].active = true
+        active = true
+      }
     }
     console.log("options", options)
     setMergeVersion(options)
