@@ -139,7 +139,6 @@ export function Migrate({ tokens, tokenAddress, usePrepareApprove, useApprove }:
                           className={`${selectedStyle} border-2`}
                           onClick={() => {
                             if (!nft.selected) {
-                              index
                             } else {
                               deselectMigrateItem(index)
                             }

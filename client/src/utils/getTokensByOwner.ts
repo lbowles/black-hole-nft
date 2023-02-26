@@ -50,6 +50,11 @@ async function getTokensByOwnerLocal({ provider, address, tokenAddress }: IToken
 
   const burnedIds = events.map((event) => event.args![2].toString())
 
+  filter = contract.filters.Transfer(address, ethers.constants.AddressZero, null)
+  events = await contract.queryFilter(filter)
+
+  burnedIds.push(...events.map((event) => event.args![2].toString()))
+
   return tokens.filter((token) => !burnedIds.includes(token.tokenId.toString()))
 }
 
