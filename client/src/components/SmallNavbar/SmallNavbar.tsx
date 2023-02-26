@@ -22,9 +22,9 @@ export const SmallNavbar = ({ navItems, setActiveNavBar }: ISmallNav) => {
           {navItems.map((page, i) => {
             let style = ""
             if (page.active) {
-              style = "bg-gray-900 text-white hover:bg-gray-800 "
+              style = "bg-gray-900 text-white hover:bg-gray-800"
             } else {
-              style = "bg-black text-gray-600 hover:text-white"
+              style = "bg-black text-gray-600 hover:text-white border border-gray-900"
             }
             if (page.visible) {
               return (

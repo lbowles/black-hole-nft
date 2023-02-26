@@ -1,4 +1,8 @@
-import { useBlackHolesTotalMinted, useVoidableBlackHolesGetUpgradeIntervals } from "../../../generated"
+import {
+  useBlackHolesTotalMinted,
+  useBlackHolesV2GetUpgradeIntervals,
+  useVoidableBlackHolesGetUpgradeIntervals,
+} from "../../../generated"
 
 type IMergingAmountGraphic = {
   levels: { startName: string; endName: string; startImg: string; endImg: string; amount?: number | undefined }[]
@@ -6,7 +10,7 @@ type IMergingAmountGraphic = {
 
 export const MergingAmountGraphic = ({ levels }: IMergingAmountGraphic) => {
   const { data: totalMinted } = useBlackHolesTotalMinted()
-  const { data: upgradeIntervals } = useVoidableBlackHolesGetUpgradeIntervals()
+  const { data: upgradeIntervals } = useBlackHolesV2GetUpgradeIntervals()
   return (
     <>
       <p className="text-white text-2xl">AS IT STANDS: {totalMinted?.toNumber().toLocaleString()} MINTED</p>
