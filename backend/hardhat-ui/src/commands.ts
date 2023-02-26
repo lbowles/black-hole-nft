@@ -128,34 +128,9 @@ export const COMMANDS: ICommand[] = [
     },
   },
   {
-    name: "Migrate to v2",
-    description: "Migrates all of the second signer's tokens",
-    command: "migrateV2",
-    inputs: [],
-    execute: async (provider: ethers.providers.JsonRpcProvider, inputs: IInput[]) => {
-      const signer = new ethers.Wallet(signer2key, provider)
-
-      const blackHoles = BlackHoles__factory.connect(blackholesDeployment.address, signer)
-      const voidableBlackHoles = VoidableBlackHoles__factory.connect(voidableBlackHolesDeployment.address, signer)
-
-      await blackHoles.setApprovalForAll(voidableBlackHoles.address, true)
-
-      const tokenIds = await getTokensByOwnerLocal({
-        provider,
-        address: signer.address,
-        tokenAddress: blackholesDeployment.address,
-      })
-      await voidableBlackHoles.mint(tokenIds)
-
-      // Hardhat evm_increaseTime
-      provider.send("evm_increaseTime", [100])
-      provider.send("evm_mine", [])
-    },
-  },
-  {
     name: "Skip to v2 merge",
-    description: "Skips to merge with 6700 total minted.",
-    command: "skipToMerge",
+    description: "Skips to merge with 6700 total minted. Some on both contracts",
+    command: "skipToMergeV2",
     inputs: [
       {
         name: "amount in second signer",
@@ -170,7 +145,7 @@ export const COMMANDS: ICommand[] = [
       const [amountInSecondSigner] = inputs
 
       const blackholesDeployment = require(`../../deployments/localhost/BlackHoles.json`)
-      const blackHoles = BlackHoles__factory.connect(blackholesDeployment.address, signer)
+      let blackHoles = BlackHoles__factory.connect(blackholesDeployment.address, signer)
 
       const totalMinted = await blackHoles.totalMinted()
       let price = await blackHoles.getPrice()
@@ -207,15 +182,17 @@ export const COMMANDS: ICommand[] = [
       await blackHoles.setTimedSaleDuration(0)
       await blackHoles.setMergingDelay(0)
 
+      blackHoles = blackHoles.connect(signer2)
+
       provider.send("evm_mine", [])
 
-      const voidableBlackHoles = VoidableBlackHoles__factory.connect(voidableBlackHolesDeployment.address, signer)
+      const voidableBlackHoles = VoidableBlackHoles__factory.connect(voidableBlackHolesDeployment.address, signer2)
 
       await blackHoles.setApprovalForAll(voidableBlackHoles.address, true)
 
       const tokenIds = await getTokensByOwnerLocal({
         provider,
-        address: signer.address,
+        address: signer2.address,
         tokenAddress: blackholesDeployment.address,
       })
       const migrateTokens = tokenIds.slice(0, Math.floor(tokenIds.length / 2))
@@ -228,6 +205,14 @@ export const COMMANDS: ICommand[] = [
       await voidableBlackHoles.merge(migrateTokens.slice(0, 20))
 
       provider.send("evm_mine", [])
+
+      // Get balance on voidableBlackHoles
+      const voidableBlackHolesBalance = await voidableBlackHoles.balanceOf(signer2.address)
+      console.log("voidableBlackHolesBalance", voidableBlackHolesBalance.toString())
+
+      // Get balance on blackHoles
+      const blackHolesBalance = await blackHoles.balanceOf(signer2.address)
+      console.log("blackHolesBalance", blackHolesBalance.toString())
     },
   },
 ]
