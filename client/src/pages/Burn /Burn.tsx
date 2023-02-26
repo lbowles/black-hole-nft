@@ -273,7 +273,8 @@ export const Burn = () => {
                     usePrepare={usePrepareBlackHolesMerge}
                     useWrite={useBlackHolesMerge}
                     migrateProps={{
-                      migrateComplete: () => {},
+                      useApprove: useBlackHolesSetApprovalForAll,
+                      usePrepareApprove: usePrepareBlackHolesSetApprovalForAll,
                     }}
                   />
                 )}

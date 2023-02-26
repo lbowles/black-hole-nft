@@ -26,6 +26,7 @@ import { SimulateMerge } from "../SimulateMerge/SimulateMerge"
 import deployments from "../../deployments.json"
 import { Migrate } from "../Migrate/Migrate"
 import { IMigrateProps } from "../../interfaces/IMigrateProps"
+import { useBlackHolesV2Migrate, usePrepareBlackHolesV2Migrate } from "../../generated"
 
 const nftTypeToImg: Record<string, string> = {
   MICRO: micro,
@@ -64,7 +65,8 @@ export function Merge({
   mergeComplete,
   usePrepare,
   useWrite,
-}: IMergeProps & { migrateProps: IMigrateProps }) {
+  migrateProps,
+}: IMergeProps & { migrateProps: Pick<IMigrateProps, "usePrepareApprove" | "useApprove"> }) {
   const [totalSM, setTotalSM] = useState(0)
   const [ownedNFTs, setOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
   const [targetTokenIndexInOwnedArray, setTargetTokenIndexInOwnedArray] = useState<number>()
@@ -96,6 +98,12 @@ export function Merge({
     hash: signResult?.hash,
     confirmations: 1,
   })
+
+  // const { config: migrateConfig } = usePrepareBlackHolesV2Migrate({
+  //   args: [tokenAddress as `0x${string}`, mergeTokenIds ? [mergeTokenIds[0]] : []],
+  //   enabled: isMergeTxSuccess
+  // })
+  // const { write: migrate, data: migrateSignResult, isLoading: isMigrateSignLoading, isSuccess: isMigrateSignSuccess } = useBlackHolesV2Migrate(migrateConfig)
 
   const handleSelectAll = () => {
     const updatedNFTs = ownedNFTs.map((nft) => ({ ...nft, selected: true }))
@@ -392,7 +400,14 @@ export function Merge({
           </div>
         </>
       ) : (
-        <></>
+        <>
+          <Migrate
+            {...migrateProps}
+            tokenAddress={tokenAddress}
+            migrateComplete={() => console.log("Migration complete")}
+            tokens={ownedNFTs.filter((nft) => mergeTokenIds[0].eq(nft.tokenId))}
+          />
+        </>
       )}
     </div>
   )

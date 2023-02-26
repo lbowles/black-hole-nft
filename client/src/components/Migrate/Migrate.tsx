@@ -13,7 +13,7 @@ import supermassive from "../../img/blackHoles/supermassive.svg"
 import supermassiveAnimated from "../../img/blackHoles/supermassiveAnimated.svg"
 import { BigNumber, BigNumberish } from "ethers"
 import { ActionButton } from "../ActionButton/ActionButton"
-import { useBlackHolesV2IsApprovedForAll } from "../../generated"
+import { useBlackHolesV2IsApprovedForAll, useBlackHolesV2Migrate, usePrepareBlackHolesV2Migrate } from "../../generated"
 import deployments from "../../deployments.json"
 import { useWaitForTransaction } from "wagmi"
 import { IMigrateProps } from "../../interfaces/IMigrateProps"
@@ -26,17 +26,9 @@ const nftTypeToImg: Record<string, string> = {
   PRIMORDIAL: primordial,
 }
 
-export function Migrate({
-  tokens,
-  tokenAddress,
-  usePrepareApprove,
-  useApprove,
-  usePrepareMigrate,
-  useMigrate,
-  migrateComplete,
-}: IMigrateProps) {
+export function Migrate({ tokens, tokenAddress, usePrepareApprove, useApprove }: IMigrateProps) {
   const [unmigratedOwnedNFTs, setUnmigratedOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
-  const [migrateTokenIds, setMigrateTokenIds] = useState<BigNumberish[]>([])
+  const [migrateTokenIds, setMigrateTokenIds] = useState<BigNumber[]>([])
 
   const addRecentTransaction = useAddRecentTransaction()
 
@@ -56,8 +48,8 @@ export function Migrate({
     isSuccess: isMigrateApproveSignSuccess,
   } = useApprove(approvalConfig)
 
-  const { config: migrateConfig } = usePrepareMigrate({
-    args: [migrateTokenIds],
+  const { config: migrateConfig } = usePrepareBlackHolesV2Migrate({
+    args: [tokenAddress as `0x${string}`, migrateTokenIds ? [migrateTokenIds[0]] : []],
     enabled: migrateTokenIds.length > 0 && isApprovedForAll,
   })
   const {
@@ -65,7 +57,7 @@ export function Migrate({
     data: migrateSignResult,
     isLoading: isMigrateSignLoading,
     isSuccess: isMigrateSignSuccess,
-  } = useMigrate(migrateConfig)
+  } = useBlackHolesV2Migrate(migrateConfig)
 
   const { data: approveTx, isLoading: isApproveTxLoading } = useWaitForTransaction({
     hash: migrateApproveSignResult?.hash,
@@ -96,7 +88,7 @@ export function Migrate({
 
   useEffect(() => {
     setUnmigratedOwnedNFTs(tokens)
-    setMigrateTokenIds(tokens.map((nft) => nft.tokenId))
+    setMigrateTokenIds(tokens.map((nft) => BigNumber.from(nft.tokenId.toString())))
   }, tokens)
 
   useEffect(() => {

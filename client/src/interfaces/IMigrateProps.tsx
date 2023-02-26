@@ -6,6 +6,4 @@ export interface IMigrateProps {
   migrateComplete: () => void
   usePrepareApprove: (config: any) => any
   useApprove: (config: any) => any
-  usePrepareMigrate: (config: any) => any
-  useMigrate: (config: any) => any
 }
