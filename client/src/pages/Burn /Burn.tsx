@@ -72,13 +72,17 @@ const nftTypeToImg: Record<string, string> = {
 //   PRIMORDIAL: primordialAnimated,
 // }
 
-const defaultPages = [
-  { name: "V1", active: true },
-  { name: "V2", active: false },
-  { name: "V3", active: false },
-]
+type PagesType = { name: string; active: boolean; visible: boolean }[]
 
-type PagesType = { name: string; active: boolean }[]
+const defaultPageOptions: PagesType = [
+  {
+    name: "V1",
+    active: true,
+    visible: false,
+  },
+  { name: "Voidable", active: false, visible: false },
+  { name: "V2", active: false, visible: false },
+]
 
 export const Burn = () => {
   const [blackHolesV2Tokens, setBlackHolesV2Tokens] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
@@ -95,7 +99,7 @@ export const Burn = () => {
   const [mergeSuccess, setMergeSuccess] = useState(false)
   const [mergeStartTimestamp, setMergeStartTimestamp] = useState<BigNumber>()
   const [shouldShowWarning, setShouldShowWarning] = useState(false)
-  const [mergeVersion, setMergeVersion] = useState<PagesType>(defaultPages)
+  const [mergeVersion, setMergeVersion] = useState<PagesType>(defaultPageOptions)
 
   // const [generalClickSound] = useSound(generalClickEffect)
   // const [linkClickSound] = useSound(linkClickEffect)
@@ -143,15 +147,17 @@ export const Burn = () => {
   }
 
   const setActiveNavBar = (index: number) => {
-    let tempMergeVersion = [...mergeVersion]
-    tempMergeVersion.map((page, i) => {
-      if (i === index) {
-        page.active = true
-      } else {
-        page.active = false
-      }
-    })
-    setMergeVersion(tempMergeVersion)
+    if (mergeVersion) {
+      let tempMergeVersion = [...mergeVersion]
+      tempMergeVersion.map((page, i) => {
+        if (i === index) {
+          page.active = true
+        } else {
+          page.active = false
+        }
+      })
+      setMergeVersion(tempMergeVersion)
+    }
   }
 
   useEffect(() => {
@@ -231,6 +237,22 @@ export const Burn = () => {
     console.log("merging enabled", isMergingEnabled)
   }, [isMergingEnabled])
 
+  useEffect(() => {
+    const options = [...mergeVersion]
+
+    if (blackHolesV1Tokens.length > 0) {
+      options[0].visible = true
+    }
+    if (voidableBlackHolesTokens.length > 0) {
+      options[1].visible = true
+    }
+    if (blackHolesV2Tokens.length > 0) {
+      options[2].visible = true
+    }
+    console.log("options", options)
+    setMergeVersion(options)
+  }, [blackHolesV1Tokens, blackHolesV2Tokens, voidableBlackHolesTokens])
+
   return (
     <>
       {shouldShowWarning && (
@@ -241,10 +263,26 @@ export const Burn = () => {
         </div>
       )}
 
-      {!isMergingEnabled && (
+      {!isMergingEnabled ? (
         <div className="mb-10">
           <p className="text-white text-center w-full text-xl mt-12">Merging not enabled yet.</p>
           {mergeStartTimestamp && <Countdown endTime={new Date(mergeStartTimestamp.toNumber() * 1000).getTime()} />}
+        </div>
+      ) : (
+        <div className="flex justify-center w-screen  p-5 pb-0">
+          <div className="w-96">
+            <div className="bg-black border-2 border-gray-800 w-full p-5 ">
+              <p className="text-white text-2xl">Merge</p>
+              <p className="text-gray-600 text-base pt-3">
+                The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
+                remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
+                markets before upgrading.
+              </p>
+              <div className="w-full mt-4">
+                <SmallNavbar navItems={mergeVersion} setActiveNavBar={setActiveNavBar} />
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -252,23 +290,6 @@ export const Burn = () => {
         <p className="text-white text-center w-full text-xl mt-12">This wallet does not own Black Holes.</p>
       ) : (
         <>
-          {blackHolesV2Tokens.length && (
-            <div className="flex justify-center w-screen  p-5 pb-0">
-              <div className="w-96">
-                <div className="bg-black border-2 border-gray-800 w-full p-5 ">
-                  <p className="text-white text-2xl">Merge</p>
-                  <p className="text-gray-600 text-base pt-3">
-                    The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
-                    remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
-                    markets before upgrading.
-                  </p>
-                  <div className="w-full mt-4">
-                    <SmallNavbar navItems={defaultPages} setActiveNavBar={setActiveNavBar} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
           {!address ? (
             <p className="text-white text-center w-full text-xl mt-12">Wallet not connected.</p>
           ) : loadingTokens ? (
@@ -282,7 +303,7 @@ export const Burn = () => {
             </div>
           ) : (
             <>
-              {isMergingEnabled && upgradeIntervals && blackHolesV2Tokens.length > 0 && (
+              {isMergingEnabled && upgradeIntervals && blackHolesV2Tokens.length > 0 && mergeVersion[2].active && (
                 <Merge
                   title="Black Holes V2"
                   enabled={isMergingEnabled}
@@ -302,7 +323,7 @@ export const Burn = () => {
                 />
               )}
 
-              {isMergingEnabled && upgradeIntervals && blackHolesV1Tokens.length > 0 && (
+              {isMergingEnabled && upgradeIntervals && blackHolesV1Tokens.length > 0 && mergeVersion[0].active && (
                 <Merge
                   title="Black Holes V1"
                   enabled={isMergingEnabled}
@@ -322,25 +343,28 @@ export const Burn = () => {
                 />
               )}
 
-              {isMergingEnabled && upgradeIntervals && voidableBlackHolesTokens.length > 0 && (
-                <Merge
-                  title="Voidable Black Holes"
-                  enabled={isMergingEnabled}
-                  tokenAddress={deployments.contracts.VoidableBlackHoles.address}
-                  findNextUpgrade={findNextUpgrade}
-                  findUpgradeType={findUpgradeType}
-                  mergeComplete={() => {}}
-                  upgradeIntervals={upgradeIntervals.map((interval) => interval.toNumber())}
-                  tokens={voidableBlackHolesTokens}
-                  usePrepare={usePrepareVoidableBlackHolesMerge}
-                  useWrite={useVoidableBlackHolesMerge}
-                  migrateProps={{
-                    useApprove: useVoidableBlackHolesSetApprovalForAll,
-                    usePrepareApprove: usePrepareVoidableBlackHolesSetApprovalForAll,
-                    useIsApprovedForAll: useVoidableBlackHolesIsApprovedForAll,
-                  }}
-                />
-              )}
+              {isMergingEnabled &&
+                upgradeIntervals &&
+                voidableBlackHolesTokens.length > 0 &&
+                mergeVersion[1].active && (
+                  <Merge
+                    title="Voidable Black Holes"
+                    enabled={isMergingEnabled}
+                    tokenAddress={deployments.contracts.VoidableBlackHoles.address}
+                    findNextUpgrade={findNextUpgrade}
+                    findUpgradeType={findUpgradeType}
+                    mergeComplete={() => {}}
+                    upgradeIntervals={upgradeIntervals.map((interval) => interval.toNumber())}
+                    tokens={voidableBlackHolesTokens}
+                    usePrepare={usePrepareVoidableBlackHolesMerge}
+                    useWrite={useVoidableBlackHolesMerge}
+                    migrateProps={{
+                      useApprove: useVoidableBlackHolesSetApprovalForAll,
+                      usePrepareApprove: usePrepareVoidableBlackHolesSetApprovalForAll,
+                      useIsApprovedForAll: useVoidableBlackHolesIsApprovedForAll,
+                    }}
+                  />
+                )}
             </>
           )}
         </>

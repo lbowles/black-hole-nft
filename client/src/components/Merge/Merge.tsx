@@ -199,7 +199,6 @@ export function Merge({
 
   return (
     <div>
-      <div className="flex justify-center w-screen text-center text-white">{title}</div>
       {!finalPage ? (
         <>
           <div className="flex justify-center w-screen z-1">
