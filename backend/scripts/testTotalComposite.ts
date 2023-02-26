@@ -1,20 +1,20 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { deployments, ethers } from "hardhat"
-import { BlackHoles, BlackHoles__factory, VoidableBlackHoles, VoidableBlackHoles__factory } from "../types"
-
-const fs = require("fs")
+import { BlackHoles, BlackHoles__factory, BlackHolesV2, BlackHolesV2__factory } from "../types"
+import svg2img from "svg2img"
+import fs from "fs"
 
 async function main() {
   let signers: SignerWithAddress[]
-  let voidableBlackHoles: VoidableBlackHoles
+  let blackHolesV2: BlackHolesV2
   let blackHoles: BlackHoles
 
   signers = await ethers.getSigners()
 
-  await deployments.fixture(["VoidableBlackHoles"])
+  await deployments.fixture(["BlackHolesV2"])
 
-  const VoidableBlackHoles = await deployments.get("VoidableBlackHoles")
-  voidableBlackHoles = VoidableBlackHoles__factory.connect(VoidableBlackHoles.address, signers[0])
+  const BlackHolesV2 = await deployments.get("BlackHolesV2")
+  blackHolesV2 = BlackHolesV2__factory.connect(BlackHolesV2.address, signers[0])
 
   const BlackHoles = await deployments.get("BlackHoles")
   blackHoles = BlackHoles__factory.connect(BlackHoles.address, signers[0])
@@ -46,28 +46,28 @@ async function main() {
   const mergingDelay = await blackHoles.mergingDelay()
   const mergeOpenTimestamp = timedSaleStartTimestamp.add(mergingDelay)
 
-  await voidableBlackHoles.setMergeOpenTimestamp(mergeOpenTimestamp)
+  await blackHolesV2.setMergeOpenTimestamp(mergeOpenTimestamp)
 
   // Wait for blocks
   await ethers.provider.send("evm_increaseTime", [mergeOpenTimestamp.toNumber()])
   await ethers.provider.send("evm_mine", [])
 
   // Migrate tokens
-  await blackHoles.setApprovalForAll(voidableBlackHoles.address, true)
+  await blackHoles.setApprovalForAll(blackHolesV2.address, true)
 
   // Wait for blocks
   await ethers.provider.send("evm_mine", [])
 
   // Numbers from 1 to 10
   let tokenIds = Array.from(Array(400).keys()).map((n) => n + 1)
-  await voidableBlackHoles.mint(tokenIds)
+  await blackHolesV2.migrate(blackHoles.address, tokenIds)
 
   // Wait for blocks
   await ethers.provider.send("evm_mine", [])
 
   /* Merge */
 
-  const upgradeIntervals = await voidableBlackHoles.getUpgradeIntervals()
+  const upgradeIntervals = await blackHolesV2.getUpgradeIntervals()
 
   console.log(upgradeIntervals)
 
@@ -75,20 +75,23 @@ async function main() {
 
   let svg = ""
 
-  fs.writeFileSync("test.html", svg)
+  // Create directory
+  const outputPath = "composite-out"
+  // Create dir if it doesn't exist
+  if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath)
+
+  // fs.writeFileSync("composite-out/test.html", svg)
 
   let currentMass = 1
 
-  for (let mass = 5; mass < upgradeIntervals[3].toNumber() + 5; mass += 5) {
+  for (let mass = 1; mass < upgradeIntervals[3].toNumber() + 5; mass += 5) {
     // Merge to next level
     // Array of numbers from 5 to 12
     const mergeIds = Array.from(Array(mass - currentMass).keys()).map((i) => tokenIds.pop()!)
 
-    console.log("Merging", mergeIds)
+    const [, simulatedResultSvg] = await blackHolesV2.blackHoleForMass(1, mass)
 
-    const [simuulatedResult, simulatedResultSvg] = await voidableBlackHoles.simulateMerge([1, ...mergeIds])
-
-    const tx = await voidableBlackHoles.merge([1, ...mergeIds])
+    const tx = await blackHolesV2.merge([1, ...mergeIds])
 
     // Wait for blocks
     await ethers.provider.send("evm_mine", [])
@@ -97,17 +100,32 @@ async function main() {
 
     totalGas = totalGas.add(receipt.gasUsed)
 
-    const tokenMetadata = await voidableBlackHoles.blackHoleForTokenId(1)
+    const tokenMetadata = await blackHolesV2.blackHoleForTokenId(1)
     console.log(
       `Mass: ${tokenMetadata.mass.toNumber()}, Level: ${tokenMetadata.level.toNumber()}, Name: ${tokenMetadata.name}`,
     )
     currentMass = tokenMetadata.mass.toNumber()
 
-    svg += `<iframe style="width: 500px; height: 500px;" srcdoc='${simulatedResultSvg}'></iframe>`
-    fs.writeFileSync("test.html", svg)
+    svg2img(simulatedResultSvg, (error, buffer) => {
+      if (error) {
+        console.error(error)
+        return
+      }
+
+      fs.writeFile(`${outputPath}/${currentMass}.png`, buffer, (error) => {
+        if (error) {
+          console.error(error)
+          return
+        }
+
+        console.log(`Successfully wrote SVG to ${outputPath}`)
+      })
+    })
   }
 
   console.log("Total gas used:", totalGas.toString())
+
+  await new Promise((resolve) => setTimeout(resolve, 1000))
 }
 
 main()
