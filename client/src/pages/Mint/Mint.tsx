@@ -72,7 +72,6 @@ export const Mint = () => {
     }
     let tempMintCount = value
     if (value < mintCount) {
-      console.log(tempPlaybackRate, value, mintCount)
       for (let i = value; i < mintCount; i++) {
         tempMintCount = tempMintCount - 1
         if (tempMintCount < 24) {

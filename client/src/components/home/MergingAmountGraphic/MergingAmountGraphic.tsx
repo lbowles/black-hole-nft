@@ -16,7 +16,6 @@ export const MergingAmountGraphic = ({ levels }: IMergingAmountGraphic) => {
         let microsForLevel = ""
         let prevForLevel = ""
         if (upgradeIntervals) {
-          console.log(upgradeIntervals.map((interval) => interval.toNumber()))
           if (levelNumber === 0) {
             microsForLevel = upgradeIntervals[levelNumber].toString()
             prevForLevel = microsForLevel

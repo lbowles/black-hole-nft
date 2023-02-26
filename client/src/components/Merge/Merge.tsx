@@ -108,10 +108,6 @@ export function Merge({
     ],
   })
 
-  useEffect(() => {
-    console.log(mergeTokenIds, totalSM)
-  }, [mergeTokenIds, totalSM])
-
   const handleSelectAll = () => {
     const updatedNFTs = ownedNFTs.map((nft) => ({ ...nft, selected: true }))
     setOwnedNFTs(updatedNFTs)
@@ -466,7 +462,7 @@ export function Merge({
               setMigrationPage(false)
               setFinalPage(false)
             }}
-            tokens={ownedNFTs.filter((nft) => mergeTokenIds[0].eq(nft.tokenId))}
+            tokens={[ownedNFTs.filter((nft) => mergeTokenIds[0].eq(nft.tokenId))[0]]}
           />
         </>
       ) : (

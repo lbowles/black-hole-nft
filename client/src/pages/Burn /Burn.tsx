@@ -18,6 +18,7 @@ import {
   useBlackHolesMerge,
   useBlackHolesSetApprovalForAll,
   useBlackHolesUpgradeIntervals,
+  useBlackHolesV2GetUpgradeIntervals,
   useBlackHolesV2IsApprovedForAll,
   useBlackHolesV2Merge,
   useBlackHolesV2SetApprovalForAll,
@@ -101,7 +102,7 @@ export const Burn = () => {
   const { address } = useAccount()
   const provider = useProvider()
 
-  const { data: upgradeIntervals } = useVoidableBlackHolesGetUpgradeIntervals()
+  const { data: upgradeIntervals } = useBlackHolesV2GetUpgradeIntervals()
   const { data: levelNames } = useBlackHolesAllBlackHoleLevelNames()
   const { data: isMergingEnabled } = useVoidableBlackHolesIsMergingEnabled()
   const { data: mergeOpenTimestamp } = useVoidableBlackHolesMergeOpenTimestamp()

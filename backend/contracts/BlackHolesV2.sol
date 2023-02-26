@@ -49,8 +49,6 @@ import "./interfaces/BlackHole.sol";
 import "svgnft/contracts/Base64.sol";
 import "./interfaces/IBlackHoles.sol";
 
-import "hardhat/console.sol";
-
 contract BlackHolesV2 is ERC4906, Ownable {
   error NotAllowed();
   error URIQueryForNonexistentToken();
@@ -105,7 +103,7 @@ contract BlackHolesV2 is ERC4906, Ownable {
   function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
     if (!_exists(_tokenId)) revert URIQueryForNonexistentToken();
 
-    string memory name = string(abi.encodePacked("Voidable BlackHole #", utils.uint2str(_tokenId)));
+    string memory name = string(abi.encodePacked("BlackHole #", utils.uint2str(_tokenId)));
     string memory description = "Fully on-chain, procedurally generated, animated black holes. Ready to be merged.";
 
     BlackHole memory blackHole = blackHoleForTokenId(_tokenId);
@@ -283,9 +281,7 @@ contract BlackHolesV2 is ERC4906, Ownable {
     }
 
     // Keep track of how many checks have been minted.
-    unchecked {
-      minted += uint32(count);
-    }
+    minted += count;
   }
 
   /**
@@ -344,6 +340,8 @@ contract BlackHolesV2 is ERC4906, Ownable {
       }
     }
 
+    burned += uint32(tokens.length - 1);
+
     massesConsumed[targetId] += sum;
 
     emit MetadataUpdate(targetId);
@@ -359,12 +357,6 @@ contract BlackHolesV2 is ERC4906, Ownable {
       blackHoles[i] = blackHoleForTokenId(tokenIds[i]);
     }
     return blackHoles;
-  }
-
-  function burn(uint256 tokenId) public {
-    require(ownerOf(tokenId) == msg.sender, "Must own token");
-    burned += 1;
-    _burn(tokenId);
   }
 
   /**
