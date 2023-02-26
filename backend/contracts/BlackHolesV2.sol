@@ -27,15 +27,21 @@
                                                    .....*22222222222222222222222#......                                                     
                                                    .....*#######################(......                                                     
                                                          ........................                                                           
-                                                                                    ..                                                      
-                                                                                                                                            
-                                                                                                                                            
-                                                                                                                                            
-                                                                                                                                            
-     ,@  .@  #(((   (@(  (4(#(   (@2  /@((4/  @     @@((.       ,@((##  @,     2@#   (2(4* @, *4        @*  @* /2(4, .@.    #4((  /4((@,    
-     .@, /4 22  @#   @   (2  44 ,@ 4/ /@,,2#  @     @4,,        ,@*,/2  @,    /4 @, #2     @/#(         @(,*@* @  /4 .@.    #4,,  (2,,,     
-      .@,@  #2  @#  .@   #2  44 (@44@ (4  #4 .@     @4          ,@  ,@  @,    2@4@2 #4     @,(2         @,  @* @  (4 .@.    #2        4(    
-       .4    *44.  .444  (444,  4*  4 /4444.  4444, 4444,       ,4444*  4444#.4. .4  ,444  4, .4.       4,  4*  44#  .4444/ (444.  4444                                                                                                                                                                                                                                  
+                                                                                  
+                                                                          ,----,   
+                                                              ,---.    .'   .' \  
+                                                              /__./|  ,----,'    | 
+                                                        ,---.;  ; |  |    :  .  ; 
+                                                        /___/ \  | |  ;    |.'  /  
+                                                        \   ;  \ ' |  `----'/  ;   
+                                                        \   \  \: |    /  ;  /    
+                                                          ;   \  ' .   ;  /  /-,   
+                                                          \   \   '  /  /  /.`|   
+                                                            \   `  ;./__;      :   
+                                                            :   \ ||   :    .'    
+                                                              '---" ;   | .'       
+                                                                    `---'          
+                                                                                  
 */
 
 pragma solidity ^0.8.12;
@@ -43,8 +49,7 @@ pragma solidity ^0.8.12;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC4906} from "./interfaces/ERC4906.sol";
 import "./Utilities.sol";
-import "./Renderer.sol";
-import "./BlackHoles.sol";
+import "./interfaces/IRenderer.sol";
 import "./interfaces/BlackHole.sol";
 import "svgnft/contracts/Base64.sol";
 import "./interfaces/IBlackHoles.sol";
@@ -58,7 +63,7 @@ contract BlackHolesV2 is ERC4906, Ownable {
 
   mapping(uint256 => uint256) public massesConsumed;
 
-  Renderer public renderer;
+  IRenderer public renderer;
   IBlackHoles public unmigratedBlackHoles;
   IBlackHoles public voidableBlackHoles;
 
@@ -82,7 +87,7 @@ contract BlackHolesV2 is ERC4906, Ownable {
     address _voidableBlackHoles
   ) ERC4906(_name, _symbol) {
     mergeOpenTimestamp = _mergeOpenTimestamp;
-    renderer = Renderer(_renderer);
+    renderer = IRenderer(_renderer);
     unmigratedBlackHoles = IBlackHoles(_unmigratedBlackHoles);
     voidableBlackHoles = IBlackHoles(_voidableBlackHoles);
   }
@@ -104,7 +109,8 @@ contract BlackHolesV2 is ERC4906, Ownable {
     if (!_exists(_tokenId)) revert URIQueryForNonexistentToken();
 
     string memory name = string(abi.encodePacked("BlackHole #", utils.uint2str(_tokenId)));
-    string memory description = "Fully on-chain, procedurally generated, animated black holes. Ready to be merged.";
+    string
+      memory description = "Fully on-chain, procedurally generated, animated black holes. Beyond the event horizon.";
 
     BlackHole memory blackHole = blackHoleForTokenId(_tokenId);
 
