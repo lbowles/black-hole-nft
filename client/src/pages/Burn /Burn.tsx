@@ -331,7 +331,7 @@ export const Burn = () => {
                   findUpgradeType={findUpgradeType}
                   mergeComplete={() => {}}
                   upgradeIntervals={upgradeIntervals.map((interval) => interval.toNumber())}
-                  tokens={blackHolesV1Tokens}
+                  tokens={voidableBlackHolesTokens}
                   usePrepare={usePrepareVoidableBlackHolesMerge}
                   useWrite={useVoidableBlackHolesMerge}
                   migrateProps={{
