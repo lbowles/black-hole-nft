@@ -152,6 +152,84 @@ export const COMMANDS: ICommand[] = [
       provider.send("evm_mine", [])
     },
   },
+  {
+    name: "Skip to v2 merge",
+    description: "Skips to merge with 6700 total minted.",
+    command: "skipToMerge",
+    inputs: [
+      {
+        name: "amount in second signer",
+        value: "300",
+      },
+    ],
+    execute: async (provider: ethers.providers.JsonRpcProvider, inputs: IInput[]) => {
+      const signer = new ethers.Wallet(signer1key, provider)
+
+      const signer2 = new ethers.Wallet(signer2key, provider)
+
+      const [amountInSecondSigner] = inputs
+
+      const blackholesDeployment = require(`../../deployments/localhost/BlackHoles.json`)
+      const blackHoles = BlackHoles__factory.connect(blackholesDeployment.address, signer)
+
+      const totalMinted = await blackHoles.totalMinted()
+      let price = await blackHoles.getPrice()
+      const threshold = await blackHoles.timedSaleThreshold()
+      if (totalMinted.toNumber() === 0) {
+        // Mint threshold
+        await blackHoles.mint(threshold, { value: price.mul(threshold) })
+      } else {
+        // Set merging threshold to current total minted + 1 and mint one
+        await blackHoles.setTimedSaleThreshold(totalMinted.add(1))
+        await blackHoles.mint(1, { value: price })
+      }
+
+      // Mine block
+      provider.send("evm_mine", [])
+
+      price = await blackHoles.getPrice()
+
+      const targetAmountInSecondSigner = amountInSecondSigner.value!
+      await blackHoles
+        .connect(signer2)
+        .mint(targetAmountInSecondSigner, { value: price.mul(targetAmountInSecondSigner) })
+
+      // Mine block
+      provider.send("evm_mine", [])
+
+      const remainingAmount = BigNumber.from(6570).sub(threshold).sub(targetAmountInSecondSigner)
+      await blackHoles.mint(remainingAmount, { value: remainingAmount.mul(price) })
+
+      // Mine block
+      provider.send("evm_mine", [])
+
+      // Set delays to 0
+      await blackHoles.setTimedSaleDuration(0)
+      await blackHoles.setMergingDelay(0)
+
+      provider.send("evm_mine", [])
+
+      const voidableBlackHoles = VoidableBlackHoles__factory.connect(voidableBlackHolesDeployment.address, signer)
+
+      await blackHoles.setApprovalForAll(voidableBlackHoles.address, true)
+
+      const tokenIds = await getTokensByOwnerLocal({
+        provider,
+        address: signer.address,
+        tokenAddress: blackholesDeployment.address,
+      })
+      const migrateTokens = tokenIds.slice(0, Math.floor(tokenIds.length / 2))
+      await voidableBlackHoles.mint(migrateTokens)
+
+      // Hardhat evm_increaseTime
+      provider.send("evm_mine", [])
+
+      // Merge the first 20
+      await voidableBlackHoles.merge(migrateTokens.slice(0, 20))
+
+      provider.send("evm_mine", [])
+    },
+  },
 ]
 
 export function getSeconds(amount: number, unit: string): number {
