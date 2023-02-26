@@ -45,6 +45,7 @@ const nftTypeToAnimatedImg: Record<string, string> = {
 
 interface IMergeProps {
   tokens: (BlackHoleMetadata & { selected: boolean })[]
+  title: string
   tokenAddress: string
   enabled: boolean
   upgradeIntervals: readonly number[]
@@ -57,6 +58,7 @@ interface IMergeProps {
 
 export function Merge({
   tokens,
+  title,
   tokenAddress,
   enabled,
   upgradeIntervals,
@@ -197,6 +199,7 @@ export function Merge({
 
   return (
     <div>
+      <div className="flex justify-center w-screen text-center text-white">{title}</div>
       {!finalPage ? (
         <>
           <div className="flex justify-center w-screen z-1">
@@ -399,7 +402,7 @@ export function Merge({
             </div>
           </div>
         </>
-      ) : (
+      ) : tokenAddress !== deployments.contracts.BlackHolesV2.address ? (
         <>
           <Migrate
             {...migrateProps}
@@ -408,6 +411,8 @@ export function Merge({
             tokens={ownedNFTs.filter((nft) => mergeTokenIds[0].eq(nft.tokenId))}
           />
         </>
+      ) : (
+        <div className="flex justify-center w-screen p-5 pb-0 text-white">Done</div>
       )}
     </div>
   )

@@ -18,15 +18,23 @@ import {
   useBlackHolesMerge,
   useBlackHolesSetApprovalForAll,
   useBlackHolesUpgradeIntervals,
+  useBlackHolesV2IsApprovedForAll,
+  useBlackHolesV2Merge,
+  useBlackHolesV2SetApprovalForAll,
   usePrepareBlackHolesMerge,
   usePrepareBlackHolesSetApprovalForAll,
+  usePrepareBlackHolesV2Merge,
+  usePrepareBlackHolesV2SetApprovalForAll,
   usePrepareVoidableBlackHolesMerge,
   usePrepareVoidableBlackHolesMint,
+  usePrepareVoidableBlackHolesSetApprovalForAll,
   useVoidableBlackHolesGetUpgradeIntervals,
+  useVoidableBlackHolesIsApprovedForAll,
   useVoidableBlackHolesIsMergingEnabled,
   useVoidableBlackHolesMerge,
   useVoidableBlackHolesMergeOpenTimestamp,
   useVoidableBlackHolesMint,
+  useVoidableBlackHolesSetApprovalForAll,
 } from "../../generated"
 import intermediate from "../../img/blackHoles/intermediate.svg"
 import intermediateAnimated from "../../img/blackHoles/intermediateAnimated.svg"
@@ -73,8 +81,11 @@ const defaultPages = [
 type PagesType = { name: string; active: boolean }[]
 
 export const Burn = () => {
-  const [ownedNFTs, setOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
-  const [unmigratedOwnedNFTs, setUnmigratedOwnedNFTs] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
+  const [blackHolesV2Tokens, setBlackHolesV2Tokens] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
+  const [blackHolesV1Tokens, setBlackHolesV1Tokens] = useState<(BlackHoleMetadata & { selected: boolean })[]>([])
+  const [voidableBlackHolesTokens, setVoidableBlackHolesTokens] = useState<
+    (BlackHoleMetadata & { selected: boolean })[]
+  >([])
   const [finalPage, setFinalPage] = useState(false)
   const [totalSM, setTotalSM] = useState(0)
   const [upgradeType, setUpgradeType] = useState("")
@@ -86,17 +97,14 @@ export const Burn = () => {
   const [shouldShowWarning, setShouldShowWarning] = useState(false)
   const [mergeVersion, setMergeVersion] = useState<PagesType>(defaultPages)
 
-  const [generalClickSound] = useSound(generalClickEffect)
-  const [linkClickSound] = useSound(linkClickEffect)
-  const [mergeSound] = useSound(mergeEffect)
+  // const [generalClickSound] = useSound(generalClickEffect)
+  // const [linkClickSound] = useSound(linkClickEffect)
+  // const [mergeSound] = useSound(mergeEffect)
 
-  const [mergeTokenIds, setMergeTokenIds] = useState<BigNumber[]>([])
   const [loadingTokens, setLoadingTokens] = useState<boolean>(true)
-  const [migrateTokenIds, setMigrateTokenIds] = useState<BigNumber[]>([])
 
   const { address } = useAccount()
   const provider = useProvider()
-  const addRecentTransaction = useAddRecentTransaction()
 
   const { data: upgradeIntervals } = useVoidableBlackHolesGetUpgradeIntervals()
   const { data: levelNames } = useBlackHolesAllBlackHoleLevelNames()
@@ -162,37 +170,52 @@ export const Burn = () => {
     if (!address || !provider || finalPage) return
     const getOwnedNFTs = async () => {
       setLoadingTokens(true)
-      const ownedNFTs = await getTokensByOwner({
-        address: address,
-        provider,
-        tokenAddress: deployments.contracts.VoidableBlackHoles.address,
-      })
-      const unmigratedNFTs = await getTokensByOwner({
+      const _blackHolesV1Tokens = await getTokensByOwner({
         address: address,
         provider,
         tokenAddress: deployments.contracts.BlackHoles.address,
       })
-      setUnmigratedOwnedNFTs(unmigratedNFTs.map((token) => ({ ...token, selected: true })).sort(compareBlackHoles))
-      setMigrateTokenIds(unmigratedNFTs.map((nft) => BigNumber.from(nft.tokenId)))
-      setOwnedNFTs(ownedNFTs.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles))
+      const _blackHolesV2Tokens = await getTokensByOwner({
+        address: address,
+        provider,
+        tokenAddress: deployments.contracts.BlackHolesV2.address,
+      })
+      const _voidableBlackHolesTokens = await getTokensByOwner({
+        address: address,
+        provider,
+        tokenAddress: deployments.contracts.VoidableBlackHoles.address,
+      })
+      setBlackHolesV1Tokens(_blackHolesV1Tokens.map((token) => ({ ...token, selected: true })).sort(compareBlackHoles))
+      setBlackHolesV2Tokens(_blackHolesV2Tokens.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles))
+      setVoidableBlackHolesTokens(
+        _voidableBlackHolesTokens.map((token) => ({ ...token, selected: false })).sort(compareBlackHoles),
+      )
+
+      console.log("blackHolesV1Tokens", _blackHolesV1Tokens)
+      console.log("blackHolesV2Tokens", _blackHolesV2Tokens)
+      console.log("voidableBlackHolesTokens", _voidableBlackHolesTokens)
+
       setLoadingTokens(false)
     }
     getOwnedNFTs()
   }, [address, provider, finalPage]) //isMigrateTxSuccess
 
   useEffect(() => {
-    if (!upgradeIntervals || ownedNFTs.length == 0) return
-    const selectedIndexes = ownedNFTs
+    if (!upgradeIntervals || blackHolesV2Tokens.length == 0) return
+    const selectedIndexes = blackHolesV2Tokens
       .map((nft, index) => (nft.selected ? index : null))
       .filter((i) => i !== null) as number[]
     setSelectedTokenIndexes(selectedIndexes)
-    const totalSelectedSM = selectedIndexes.reduce((acc, index) => acc + parseInt(ownedNFTs[index].mass.toString()), 0)
+    const totalSelectedSM = selectedIndexes.reduce(
+      (acc, index) => acc + parseInt(blackHolesV2Tokens[index].mass.toString()),
+      0,
+    )
     setTotalSM(totalSelectedSM)
     const type = findUpgradeType(totalSelectedSM)
     setUpgradeType(type)
     const nextUpgrade = findNextUpgrade(totalSelectedSM)
     setNextUpgradeDetails(nextUpgrade)
-  }, [ownedNFTs, upgradeIntervals])
+  }, [blackHolesV2Tokens, upgradeIntervals])
 
   // useEffect(() => {
   //   if (isMergeTxSuccess || isMigrateTxSuccess) {
@@ -225,11 +248,11 @@ export const Burn = () => {
         </div>
       )}
 
-      {ownedNFTs.length === 0 && unmigratedOwnedNFTs.length === 0 && !loadingTokens ? (
+      {blackHolesV2Tokens.length === 0 && blackHolesV1Tokens.length === 0 && !loadingTokens ? (
         <p className="text-white text-center w-full text-xl mt-12">This wallet does not own Black Holes.</p>
       ) : (
         <>
-          {ownedNFTs.length && (
+          {blackHolesV2Tokens.length && (
             <div className="flex justify-center w-screen  p-5 pb-0">
               <div className="w-96">
                 <div className="bg-black border-2 border-gray-800 w-full p-5 ">
@@ -246,42 +269,80 @@ export const Burn = () => {
               </div>
             </div>
           )}
-          {
-            // TODO: General loading state (for all the other contract variables)
-            !address ? (
-              <p className="text-white text-center w-full text-xl mt-12">Wallet not connected.</p>
-            ) : loadingTokens ? (
-              <div className="flex justify-center w-screen  p-5 items-center mt-7">
-                <div>
-                  <div className="flex w-full justify-center">
-                    <img className="h-[20px] " src={blockSpinner}></img>
-                  </div>
-                  <p className="text-white text-center w-full text-xl pt-2">Fetching tokens</p>
+          {!address ? (
+            <p className="text-white text-center w-full text-xl mt-12">Wallet not connected.</p>
+          ) : loadingTokens ? (
+            <div className="flex justify-center w-screen  p-5 items-center mt-7">
+              <div>
+                <div className="flex w-full justify-center">
+                  <img className="h-[20px] " src={blockSpinner}></img>
                 </div>
+                <p className="text-white text-center w-full text-xl pt-2">Fetching tokens</p>
               </div>
-            ) : (
-              <>
-                {isMergingEnabled && upgradeIntervals && (
-                  <Merge
-                    enabled={isMergingEnabled}
-                    tokenAddress={deployments.contracts.BlackHoles.address}
-                    findNextUpgrade={findNextUpgrade}
-                    findUpgradeType={findUpgradeType}
-                    mergeComplete={() => {}}
-                    upgradeIntervals={upgradeIntervals.map((interval) => interval.toNumber())}
-                    tokens={unmigratedOwnedNFTs}
-                    usePrepare={usePrepareBlackHolesMerge}
-                    useWrite={useBlackHolesMerge}
-                    migrateProps={{
-                      useApprove: useBlackHolesSetApprovalForAll,
-                      usePrepareApprove: usePrepareBlackHolesSetApprovalForAll,
-                      useIsApprovedForAll: useBlackHolesIsApprovedForAll,
-                    }}
-                  />
-                )}
-              </>
-            )
-          }
+            </div>
+          ) : (
+            <>
+              {isMergingEnabled && upgradeIntervals && blackHolesV2Tokens.length > 0 && (
+                <Merge
+                  title="Black Holes V2"
+                  enabled={isMergingEnabled}
+                  tokenAddress={deployments.contracts.BlackHolesV2.address}
+                  findNextUpgrade={findNextUpgrade}
+                  findUpgradeType={findUpgradeType}
+                  mergeComplete={() => {}}
+                  upgradeIntervals={upgradeIntervals.map((interval) => interval.toNumber())}
+                  tokens={blackHolesV2Tokens}
+                  usePrepare={usePrepareBlackHolesV2Merge}
+                  useWrite={useBlackHolesV2Merge}
+                  migrateProps={{
+                    useApprove: useBlackHolesV2SetApprovalForAll,
+                    usePrepareApprove: usePrepareBlackHolesV2SetApprovalForAll,
+                    useIsApprovedForAll: useBlackHolesV2IsApprovedForAll,
+                  }}
+                />
+              )}
+
+              {isMergingEnabled && upgradeIntervals && blackHolesV1Tokens.length > 0 && (
+                <Merge
+                  title="Black Holes V1"
+                  enabled={isMergingEnabled}
+                  tokenAddress={deployments.contracts.BlackHoles.address}
+                  findNextUpgrade={findNextUpgrade}
+                  findUpgradeType={findUpgradeType}
+                  mergeComplete={() => {}}
+                  upgradeIntervals={upgradeIntervals.map((interval) => interval.toNumber())}
+                  tokens={blackHolesV1Tokens}
+                  usePrepare={usePrepareBlackHolesMerge}
+                  useWrite={useBlackHolesMerge}
+                  migrateProps={{
+                    useApprove: useBlackHolesSetApprovalForAll,
+                    usePrepareApprove: usePrepareBlackHolesSetApprovalForAll,
+                    useIsApprovedForAll: useBlackHolesIsApprovedForAll,
+                  }}
+                />
+              )}
+
+              {isMergingEnabled && upgradeIntervals && voidableBlackHolesTokens.length > 0 && (
+                <Merge
+                  title="Voidable Black Holes"
+                  enabled={isMergingEnabled}
+                  tokenAddress={deployments.contracts.VoidableBlackHoles.address}
+                  findNextUpgrade={findNextUpgrade}
+                  findUpgradeType={findUpgradeType}
+                  mergeComplete={() => {}}
+                  upgradeIntervals={upgradeIntervals.map((interval) => interval.toNumber())}
+                  tokens={blackHolesV1Tokens}
+                  usePrepare={usePrepareVoidableBlackHolesMerge}
+                  useWrite={useVoidableBlackHolesMerge}
+                  migrateProps={{
+                    useApprove: useVoidableBlackHolesSetApprovalForAll,
+                    usePrepareApprove: usePrepareVoidableBlackHolesSetApprovalForAll,
+                    useIsApprovedForAll: useVoidableBlackHolesIsApprovedForAll,
+                  }}
+                />
+              )}
+            </>
+          )}
         </>
       )}
     </>
