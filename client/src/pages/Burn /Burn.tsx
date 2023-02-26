@@ -286,9 +286,30 @@ export const Burn = () => {
             <div className="bg-black border-2 border-gray-800 w-full p-5 ">
               <p className="text-white text-2xl">Merge</p>
               <p className="text-gray-600 text-base pt-3">
-                The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
-                remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
-                markets before upgrading.
+                {/* V1 */}
+                {mergeVersion[0].active && (
+                  <>
+                    The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
+                    remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
+                    markets before upgrading.
+                  </>
+                )}
+                {/* Voidable */}
+                {mergeVersion[1].active && (
+                  <>
+                    The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
+                    remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
+                    markets before upgrading.
+                  </>
+                )}
+                {/* V2 */}
+                {mergeVersion[2].active && (
+                  <>
+                    The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
+                    remaining token’s metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
+                    markets before upgrading.
+                  </>
+                )}
               </p>
               <div className="w-full mt-4">
                 <SmallNavbar navItems={mergeVersion} setActiveNavBar={setActiveNavBar} />
