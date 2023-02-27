@@ -283,7 +283,10 @@ export const Burn = () => {
         </div>
       )}
 
-      {blackHolesV2Tokens.length === 0 && blackHolesV1Tokens.length === 0 && !loadingTokens ? (
+      {blackHolesV2Tokens.length === 0 &&
+      blackHolesV1Tokens.length === 0 &&
+      voidableBlackHolesTokens.length === 0 &&
+      !loadingTokens ? (
         <p className="text-white text-center w-full text-xl mt-12">This wallet does not own Black Holes.</p>
       ) : (
         <>
