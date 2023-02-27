@@ -252,9 +252,24 @@ export const Burn = () => {
               <p className="text-white text-2xl">Merge</p>
               <p className="text-gray-600 text-base pt-3">
                 The merging process allows you to upgrade the mass of one of your Black Holes by burning others. The
-                remaining token's metadata is UPDATED. REMEMBER TO DELIST the remaining Black Hole from secondary
-                markets before upgrading.
+                remaining token's metadata is updated.{" "}
+                <a
+                  href="https://opensea.io/collection/onchain-blackholes-v1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white underline transition-colors"
+                >
+                  V1 Black Holes
+                </a>{" "}
+                can be purchased, merged, and migrated to V2. <br></br>{" "}
+                <p className="text-white" style={{ display: "inline" }}>
+                  Remeber to delist
+                </p>{" "}
+                the remaining Black Hole from secondary markets before upgrading.
               </p>
+              <div className="w-full mt-4">
+                <SmallNavbar navItems={mergeVersion} setActiveNavBar={setActiveNavBar} />
+              </div>
               <p className="text-gray-600 text-base pt-3">
                 {/* V1 */}
                 {mergeVersion[0].active && (
@@ -273,11 +288,8 @@ export const Burn = () => {
                   </>
                 )}
                 {/* V2 */}
-                {mergeVersion[2].active && <>Black Holes V2 is the latest deployment of Black Holes.</>}
+                {mergeVersion[2].active && <>Black Holes V2 is the latest deployment of Black Holes. </>}
               </p>
-              <div className="w-full mt-4">
-                <SmallNavbar navItems={mergeVersion} setActiveNavBar={setActiveNavBar} />
-              </div>
             </div>
           </div>
         </div>
