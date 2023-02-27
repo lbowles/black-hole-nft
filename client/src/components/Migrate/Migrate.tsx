@@ -152,7 +152,7 @@ export function Migrate({
                           onClick={() => {
                             if (!nft.selected) {
                             } else {
-                              deselectMigrateItem(index)
+                              // deselectMigrateItem(index)
                             }
                           }}
                         >
