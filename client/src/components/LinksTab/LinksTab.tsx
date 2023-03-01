@@ -1,4 +1,6 @@
 import opensea from "../../img/icons/opensea.svg"
+import opensea1 from "../../img/icons/opensea-v1.svg"
+import opensea2 from "../../img/icons/opensea-v2.svg"
 import twitter from "../../img/icons/twitter.svg"
 import gihub from "../../img/icons/github.svg"
 import etherscan from "../../img/icons/etherscan.svg"
@@ -18,7 +20,16 @@ export const LinksTab = () => {
           linkClickSound()
         }}
       >
-        <img src={opensea}></img>
+        <img src={opensea1}></img>
+      </a>
+      <a
+        target="_blank"
+        href="https://opensea.io/collection/onchain-blackholes"
+        onClick={() => {
+          linkClickSound()
+        }}
+      >
+        <img src={opensea2}></img>
       </a>
       <a
         target="_blank"
