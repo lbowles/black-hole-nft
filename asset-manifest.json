@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.8c000b0b.css",
-    "main.js": "/static/js/main.db6489c7.js",
+    "main.js": "/static/js/main.b6830e05.js",
     "static/js/510.0c7fe483.chunk.js": "/static/js/510.0c7fe483.chunk.js",
     "static/js/963.ba5cc79f.chunk.js": "/static/js/963.ba5cc79f.chunk.js",
     "static/js/448.af208807.chunk.js": "/static/js/448.af208807.chunk.js",
@@ -55,10 +55,11 @@
     "static/media/intermediate.svg": "/static/media/intermediate.d9fad31001ca1d1a123df1d736562d69.svg",
     "static/media/micro.svg": "/static/media/micro.5854ff0b7a9454847dc128dc75523d88.svg",
     "static/media/stellar.svg": "/static/media/stellar.d318ce92f13dabd126ad4cd6b2a58004.svg",
+    "static/media/opensea-v2.svg": "/static/media/opensea-v2.1405e8ebf3afba5afc7cf98a888322ff.svg",
+    "static/media/opensea-v1.svg": "/static/media/opensea-v1.48088fae4471145dee86fdc91c6d2603.svg",
     "static/media/blockSpinner.svg": "/static/media/blockSpinner.e41c4daa0784bbcfac19f7e02d179c41.svg",
     "index.html": "/index.html",
     "static/media/etherscan.svg": "/static/media/etherscan.f1cffab3c1be1d11d24799db418a0a80.svg",
-    "static/media/opensea.svg": "/static/media/opensea.36d877cf119d9755fb6b7bc99da2eaf0.svg",
     "static/media/github.svg": "/static/media/github.3d4d3b1e87fd8b57b0a232ec7711e3bf.svg",
     "static/media/twitter.svg": "/static/media/twitter.b41c0508f939d41a4f9d6c6f52cef4a8.svg",
     "static/media/dropdown.svg": "/static/media/dropdown.b713bfd85d4a7c2766e43757f0df8b61.svg",
@@ -67,6 +68,6 @@
   },
   "entrypoints": [
     "static/css/main.8c000b0b.css",
-    "static/js/main.db6489c7.js"
+    "static/js/main.b6830e05.js"
   ]
 }
