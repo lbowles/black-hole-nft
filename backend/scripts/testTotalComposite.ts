@@ -82,14 +82,15 @@ async function main() {
 
   // fs.writeFileSync("composite-out/test.html", svg)
 
-  let currentMass = 1
+  let currentMass = 0
+  const interval = 1
 
-  for (let mass = 1; mass < upgradeIntervals[3].toNumber() + 5; mass += 5) {
+  for (let i = 1; i < upgradeIntervals[3].toNumber() + 1; i += interval) {
     // Merge to next level
     // Array of numbers from 5 to 12
-    const mergeIds = Array.from(Array(mass - currentMass).keys()).map((i) => tokenIds.pop()!)
+    const mergeIds = Array.from(Array(interval).keys()).map((i) => tokenIds.pop()!)
 
-    const [, simulatedResultSvg] = await blackHolesV2.blackHoleForMass(1, mass)
+    const [, simulatedResultSvg] = await blackHolesV2.blackHoleForMass(1, i)
 
     const tx = await blackHolesV2.merge([1, ...mergeIds])
 
