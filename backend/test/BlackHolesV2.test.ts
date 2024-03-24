@@ -12,7 +12,7 @@ import {
   VoidableBlackHoles__factory,
 } from "../types"
 
-describe.only("BlackHolesV2", function () {
+describe("BlackHolesV2", function () {
   let signers: SignerWithAddress[]
   let blackHolesV2: BlackHolesV2
   let voidableBlackHoles: VoidableBlackHoles

@@ -119,7 +119,7 @@ async function main() {
           return
         }
 
-        console.log(`Successfully wrote SVG to ${outputPath}`)
+        console.log(`Successfully wrote PNG to ${outputPath}`)
       })
     })
   }

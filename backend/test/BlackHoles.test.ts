@@ -357,4 +357,53 @@ describe("BlackHoles", function () {
     // Two unmerged tokens have the same style
     expect(style6).to.equal(style5)
   })
+
+  it.only("Should merge 10", async function () {
+    /* Complete sale (mint 11,000 tokens) */
+    expect(await blackHoles.isMergingEnabled()).to.be.false
+
+    // Mint in threshold sale
+    mintPrice = await blackHoles.getPrice()
+    await blackHoles.mint(threshold, { value: mintPrice.mul(threshold) })
+
+    // Mint in timed sale
+    mintPrice = await blackHoles.getPrice()
+    await blackHoles.mint(threshold.mul(10), { value: mintPrice.mul(threshold.mul(10)) })
+
+    expect(await blackHoles.isMergingEnabled()).to.be.false
+
+    // Progress time by timed sale duration
+    const timedSaleDuration = await blackHoles.timedSaleDuration()
+    await ethers.provider.send("evm_increaseTime", [timedSaleDuration.toNumber()])
+    await ethers.provider.send("evm_mine", [])
+
+    expect(await blackHoles.isMergingEnabled()).to.be.false
+
+    await expect(blackHoles.merge([1, 2, 3, 4])).to.be.revertedWith("Merging not enabled")
+
+    // Progress time by merging delay
+    const mergingDelay = await blackHoles.mergingDelay()
+    await ethers.provider.send("evm_increaseTime", [mergingDelay.toNumber()])
+    await ethers.provider.send("evm_mine", [])
+
+    expect(await blackHoles.isMergingEnabled()).to.be.true
+
+    /* Merge */
+    const totalMinted = (await blackHoles.totalMinted()).toNumber()
+    expect(totalMinted).to.equal(threshold.add(threshold.mul(10)).toNumber())
+
+    const baseUpgradeMass = (await blackHoles.getBaseUpgradeMass()).toNumber()
+    const maxLevelTokenCap = (await blackHoles.MAX_SUPPLY_OF_INTERSTELLAR()).toNumber()
+    const maxLevel = (await blackHoles.MAX_LEVEL()).toNumber()
+    expect(baseUpgradeMass).to.equal(Math.floor(totalMinted / maxLevelTokenCap / 2 ** (maxLevel - 1)))
+
+    // Update correct token's metadata and burn the right tokens
+    const tokens = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    const tx = await blackHoles.merge([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    const receipt = await tx.wait()
+    const gasUsed = receipt.gasUsed
+    const gasCost = gasUsed.mul(ethers.utils.parseUnits("20", "gwei"))
+    console.log("Gas used:", gasUsed.toString())
+    console.log("Gas cost:", ethers.utils.formatEther(gasCost))
+  })
 })

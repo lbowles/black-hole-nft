@@ -94,7 +94,7 @@ library utils {
   }
 
   function uint2floatstr(uint256 _i_scaled, uint256 _decimals) internal pure returns (string memory) {
-    return string.concat(uint2str(_i_scaled / (10**_decimals)), ".", uint2str(_i_scaled % (10**_decimals)));
+    return string.concat(uint2str(_i_scaled / (10 ** _decimals)), ".", uint2str(_i_scaled % (10 ** _decimals)));
   }
 
   function int2str(int256 _i) internal pure returns (string memory _uintAsString) {

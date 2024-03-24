@@ -189,22 +189,22 @@ export const Mint = () => {
     }
   }, [mintSignResult])
 
-  useEffect(() => {
-    if (mintTx?.status === 1) {
-      mintSound()
-      const tokenIds = mintTx.logs
-        .map((log) => {
-          try {
-            const events = BlackHoles__factory.createInterface().decodeEventLog("Transfer", log.data, log.topics)
-            return events.tokenId.toString()
-          } catch (e) {
-            return null
-          }
-        })
-        .filter((id) => id !== null)
-      setMintedTokens(tokenIds)
-    }
-  }, [mintTx])
+  // useEffect(() => {
+  //   if (mintTx?.status === 1) {
+  //     mintSound()
+  //     const tokenIds = mintTx.logs
+  //       .map((log) => {
+  //         try {
+  //           const events = BlackHoles__factory.createInterface().decodeEventLog("Transfer", log.data, log.topics)
+  //           return events.tokenId.toString()
+  //         } catch (e) {
+  //           return null
+  //         }
+  //       })
+  //       .filter((id) => id !== null)
+  //     setMintedTokens(tokenIds)
+  //   }
+  // }, [mintTx])
 
   return (
     <>
